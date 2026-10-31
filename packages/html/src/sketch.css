@@ -97,13 +97,16 @@
 .sketch,
 .sketch * { box-sizing: border-box; }
 
-/* Gutter, code, and trailing tags. The tag column takes the remaining width and wraps. */
+/* Gutter, code, and trailing tags. The tag column takes the remaining width. */
 .sk-lines {
   display: grid;
   grid-template-columns: auto max-content minmax(22ch, 1fr);
 }
 
+/* Each line is a row of the grid with two rows of its own. The second one holds tags moved under
+   the code, and is empty otherwise. Everything is placed explicitly so the guides can overlap. */
 .sk-row {
+  --sk-under-indent: calc((var(--d, 0) + 1) * var(--sk-indent));
   display: grid;
   grid-column: 1 / -1;
   grid-template-columns: subgrid;
@@ -111,8 +114,18 @@
 .sk-row:hover { background: var(--sk-row-hover); }
 .sk-has-diag { box-shadow: inset 3px 0 var(--sk-amber); }
 
+/* Indentation guides. The row draws them so they run on beside tags moved under the code. */
+.sk-row::before {
+  content: '';
+  grid-area: 1 / 2 / span 2;
+  width: calc(var(--d, 0) * var(--sk-indent));
+  background: repeating-linear-gradient(to right, var(--sk-guide) 0 1px, transparent 1px var(--sk-indent));
+  background-position: 0.5ch 0;
+  pointer-events: none;
+}
+
 .sk-gut {
-  grid-column: 1;
+  grid-area: 1 / 1 / span 2;
   padding-left: 1rem;
   text-align: right;
   color: var(--sk-faint);
@@ -127,52 +140,63 @@ a.sk-src:hover { color: var(--sk-blue); text-decoration: underline; }
 .sk-src-inherited { opacity: 0.6; }
 
 .sk-code {
-  grid-column: 2;
-  position: relative;
+  grid-area: 1 / 2;
+  position: relative; /* holds the hidden text */
   white-space: pre;
 }
-.sk-code::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: calc(var(--d, 0) * var(--sk-indent));
-  background: repeating-linear-gradient(to right, var(--sk-guide) 0 1px, transparent 1px var(--sk-indent));
-  background-position: 0.5ch 0;
-  pointer-events: none;
-}
 
-/* Tags wrap between each other on tighter lines; the first line stays centered on the code line.
-   A tag never breaks: a note that doesn't fit is cut with an ellipsis (the full tag is the tooltip). */
+/* Tags wrap between each other, and a long note wraps beside its pill, so nothing is cut.
+   The first line of tags stays centered on the code line. */
 .sk-tags {
   --sk-tag-lh: 1.4;
-  grid-column: 3;
+  grid-area: 1 / 3;
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
+  align-items: baseline;
   gap: 0.15rem 0.45rem;
   padding: calc((var(--sk-lh) - var(--sk-tag-lh)) * 0.5em) 1rem calc((var(--sk-lh) - var(--sk-tag-lh)) * 0.5em) 3ch;
   line-height: var(--sk-tag-lh);
 }
 .sk-tags .sk-tagw {
   display: inline-flex;
-  align-items: center;
+  align-items: baseline;
   min-width: 0;
-  max-width: 100%;
 }
 .sk-tags .sk-tag { flex: none; }
 .sk-tags .sk-note {
-  position: relative; /* clips the hidden brackets too */
+  position: relative; /* holds the hidden brackets */
   min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
-/* Danger notes are never cut. */
-.sk-tags .sk-note-danger { flex: none; }
 
-/* Narrow boxes: code wraps (continuation lines hang 2ch past the indentation) and trailing tags
-   move to their own line under the code, one level deeper. Nothing scrolls sideways. */
+/* Crowded lines: when a line's tags don't fit on one line in the tag column, they move under its code,
+   across the code and tag columns, one level deeper. The renderer marks each line with the box width
+   its tags need, rounded up to 10ch (`sk-fit-90`), or `sk-under` when that is more than 250ch. */
+.sk-under > .sk-tags { grid-area: 2 / 2 / auto / -1; padding-left: var(--sk-under-indent); }
+@container sketch (max-width: 60ch) { .sk-fit-60 > .sk-tags { grid-area: 2 / 2 / auto / -1; padding-left: var(--sk-under-indent); } }
+@container sketch (max-width: 70ch) { .sk-fit-70 > .sk-tags { grid-area: 2 / 2 / auto / -1; padding-left: var(--sk-under-indent); } }
+@container sketch (max-width: 80ch) { .sk-fit-80 > .sk-tags { grid-area: 2 / 2 / auto / -1; padding-left: var(--sk-under-indent); } }
+@container sketch (max-width: 90ch) { .sk-fit-90 > .sk-tags { grid-area: 2 / 2 / auto / -1; padding-left: var(--sk-under-indent); } }
+@container sketch (max-width: 100ch) { .sk-fit-100 > .sk-tags { grid-area: 2 / 2 / auto / -1; padding-left: var(--sk-under-indent); } }
+@container sketch (max-width: 110ch) { .sk-fit-110 > .sk-tags { grid-area: 2 / 2 / auto / -1; padding-left: var(--sk-under-indent); } }
+@container sketch (max-width: 120ch) { .sk-fit-120 > .sk-tags { grid-area: 2 / 2 / auto / -1; padding-left: var(--sk-under-indent); } }
+@container sketch (max-width: 130ch) { .sk-fit-130 > .sk-tags { grid-area: 2 / 2 / auto / -1; padding-left: var(--sk-under-indent); } }
+@container sketch (max-width: 140ch) { .sk-fit-140 > .sk-tags { grid-area: 2 / 2 / auto / -1; padding-left: var(--sk-under-indent); } }
+@container sketch (max-width: 150ch) { .sk-fit-150 > .sk-tags { grid-area: 2 / 2 / auto / -1; padding-left: var(--sk-under-indent); } }
+@container sketch (max-width: 160ch) { .sk-fit-160 > .sk-tags { grid-area: 2 / 2 / auto / -1; padding-left: var(--sk-under-indent); } }
+@container sketch (max-width: 170ch) { .sk-fit-170 > .sk-tags { grid-area: 2 / 2 / auto / -1; padding-left: var(--sk-under-indent); } }
+@container sketch (max-width: 180ch) { .sk-fit-180 > .sk-tags { grid-area: 2 / 2 / auto / -1; padding-left: var(--sk-under-indent); } }
+@container sketch (max-width: 190ch) { .sk-fit-190 > .sk-tags { grid-area: 2 / 2 / auto / -1; padding-left: var(--sk-under-indent); } }
+@container sketch (max-width: 200ch) { .sk-fit-200 > .sk-tags { grid-area: 2 / 2 / auto / -1; padding-left: var(--sk-under-indent); } }
+@container sketch (max-width: 210ch) { .sk-fit-210 > .sk-tags { grid-area: 2 / 2 / auto / -1; padding-left: var(--sk-under-indent); } }
+@container sketch (max-width: 220ch) { .sk-fit-220 > .sk-tags { grid-area: 2 / 2 / auto / -1; padding-left: var(--sk-under-indent); } }
+@container sketch (max-width: 230ch) { .sk-fit-230 > .sk-tags { grid-area: 2 / 2 / auto / -1; padding-left: var(--sk-under-indent); } }
+@container sketch (max-width: 240ch) { .sk-fit-240 > .sk-tags { grid-area: 2 / 2 / auto / -1; padding-left: var(--sk-under-indent); } }
+@container sketch (max-width: 250ch) { .sk-fit-250 > .sk-tags { grid-area: 2 / 2 / auto / -1; padding-left: var(--sk-under-indent); } }
+
+/* Narrow boxes: code wraps (continuation lines hang 2ch past the indentation) and all trailing tags
+   move under the code. Nothing scrolls sideways. */
 @container sketch (max-width: 36rem) {
   .sk-lines { grid-template-columns: auto minmax(0, 1fr); }
   .sk-code {
@@ -184,23 +208,8 @@ a.sk-src:hover { color: var(--sk-blue); text-decoration: underline; }
     text-indent: calc(-1 * var(--sk-hang));
   }
   .sk-code * { text-indent: 0; }
-  .sk-tags {
-    grid-column: 2;
-    position: relative;
-    padding-left: calc((var(--d, 0) + 1) * var(--sk-indent));
-  }
+  .sk-tags { grid-area: 2 / 2 / auto / -1; padding-left: var(--sk-under-indent); }
   .sk-tags:empty { display: none; }
-  .sk-tags::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: calc((var(--d, 0) + 1) * var(--sk-indent));
-    background: repeating-linear-gradient(to right, var(--sk-guide) 0 1px, transparent 1px var(--sk-indent));
-    background-position: 0.5ch 0;
-    pointer-events: none;
-  }
 }
 
 /* ---------- Tags ---------- */

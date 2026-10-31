@@ -243,7 +243,7 @@ A highlighter works only from tags, the shape of calls and bindings, and positio
 | Labeled variable | Persistent underline in the label's color: wavy pink for untrusted, solid purple for secret |
 | Other kinds | Neutral pill, unless the renderer assigns a color |
 | `::src` tag | Hidden; the line links to its source, and calls link to their definitions. A line made only of `::src` tags is hidden entirely. The file named on the signature appears at the end of that line. |
-| Trailing tags | Aligned into a right-hand tag column, with their notes. When the column doesn't fit, a renderer may move them under the line. |
+| Trailing tags | Aligned into a right-hand tag column, with their notes. When a line's tags don't fit on one line of the column, a renderer may move them under the line. A note too long for the space wraps rather than being cut off. |
 | `::new` tag | Green pill. A green bar in the gutter beside the line, and beside every line of the block it covers |
 | `::changed` tag | Blue pill with its note. A blue bar in the gutter beside the line |
 | `::removed` tag | Red pill. A red bar in the gutter beside the line and the block it covers, whose code is struck through and whose effects are dimmed |

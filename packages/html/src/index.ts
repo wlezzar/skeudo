@@ -34,6 +34,9 @@ function link(cls: string, href: string | undefined, title: string, inner: strin
     : `<span class="${cls}"${t}>${inner}</span>`;
 }
 
+/** The `?` and `~` modifiers as written. */
+const tagMods = (tag: Tag) => /^::[^?~:[]*([?~]*)/u.exec(tag.raw)?.[1] ?? '';
+
 /** Renders one tag as a pill, followed by its note. */
 export function tagHtml(tag: Tag, opts: HtmlOptions = {}): string {
   const labelKinds = opts.labelKinds ?? DEFAULT_LABEL_KINDS;
@@ -44,7 +47,7 @@ export function tagHtml(tag: Tag, opts: HtmlOptions = {}): string {
   if (tag.value === '*') cls.push('sk-rt');
   const color = opts.kindColors?.[tag.kind];
   const style = color ? ` style="--sk-c:${escapeHtml(color)}"` : '';
-  const mods = /^::[^?~:[]*([?~]*)/u.exec(tag.raw)?.[1] ?? '';
+  const mods = tagMods(tag);
 
   let inner = hiddenText('::') + `<span class="sk-kind">${escapeHtml(tag.kind)}</span>`;
   if (mods) inner += `<span class="sk-mod">${escapeHtml(mods)}</span>`;
@@ -113,7 +116,69 @@ function gutterHtml(src: ResolvedSrc | undefined, opts: HtmlOptions): string {
   return link('sk-src', opts.srcHref?.(src), where, label);
 }
 
-function lineHtml(line: SketchLine, sketch: Sketch, opts: HtmlOptions, gutter: boolean): string {
+/*
+ * Tag column fit. The renderer can't measure the page, but a sketch is set in a monospace font, so it
+ * can estimate widths in `ch`. For each line with trailing tags it works out how wide the box must be
+ * for those tags to fit on one line in the tag column, and marks the line with that width rounded up
+ * to a step (`sk-fit-90` means 90ch). sketch.css moves a marked line's tags under its code when the
+ * box is narrower. The constants mirror sketch.css.
+ */
+const FIT_STEP = 10;
+const FIT_MIN = 60;
+const FIT_MAX = 250;
+/** One `em` in `ch`, for a monospace font about 0.6em wide. */
+const EM = 5 / 3;
+/** Tags and notes are set at 0.8em. */
+const TAG_SCALE = 0.8;
+/** Gap between tags (0.45rem), and the tag column's padding (3ch on the left, 1rem on the right). */
+const TAG_GAP = 0.9;
+const TAG_COLUMN_PADDING = 5;
+/** The tag column never gets narrower than this (`minmax(22ch, 1fr)`). */
+const TAG_COLUMN_MIN = 22;
+
+const WIDE_RE = /[ᄀ-ᅟ⺀-꓏가-힣豈-﫿︰-﹏＀-｠￠-￦\u{1f300}-\u{1faff}\u{20000}-\u{3fffd}]/u;
+
+function textWidth(s: string): number {
+  let w = 0;
+  for (const c of s) w += WIDE_RE.test(c) ? 2 : 1;
+  return w;
+}
+
+/** Estimated width of a rendered tag and its note, in `ch` of the sketch font. */
+function tagWidth(tag: Tag): number {
+  let w = EM + textWidth(tag.kind) + tagMods(tag).length; // 0.5em of padding on each side
+  if (tag.value) w += 0.8 * EM + textWidth(tag.value); // 0.4em of margin and 0.4em of padding around the divider
+  if (tag.note) w += 0.4 * EM + textWidth(tag.note.text) + (tag.note.danger ? 1 + 0.25 * EM : 0);
+  return w * TAG_SCALE + 0.25; // plus the pill's border
+}
+
+function codeWidth(line: SketchLine, unit: number): number {
+  let w = line.depth * unit;
+  for (const seg of line.segments) {
+    if (seg.type !== 'tag') w += textWidth(seg.text);
+    else if (seg.tag.kind !== 'src') w += tagWidth(seg.tag);
+  }
+  return w;
+}
+
+/** Estimated width of the gutter column (`.sk-gut`: 1rem of padding, then numbers at 0.78em). */
+function gutterWidth(lines: SketchLine[], gutter: boolean): number {
+  if (!gutter) return 2;
+  const digits = Math.max(1, ...lines.map((l) => (l.src?.start !== undefined && !l.src.inherited ? String(l.src.start).length : 1)));
+  return 2 + 0.78 * Math.max(4.5, 1.5 + digits);
+}
+
+/** The `sk-fit-*` class for a line whose trailing tags (given as widths) may not fit in the tag column, if any. */
+function fitClass(widths: number[], before: number): string | undefined {
+  if (!widths.length) return undefined;
+  const column = TAG_COLUMN_PADDING + widths.reduce((a, b) => a + b, 0) + TAG_GAP * (widths.length - 1);
+  if (column <= TAG_COLUMN_MIN) return undefined;
+  const need = Math.ceil((before + column) / FIT_STEP) * FIT_STEP;
+  if (need < FIT_MIN) return undefined;
+  return need > FIT_MAX ? 'sk-under' : `sk-fit-${need}`;
+}
+
+function lineHtml(line: SketchLine, sketch: Sketch, opts: HtmlOptions, gutter: boolean, before: number): string {
   const indent = ' '.repeat(line.depth * (sketch.indentUnit ?? 4));
   const cls = ['sk-row'];
   if (line.blank) cls.push('sk-blank');
@@ -127,10 +192,17 @@ function lineHtml(line: SketchLine, sketch: Sketch, opts: HtmlOptions, gutter: b
   let code = line.segments.map((s) => segmentHtml(s, sketch, opts)).join('');
   // Wrapped so the strike-through of a removed line skips its indentation.
   if (code && line.change?.kind === 'removed') code = `<span class="sk-struck">${code}</span>`;
-  const tags = line.tags.filter((t) => t.trailing && t.kind !== 'src').map((t) => tagHtml(t, opts));
+  const trailing = line.tags.filter((t) => t.trailing && t.kind !== 'src');
+  const tags = trailing.map((t) => tagHtml(t, opts));
+  const widths = trailing.map(tagWidth);
   if (line.signature && line.src && sketch.file) {
-    tags.push(link('sk-file', opts.srcHref?.(line.src), formatLocation(line.src), escapeHtml(sketch.file)));
+    // Set at 0.78em. It can also break after a slash, when even the line under the code is too narrow.
+    const file = escapeHtml(sketch.file).replaceAll('/', '/<wbr>');
+    tags.push(link('sk-file', opts.srcHref?.(line.src), formatLocation(line.src), file));
+    widths.push(textWidth(sketch.file) * 0.78);
   }
+  const fit = fitClass(widths, before);
+  if (fit) cls.push(fit);
 
   return (
     `<div class="${cls.join(' ')}" style="--d:${line.depth}" data-line="${line.number}"${title}>` +
@@ -147,7 +219,10 @@ export function toHtml(input: string | Sketch, opts: HtmlOptions = {}): string {
   const firstContent = sketch.lines.findIndex((l) => !l.blank);
   const lines = firstContent === -1 ? [] : sketch.lines.slice(firstContent).filter((l) => !l.hidden);
   const gutter = lines.some((l) => l.src);
-  const rows = lines.map((l) => lineHtml(l, sketch, opts, gutter)).join('');
+  // Everything left of the tag column: the gutter and the widest line of code.
+  const unit = sketch.indentUnit ?? 4;
+  const before = gutterWidth(lines, gutter) + Math.max(0, ...lines.map((l) => codeWidth(l, unit)));
+  const rows = lines.map((l) => lineHtml(l, sketch, opts, gutter, before)).join('');
   const style = `--sk-indent:${sketch.indentUnit ?? 4}ch`;
   return (
     `<div class="sketch${gutter ? ' sk-gutter' : ''}" style="${style}" data-sketch>` +
