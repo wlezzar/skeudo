@@ -57,6 +57,9 @@ Every marker is a tag: `::kind`, optionally followed by `:value` and an attached
 | `::danger[note]` | Flags something on the line a reviewer should stop at. |
 | `::unsure[note]` | The author isn't sure the line is accurate. |
 | `::src[location]` | Links the line to its source. With a call name as value, `::src:name[location]` links that call to its definition. |
+| `::new` | The change being sketched adds this line. See Changes. |
+| `::changed[how]` | The change being sketched alters what this line does. See Changes. |
+| `::removed[what]` | The change being sketched takes this behavior away. See Changes. |
 
 Any other kind is valid, such as `::todo[ask about retries]` or `::lock:token-refresh`. The spec sets default colors for the kinds above and renders others as a neutral pill; renderers may let users give any kind its own color.
 
@@ -135,6 +138,36 @@ Labeled data reaches an effect when the labeled variable is used on a line that 
 
 Labels don't follow bindings. After `user = get_or_create(body.email)`, `user` is not untrusted. Label a derived value too when it should be tracked.
 
+## Changes
+
+A sketch of a commit or pull request describes the code after the change and marks what the change did. Three tags carry the marks:
+
+| Tag | Meaning |
+| --- | --- |
+| `::new` | The change adds this line. On a block header, it adds the whole block. |
+| `::changed[how]` | The change alters what this line does. The note says how, usually by naming the old behavior, as in `::changed[was wall-clock time]`. |
+| `::removed[what]` | The change takes this behavior away. On a block header, it removes the whole block. The note is optional when the line already says what is gone. |
+
+A line without a change tag is unchanged; keep only the unchanged lines needed to follow the flow. A line inside a new or removed block takes the change from its header, unless it carries a change tag of its own, as a line moved into a new block does with `::changed[ran before the encoder started]`. A `::changed` header covers only its own line, since a new condition on an `if` doesn't change what runs inside it.
+
+A removed line stays where the behavior used to run, and keeps its effect tags. These are effects the code no longer has, so tools show them as removed rather than counting them among the code's effects or as places labeled data reaches.
+
+By convention, change tags follow a line's effect tags and come before its `::src` tags. In a sketch of a change, `::src` locations refer to the code after the change.
+
+```sketch
+cancel_order(order_id):
+    order = load_order(order_id)            ::read:postgres.orders[lookup by key]
+    if order is shipped:
+        ::fail:AlreadyShipped
+    refund_id = refund(order.payment)       ::write:stripe ::new
+    if that fails:                          ::new
+        ::fail:RefundFailed
+    mark order cancelled, with refund_id    ::write:postgres.orders ::changed[was deleted]
+    email the customer                      ::write:sendgrid ::removed
+```
+
+The change refunds the payment before it touches the order. If marking the order fails, the customer has the money back but the order stays open, and a retry refunds again, since nothing makes the refund idempotent. The customer also stops getting an email, which the reviewer should confirm is intended.
+
 ## Grammar
 
 The grammar covers only tags, notes, calls, bindings and blocks; any other text is prose. Written in EBNF:
@@ -166,7 +199,7 @@ A sketch always renders. Problems are warnings attached to their line, never err
 
 - Indentation isn't 2 or 4 spaces per level, changes unit partway, or doesn't line up with an enclosing block.
 - A note has no closing `]`. The `[` and what follows stay prose.
-- `::read` or `::write` has no system, `::fail` has no name, or a label has no variable.
+- `::read` or `::write` has no system, `::fail` has no name, a label has no variable, or `::changed` has no note.
 - `::src` has no location, or its location has no file and the signature names none.
 
 ## Authoring rules
@@ -183,11 +216,12 @@ These rules apply to anyone writing a sketch, human or AI. The first two carry t
 | Flag doubt instead of guessing | Add `~` or `::unsure[…]` when a claim isn't verified. When a detail like an access pattern is a guess, say "probably" in its note. |
 | Flag dangers | Start a note with `!` where a reviewer should stop, as in `::write:stripe[!no idempotency key]` or `::read:postgres.orders[!full scan]`. Use `::danger[…]` for a danger that belongs to the whole line. |
 | Label data worth tracking | Add `::untrusted` where outside input enters and `::secret` for sensitive values. |
+| Mark what a change did | In a sketch of a commit or pull request, tag added lines `::new`, altered lines `::changed[was …]` and removed behavior `::removed`. See Changes. |
 | Leave out observability | Omit logs, metrics and traces, unless they are a requirement like an audit log or labeled data flows into them. A kept log is an effect and gets a tag, such as `::write:logs`. |
 
 ## Rendering
 
-A highlighter works only from tags, the shape of calls and bindings, and position, so it needs no vocabulary. Five colors are always on: violet, blue, aqua, orange and red. Amber marks dangers, and pink and purple mark the two labels.
+A highlighter works only from tags, the shape of calls and bindings, and position, so it needs no vocabulary. Five colors are always on: violet, blue, aqua, orange and red. Amber marks dangers, and pink and purple mark the two labels. Changes use diff colors: green for new, blue for changed and red for removed, shown as a bar in the gutter, where no other color appears.
 
 | Element | Rendering |
 | --- | --- |
@@ -210,6 +244,9 @@ A highlighter works only from tags, the shape of calls and bindings, and positio
 | Other kinds | Neutral pill, unless the renderer assigns a color |
 | `::src` tag | Hidden; the line links to its source, and calls link to their definitions. A line made only of `::src` tags is hidden entirely. The file named on the signature appears at the end of that line. |
 | Trailing tags | Aligned into a right-hand tag column, with their notes. When the column doesn't fit, a renderer may move them under the line. |
+| `::new` tag | Green pill. A green bar in the gutter beside the line, and beside every line of the block it covers |
+| `::changed` tag | Blue pill with its note. A blue bar in the gutter beside the line |
+| `::removed` tag | Red pill. A red bar in the gutter beside the line and the block it covers, whose code is struck through and whose effects are dimmed |
 
 ### First words
 
@@ -224,10 +261,11 @@ Renderers may change these, but should keep each role distinct.
 | Color | Used for | Light | Dark |
 | --- | --- | --- | --- |
 | Violet | First words | `#6d28d9` | `#a78bfa` |
-| Blue | Calls, the signature's name | `#1d4ed8` | `#93c5fd` |
+| Blue | Calls, the signature's name, changed lines | `#1d4ed8` | `#93c5fd` |
 | Aqua | Reads | `#0f766e` | `#5eead4` |
 | Orange | Writes | `#c2410c` | `#fdba74` |
-| Red | Failures | `#b91c1c` | `#fca5a5` |
+| Red | Failures, removed lines | `#b91c1c` | `#fca5a5` |
+| Green | New lines | `#15803d` | `#86efac` |
 | Amber | Dangers | `#a15c07` | `#fcd34d` |
 | Pink | Untrusted | `#be185d` | `#f9a8d4` |
 | Purple | Secret | `#7c3aed` | `#c4b5fd` |
@@ -332,11 +370,11 @@ These changes make the format consistent with what was sketched in discussion, a
 | Label flows | Not specified | Labeled data reaches an effect when the variable is used on the effect's line; labels don't follow bindings | Tools can point at the exact line, and nothing is inferred behind the author's back |
 | Label colors | Not specified | Pink for untrusted, purple for secret | The two labels stay distinct from each other and from effects |
 | Problems in a sketch | Not specified | Warnings on the line; a sketch always renders | A half-written sketch is still worth reading |
+| Changes | Not designed; sketches of commits used provisional `::new`, `::changed` and `::removed` tags | The three tags are defined. New and removed cover their block, and removed effects stay visible but don't count | Commits and pull requests are what gets sketched most, and tags need no grammar change |
 
 | Open question | Current default |
 | --- | --- |
 | Which revision of the code `::src` line numbers refer to | Left to the tool that generates the sketch |
-| How a pull request's changes show up in a sketch (diff mode) | Not designed yet |
 | Zoom levels: one line, block level, near source | Block level only |
 | Whether model calls need their own kind, for cost and nondeterminism | Treated as reads |
 | Whether shorthands such as `->sys` come back as sugar for tags | Tags only |

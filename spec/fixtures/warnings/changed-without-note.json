@@ -1,0 +1,67 @@
+{
+  "signature": { "name": "f", "line": 1 },
+  "indentUnit": 4,
+  "diagnostics": [
+    {
+      "line": 2,
+      "severity": "warning",
+      "message": "::changed needs a note saying how, as in ::changed[was …]."
+    },
+    {
+      "line": 3,
+      "severity": "warning",
+      "message": "::changed needs a note saying how, as in ::changed[was …]."
+    }
+  ],
+  "changes": [
+    { "line": 2, "kind": "changed" },
+    { "line": 3, "kind": "changed" },
+    { "line": 4, "kind": "changed" }
+  ],
+  "lines": [
+    {
+      "number": 1,
+      "depth": 0,
+      "text": "f():",
+      "signature": true,
+      "header": true,
+      "segments": [{ "type": "fn", "text": "f" }, { "type": "text", "text": "():" }]
+    },
+    {
+      "number": 2,
+      "depth": 1,
+      "text": "a     ::changed",
+      "parent": 1,
+      "change": { "kind": "changed" },
+      "tags": [{ "raw": "::changed", "kind": "changed", "trailing": true }],
+      "segments": [{ "type": "word", "text": "a" }]
+    },
+    {
+      "number": 3,
+      "depth": 1,
+      "text": "b     ::changed[]",
+      "parent": 1,
+      "change": { "kind": "changed" },
+      "tags": [
+        { "raw": "::changed[]", "kind": "changed", "note": { "text": "" }, "trailing": true }
+      ],
+      "segments": [{ "type": "word", "text": "b" }]
+    },
+    {
+      "number": 4,
+      "depth": 1,
+      "text": "c     ::changed[was d]",
+      "parent": 1,
+      "change": { "kind": "changed", "note": "was d" },
+      "tags": [
+        {
+          "raw": "::changed[was d]",
+          "kind": "changed",
+          "note": { "text": "was d" },
+          "trailing": true
+        }
+      ],
+      "segments": [{ "type": "word", "text": "c" }]
+    }
+  ]
+}

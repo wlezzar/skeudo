@@ -37,6 +37,18 @@ export interface ResolvedSrc extends SrcLocation {
   inherited?: boolean;
 }
 
+/** A change tag in a sketch of a commit or pull request. */
+export type ChangeKind = 'new' | 'changed' | 'removed';
+
+/** What the change being sketched did to a line. */
+export interface LineChange {
+  kind: ChangeKind;
+  /** The note of the line's own change tag, such as `was wall-clock time`. */
+  note?: string;
+  /** Line number of the new or removed block header the change comes from, when the line has no change tag of its own. */
+  from?: number;
+}
+
 export type Segment =
   | { type: 'text'; text: string }
   /** First word of a prose line or block header. */
@@ -71,6 +83,8 @@ export interface SketchLine {
   trailingStart: number;
   /** Explicit or inherited source location. */
   src?: ResolvedSrc;
+  /** Own or inherited change, in a sketch of a commit or pull request. */
+  change?: LineChange;
   /** True when the line holds nothing but `::src` tags, so a renderer drops it. */
   hidden: boolean;
 }

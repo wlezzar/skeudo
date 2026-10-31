@@ -15,6 +15,7 @@ The JSON is the parser's AST (`Sketch` in `packages/core/src/types.ts`), with th
 - A tag inside a line's segments is written as `{ "type": "tag", "raw": … }` instead of repeating the whole tag.
 - Variables are keyed by name, without a `name` field.
 - `flows` is added from `analyze()`: each line where a labeled variable reaches an effect, with the effect as its raw tag.
+- `changes` is added from `analyze()`: each change tag, whether it covers a whole block, and the effects on the lines it covers, as `L<line> <raw tag>`.
 - `false`, missing values, empty arrays and empty objects are left out.
 
 `packages/core/test/fixture.ts` does this conversion. Warning messages are compared word for word, so rewording one means updating the fixtures that produce it.

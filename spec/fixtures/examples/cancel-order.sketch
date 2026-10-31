@@ -1,0 +1,9 @@
+cancel_order(order_id):
+    order = load_order(order_id)            ::read:postgres.orders[lookup by key]
+    if order is shipped:
+        ::fail:AlreadyShipped
+    refund_id = refund(order.payment)       ::write:stripe ::new
+    if that fails:                          ::new
+        ::fail:RefundFailed
+    mark order cancelled, with refund_id    ::write:postgres.orders ::changed[was deleted]
+    email the customer                      ::write:sendgrid ::removed

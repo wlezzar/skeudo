@@ -33,6 +33,7 @@ Sketches go in fenced code blocks tagged `sketch`. Lines nest by indentation, 4 
 | `::danger[note]` | Something on the line a reviewer should stop at. |
 | `::unsure[note]` | You aren't sure the line is accurate. |
 | `::src[location]`, `::src:call[location]` | Links a line to its source, or a call to its definition. |
+| `::new`, `::changed[was …]`, `::removed` | What a commit or pull request did to the line. See step 6. |
 | `::anything[note]` | Any other kind is valid and renders as a neutral pill. |
 
 - **Systems** are free names: `postgres`, `stripe`, `redis`. A dot names the part: `postgres.orders`, `s3.reports`. `*` means decided at runtime.
@@ -62,10 +63,13 @@ Sketches go in fenced code blocks tagged `sketch`. Lines nest by indentation, 4 
    - Put `::src:name[path:line]` at the end of the sketch for calls a reviewer may open.
    - Line numbers refer to the revision you sketched; state it in the document. Get them with `grep -n` or `git show <rev>:<path> | grep -n …`.
 6. **Mark changes (commits and PRs only).**
-   - Sketch the code as it is after the change.
-   - Tag what changed: `::new` on a line the change adds, `::changed[was …]` on a line whose behavior changed, and `::removed[…]` on a prose line describing behavior that is gone.
+   - Sketch the code as it is after the change. `::src` locations refer to that revision.
+   - Tag what changed: `::new` on a line the change adds, `::changed[was …]` on a line whose behavior changed, and `::removed` on a line describing behavior that is gone, kept where it used to run.
+   - `::new` or `::removed` on a block header covers the whole block, so don't repeat it on the lines inside. A line inside can still carry its own tag, such as `::changed[…]` on a line moved into a new block.
+   - `::changed` always gets a note saying how. `::changed` on a block header covers only that line.
+   - A removed line keeps its effect tags, so the reviewer sees the effects the code no longer has.
+   - Put change tags after the line's effect tags and before its `::src` tags.
    - Unchanged lines carry no change tag. Keep the ones needed to follow the flow.
-   - This convention is provisional, because the spec doesn't define a diff mode yet.
 7. **Review your own sketch** against the checklist below, then write down what a reviewer should check.
 
 ## Output
@@ -98,6 +102,7 @@ Each item in the last section should be something the sketches make visible: an 
 - No effect hides in words like "save and notify" or "clean up": one tag per effect, in order.
 - Read and write chosen by state change; hidden conditions marked `?`; unverified effects marked `~`; guesses say "probably".
 - Untrusted input and secrets are labeled where they enter.
+- In a sketch of a change, every added, altered or removed behavior carries a change tag, and every `::changed` has a note.
 - Indentation is 4 spaces per level; calls close on the same line; notes contain no `]`.
 - Calls are real names a reviewer can open; everything else is prose.
 

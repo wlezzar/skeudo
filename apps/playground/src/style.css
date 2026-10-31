@@ -201,6 +201,12 @@ select:focus, input:focus, textarea:focus { outline: 2px solid var(--focus); out
 .rv-stat.orange b, .num.orange { color: var(--sk-orange); }
 .rv-stat.red b { color: var(--sk-red); }
 .rv-stat.amber b { color: var(--sk-amber); }
+.rv-stat.green b { color: var(--sk-green); }
+
+/* Effects the change takes away. */
+.rv-removed .sk-tagw, .rv-removed.rv-row .rv-ctx { opacity: 0.55; }
+.rv-removed.rv-row .rv-ctx { text-decoration: line-through; }
+.rv-effects { display: inline-flex; flex-wrap: wrap; gap: 0.3rem; }
 
 .rv-table { border-collapse: collapse; font-size: 13px; width: 100%; }
 .rv-table th, .rv-table td { text-align: left; padding: 0.35rem 0.6rem; border-bottom: 1px solid var(--border); }

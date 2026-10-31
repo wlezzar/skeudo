@@ -1,4 +1,5 @@
-/* Sketch renderer styles. Colors follow the spec: violet, blue, aqua, orange, red, plus amber for dangers. */
+/* Sketch renderer styles. Colors follow the spec: violet, blue, aqua, orange, red, plus amber for dangers
+   and green, blue and red for changes. */
 
 :root {
   --sk-font: ui-monospace, 'JetBrains Mono', 'SF Mono', SFMono-Regular, Menlo, Consolas, monospace;
@@ -15,6 +16,7 @@
   --sk-aqua: #0f766e;
   --sk-orange: #c2410c;
   --sk-red: #b91c1c;
+  --sk-green: #15803d;
   --sk-amber: #a15c07;
   --sk-neutral: #556070;
   --sk-untrusted: #be185d;
@@ -40,6 +42,7 @@
     --sk-aqua: #5eead4;
     --sk-orange: #fdba74;
     --sk-red: #fca5a5;
+    --sk-green: #86efac;
     --sk-amber: #fcd34d;
     --sk-neutral: #a3acbd;
     --sk-untrusted: #f9a8d4;
@@ -64,6 +67,7 @@
   --sk-aqua: #5eead4;
   --sk-orange: #fdba74;
   --sk-red: #fca5a5;
+  --sk-green: #86efac;
   --sk-amber: #fcd34d;
   --sk-neutral: #a3acbd;
   --sk-untrusted: #f9a8d4;
@@ -243,6 +247,9 @@ a.sk-src:hover { color: var(--sk-blue); text-decoration: underline; }
 .sk-k-secret { --sk-c: var(--sk-secret); }
 .sk-k-unsure { --sk-c: var(--sk-neutral); border-style: dotted; }
 .sk-k-src { --sk-c: var(--sk-blue); }
+.sk-k-new { --sk-c: var(--sk-green); }
+.sk-k-changed { --sk-c: var(--sk-blue); }
+.sk-k-removed { --sk-c: var(--sk-red); }
 
 /* Conditional (?): dashed outline in the effect's color. */
 .sk-cond {
@@ -278,6 +285,23 @@ a.sk-src:hover { color: var(--sk-blue); text-decoration: underline; }
   font-weight: 650;
 }
 .sk-bang { margin-right: 0.25em; font-weight: 800; }
+
+/* ---------- Changes ---------- */
+
+/* A bar on the gutter's inner edge, as in a diff, beside every line a change covers. */
+.sk-ch > .sk-gut {
+  background: linear-gradient(var(--sk-ch), var(--sk-ch)) no-repeat right 0.35rem top 0 / 3px 100%;
+}
+.sk-ch-new { --sk-ch: var(--sk-green); }
+.sk-ch-changed { --sk-ch: var(--sk-blue); }
+.sk-ch-removed { --sk-ch: var(--sk-red); }
+/* Removed lines: the code is struck through and the effects it no longer has are dimmed. */
+.sk-ch-removed > .sk-code { opacity: 0.6; }
+.sk-struck {
+  text-decoration: line-through;
+  text-decoration-color: color-mix(in srgb, var(--sk-red) 70%, transparent);
+}
+.sk-ch-removed > .sk-tags .sk-tagw:not(:has(.sk-k-removed)) { opacity: 0.5; }
 
 /* ---------- Code ---------- */
 

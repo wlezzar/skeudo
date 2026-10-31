@@ -1,4 +1,5 @@
 import {
+  CHANGE_KINDS,
   formatLocation,
   parse,
   type ParseOptions,
@@ -16,7 +17,7 @@ export interface HtmlOptions extends ParseOptions {
   kindColors?: Record<string, string>;
 }
 
-const KNOWN_KINDS = new Set(['read', 'write', 'fail', 'src', 'danger', 'unsure', 'untrusted', 'secret']);
+const KNOWN_KINDS = new Set(['read', 'write', 'fail', 'src', 'danger', 'unsure', 'untrusted', 'secret', ...CHANGE_KINDS]);
 const DEFAULT_LABEL_KINDS = ['untrusted', 'secret'];
 
 const ESC: Record<string, string> = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
@@ -118,11 +119,14 @@ function lineHtml(line: SketchLine, sketch: Sketch, opts: HtmlOptions, gutter: b
   if (line.blank) cls.push('sk-blank');
   if (line.signature) cls.push('sk-sig');
   if (line.header) cls.push('sk-header');
+  if (line.change) cls.push('sk-ch', `sk-ch-${line.change.kind}`);
   const diags = sketch.diagnostics.filter((d) => d.line === line.number);
   if (diags.length) cls.push('sk-has-diag');
   const title = diags.length ? ` title="${escapeHtml(diags.map((d) => d.message).join('\n'))}"` : '';
 
-  const code = line.segments.map((s) => segmentHtml(s, sketch, opts)).join('');
+  let code = line.segments.map((s) => segmentHtml(s, sketch, opts)).join('');
+  // Wrapped so the strike-through of a removed line skips its indentation.
+  if (code && line.change?.kind === 'removed') code = `<span class="sk-struck">${code}</span>`;
   const tags = line.tags.filter((t) => t.trailing && t.kind !== 'src').map((t) => tagHtml(t, opts));
   if (line.signature && line.src && sketch.file) {
     tags.push(link('sk-file', opts.srcHref?.(line.src), formatLocation(line.src), escapeHtml(sketch.file)));

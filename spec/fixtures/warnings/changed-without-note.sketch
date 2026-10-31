@@ -1,0 +1,4 @@
+f():
+    a     ::changed
+    b     ::changed[]
+    c     ::changed[was d]

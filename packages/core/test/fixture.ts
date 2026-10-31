@@ -6,15 +6,22 @@ import { analyze, parse } from '../src';
  */
 export function project(source: string): unknown {
   const sketch = parse(source);
+  const review = analyze(sketch);
   const { source: _source, variables, lines, ...rest } = sketch;
   return clean({
     ...rest,
     variables: Object.fromEntries(Object.values(variables).map(({ name, ...v }) => [name, v])),
-    flows: analyze(sketch).flows.map((f) => ({
+    flows: review.flows.map((f) => ({
       line: f.line,
       variable: f.variable,
       labels: f.labels,
       effect: f.effect.tag.raw,
+    })),
+    changes: review.changes.map((c) => ({
+      line: c.line,
+      kind: c.kind,
+      block: c.block,
+      effects: c.effects.map((e) => `L${e.line} ${e.tag.raw}`),
     })),
     lines: lines.map(({ children: _children, trailingStart: _trailingStart, tags, segments, ...line }) => ({
       ...line,

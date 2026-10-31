@@ -88,6 +88,9 @@ const LEGEND = [
   ['::untrusted:body', 'unvalidated input'],
   ['::secret:token', 'sensitive value'],
   ['::unsure[maybe async]', 'author is unsure'],
+  ['::new', 'added by the change (a header: its whole block)'],
+  ['::changed[was wall-clock time]', 'altered by the change'],
+  ['::removed', 'taken away by the change (a header: its whole block)'],
   ['::todo[ask about retries]', 'any other kind'],
 ];
 const legendHtml = () =>
@@ -111,16 +114,32 @@ function reviewHtml(items: Parsed[], markdown: boolean): string {
 
 function reviewSection({ sketch, review: r, offset }: Parsed, index: number, markdown: boolean): string {
   const ln = (line: number) => `<span class="rv-ln">L${line + offset - 1}</span>`;
-  const row = (line: number, body: string) => `<li class="rv-row" data-sketch-index="${index}" data-line="${line}">${ln(line)}<span class="rv-body">${body}</span></li>`;
-  const reads = r.effects.filter((e) => e.direction === 'read').length;
-  const writes = r.effects.length - reads;
+  const row = (line: number, body: string, cls = '') =>
+    `<li class="rv-row${cls ? ` ${cls}` : ''}" data-sketch-index="${index}" data-line="${line}">${ln(line)}<span class="rv-body">${body}</span></li>`;
+  // Removed effects are ones the code no longer has, so they aren't counted.
+  const current = r.effects.filter((e) => e.change !== 'removed');
+  const reads = current.filter((e) => e.direction === 'read').length;
+  const writes = current.length - reads;
   const dangers = r.flags.filter((f) => f.kind === 'danger').length;
   const stat = (n: number, label: string, cls = '') => `<span class="rv-stat ${n ? cls : 'zero'}"><b>${n}</b> ${label}${n === 1 ? '' : 's'}</span>`;
 
   const title = sketch.signature ? sketch.signature.name : `Sketch at line ${offset}`;
   let html = `<section class="rv" data-sketch-scope>`;
   if (markdown) html += `<h2>${esc(title)}</h2>`;
-  html += `<div class="rv-stats">${stat(reads, 'read', 'aqua')}${stat(writes, 'write', 'orange')}${stat(r.failures.length, 'failure', 'red')}${stat(dangers, 'danger', 'amber')}${stat(r.diagnostics.length, 'warning', 'amber')}</div>`;
+  const changes = r.changes.length ? stat(r.changes.length, 'change', 'green') : '';
+  html += `<div class="rv-stats">${changes}${stat(reads, 'read', 'aqua')}${stat(writes, 'write', 'orange')}${stat(r.failures.length, 'failure', 'red')}${stat(dangers, 'danger', 'amber')}${stat(r.diagnostics.length, 'warning', 'amber')}</div>`;
+
+  if (r.changes.length) {
+    html += `<h3>Changes</h3><ol class="rv-list">`;
+    for (const c of r.changes) {
+      const scope = c.block ? `<span class="muted">whole block</span>` : '';
+      const effects = c.effects.length
+        ? `<span class="rv-effects${c.kind === 'removed' ? ' rv-removed' : ''}">${c.effects.map((e) => tagHtml(e.tag)).join(' ')}</span>`
+        : '';
+      html += row(c.line, `${tagHtml(c.tag)}<span class="rv-ctx">${esc(c.context)}</span>${scope}${effects}`);
+    }
+    html += `</ol>`;
+  }
 
   if (r.systems.length) {
     html += `<h3>Systems touched</h3><table class="rv-table"><thead><tr><th>System</th><th>Parts</th><th>Reads</th><th>Writes</th></tr></thead><tbody>`;
@@ -132,7 +151,9 @@ function reviewSection({ sketch, review: r, offset }: Parsed, index: number, mar
 
   if (r.effects.length) {
     html += `<h3>Effects, in order</h3><ol class="rv-list">`;
-    for (const e of r.effects) html += row(e.line, `${tagHtml(e.tag)}<span class="rv-ctx">${esc(e.context)}</span>`);
+    for (const e of r.effects) {
+      html += row(e.line, `${tagHtml(e.tag)}<span class="rv-ctx">${esc(e.context)}</span>`, e.change === 'removed' ? 'rv-removed' : '');
+    }
     html += `</ol>`;
   } else {
     html += `<h3>Effects</h3><p class="empty">No effects tagged. Under the contract, that claims this code touches nothing outside the process.</p>`;
@@ -215,7 +236,7 @@ function render() {
   );
 
   const warnings = parsed.reduce((n, p) => n + p.review.diagnostics.length, 0);
-  const effects = parsed.reduce((n, p) => n + p.review.effects.length, 0);
+  const effects = parsed.reduce((n, p) => n + p.review.effects.filter((e) => e.change !== 'removed').length, 0);
   reviewCount.textContent = String(effects);
   status.innerHTML =
     (mode === 'markdown' ? `Markdown · ${parsed.length} sketch${parsed.length === 1 ? '' : 'es'}` : `Sketch · ${source.split('\n').length} lines`) +

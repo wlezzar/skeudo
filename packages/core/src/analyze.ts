@@ -1,4 +1,5 @@
-import type { Diagnostic, Note, Sketch, SketchLine, Tag, Variable } from './types';
+import { CHANGE_KINDS } from './parse';
+import type { ChangeKind, Diagnostic, Note, Sketch, SketchLine, Tag, Variable } from './types';
 
 export interface Effect {
   line: number;
@@ -17,8 +18,24 @@ export interface Effect {
   tag: Tag;
   /** The line's text with its tags removed. */
   context: string;
+  /** What the change being sketched did to the effect's line. A removed effect is one the code no longer has. */
+  change?: ChangeKind;
 }
 
+/** A change tag, with the effects on the lines it covers. */
+export interface Change {
+  line: number;
+  kind: ChangeKind;
+  note?: string;
+  tag: Tag;
+  context: string;
+  /** True when the tag is `::new` or `::removed` on a block header, so it covers the whole block. */
+  block: boolean;
+  /** Effects on the lines the change covers, in order. */
+  effects: Effect[];
+}
+
+/** Systems, counted from the effects the code has: removed effects are left out. */
 export interface SystemUse {
   name: string;
   reads: number;
@@ -42,7 +59,7 @@ export interface Flag {
   tag: Tag;
 }
 
-/** A labeled variable used on a line that has an effect. */
+/** A labeled variable used on a line that has an effect. Removed effects are left out. */
 export interface Flow {
   line: number;
   variable: string;
@@ -56,13 +73,15 @@ export interface Review {
   failures: Failure[];
   flags: Flag[];
   flows: Flow[];
+  /** Change tags in a sketch of a commit or pull request, in line order. */
+  changes: Change[];
   labeled: Variable[];
   /** Tags of kinds the spec doesn't define, such as `::todo` or `::lock`. */
   others: { line: number; tag: Tag; context: string }[];
   diagnostics: Diagnostic[];
 }
 
-const KNOWN = new Set(['read', 'write', 'fail', 'src', 'danger', 'unsure', 'untrusted', 'secret']);
+const KNOWN = new Set(['read', 'write', 'fail', 'src', 'danger', 'unsure', 'untrusted', 'secret', ...CHANGE_KINDS]);
 
 /** The line's text without its tags. */
 export function lineContext(line: SketchLine): string {
@@ -79,11 +98,29 @@ export function analyze(sketch: Sketch): Review {
   const flows: Flow[] = [];
   const others: Review['others'] = [];
   const systems = new Map<string, SystemUse>();
+  const changes: Change[] = [];
+  const changeAt = new Map<number, Change>();
 
   for (const line of sketch.lines) {
     if (line.blank) continue;
     const context = lineContext(line);
     const lineEffects: Effect[] = [];
+
+    const own = line.change && line.change.from === undefined ? line.tags.find((t) => CHANGE_KINDS.has(t.kind)) : undefined;
+    if (own && line.change) {
+      const change: Change = {
+        line: line.number,
+        kind: line.change.kind,
+        note: line.change.note,
+        tag: own,
+        context,
+        block: line.header && line.change.kind !== 'changed',
+        effects: [],
+      };
+      changes.push(change);
+      changeAt.set(line.number, change);
+    }
+    const coveringChange = line.change && changeAt.get(line.change.from ?? line.number);
 
     for (const tag of line.tags) {
       if (tag.note?.danger) flags.push({ line: line.number, kind: 'danger', text: tag.note.text, tag });
@@ -104,15 +141,20 @@ export function analyze(sketch: Sketch): Review {
           note: tag.note,
           tag,
           context,
+          change: line.change?.kind,
         };
         effects.push(effect);
-        lineEffects.push(effect);
+        coveringChange?.effects.push(effect);
 
-        const use = systems.get(root) ?? { name: root, reads: 0, writes: 0, parts: [], runtime: effect.runtime };
-        if (tag.kind === 'read') use.reads++;
-        else use.writes++;
-        if (effect.part && !use.parts.includes(effect.part)) use.parts.push(effect.part);
-        systems.set(root, use);
+        // A removed effect is one the code no longer has: it isn't counted or followed.
+        if (effect.change !== 'removed') {
+          lineEffects.push(effect);
+          const use = systems.get(root) ?? { name: root, reads: 0, writes: 0, parts: [], runtime: effect.runtime };
+          if (tag.kind === 'read') use.reads++;
+          else use.writes++;
+          if (effect.part && !use.parts.includes(effect.part)) use.parts.push(effect.part);
+          systems.set(root, use);
+        }
 
         if (effect.unverified) flags.push({ line: line.number, kind: 'unverified', text: `${tag.kind}:${system} is unverified`, tag });
         if (effect.runtime) flags.push({ line: line.number, kind: 'runtime', text: `${tag.kind} target is decided at runtime`, tag });
@@ -152,6 +194,7 @@ export function analyze(sketch: Sketch): Review {
     failures,
     flags,
     flows,
+    changes,
     labeled: Object.values(sketch.variables).filter((v) => v.labels.length),
     others,
     diagnostics: sketch.diagnostics,

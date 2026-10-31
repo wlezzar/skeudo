@@ -121,6 +121,17 @@ const runAgent = `run_agent(task):
     ::fail:TooManyTurns
 `;
 
+const cancelOrder = `cancel_order(order_id):
+    order = load_order(order_id)            ::read:postgres.orders[lookup by key]
+    if order is shipped:
+        ::fail:AlreadyShipped
+    refund_id = refund(order.payment)       ::write:stripe ::new
+    if that fails:                          ::new
+        ::fail:RefundFailed
+    mark order cancelled, with refund_id    ::write:postgres.orders ::changed[was deleted]
+    email the customer                      ::write:sendgrid ::removed
+`;
+
 const realCode = `load_config(path):
     Real code stays plain: only tags after whitespace are markers.
     text = std::fs::read_to_string(&path)   ::read:fs ::untrusted:text
@@ -173,6 +184,7 @@ export const examples: Example[] = [
   { id: 'search-orders', title: 'Access patterns (search_orders)', source: searchOrders },
   { id: 'book-trip', title: 'Failure blocks (book_trip)', source: bookTrip },
   { id: 'run-agent', title: 'Runtime effects (run_agent)', source: runAgent },
+  { id: 'cancel-order', title: 'A change (cancel_order)', source: cancelOrder },
   { id: 'real-code', title: 'Real code stays plain (load_config)', source: realCode },
   { id: 'pr-comment', title: 'Markdown: a review comment', source: prComment },
   { id: 'spec', title: 'Markdown: the spec itself', source: spec },

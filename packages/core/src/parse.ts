@@ -1,4 +1,5 @@
 import type {
+  ChangeKind,
   Diagnostic,
   ParseOptions,
   ResolvedSrc,
@@ -27,6 +28,8 @@ const BINDING_RE = /^([\p{L}_][\p{L}\p{N}_]*)\s*=(?![=>])/u;
 const WORD_RE = /^[\p{L}][\p{L}\p{N}_'’-]*/u;
 
 const DEFAULT_LABEL_KINDS = ['untrusted', 'secret'];
+/** Tag kinds that mark what a commit or pull request did to a line. */
+export const CHANGE_KINDS: ReadonlySet<string> = new Set<ChangeKind>(['new', 'changed', 'removed']);
 
 /**
  * Finds every tag in a line. A tag starts at the beginning of the text or after whitespace,
@@ -265,6 +268,8 @@ export function parse(source: string, options: ParseOptions = {}): Sketch {
         warn(line.number, `::${t.kind} needs the variable it labels, as in ::${t.kind}:name.`);
       } else if (t.kind === 'src' && !t.note?.text) {
         warn(line.number, `::src needs a location in its note, as in ::src[app/file.py:12-24].`);
+      } else if (t.kind === 'changed' && !t.note?.text) {
+        warn(line.number, `::changed needs a note saying how, as in ::changed[was …].`);
       }
     }
   }
@@ -308,6 +313,21 @@ export function parse(source: string, options: ParseOptions = {}): Sketch {
     if (line.src || line.parent === undefined) continue;
     const parentSrc = byNumber.get(line.parent)?.src;
     if (parentSrc) line.src = { ...parentSrc, inherited: true };
+  }
+
+  // --- Changes --------------------------------------------------------------------
+  // A line's own change tag wins; otherwise it takes the change of an enclosing new or removed block.
+  for (const line of body) {
+    const own = line.tags.find((t) => CHANGE_KINDS.has(t.kind));
+    if (own) {
+      line.change = { kind: own.kind as ChangeKind, note: own.note?.text || undefined };
+      continue;
+    }
+    const parent = line.parent === undefined ? undefined : byNumber.get(line.parent);
+    const outer = parent?.change;
+    if (parent && outer && outer.kind !== 'changed') {
+      line.change = { kind: outer.kind, from: outer.from ?? parent.number };
+    }
   }
 
   // --- Segments -------------------------------------------------------------------

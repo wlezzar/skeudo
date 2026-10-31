@@ -1,0 +1,14 @@
+sync(account):
+    if account is stale:                  ::new
+        fetch(account)                    ::read:crm
+        if that fails:
+            ::fail:CrmDown
+        mark it fresh                     ::changed[ran after the save]
+    save(account)                         ::write:postgres.accounts ::changed[now upserts]
+    ::removed[no longer retries on timeout]
+    if the save took over a second:       ::changed[was half a second]
+        alert(account)                    ::write:pagerduty
+    when the account is archived:         ::removed
+        log_event(token)                  ::write:logs
+        purge the cache                   ::write:redis
+    ::secret:token
