@@ -1,4 +1,4 @@
-import spec from '../../../.tasks/001-design/spec.md?raw';
+import spec from '../../../spec/spec.md?raw';
 
 export interface Example {
   id: string;

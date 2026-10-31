@@ -12,10 +12,9 @@ import type {
 } from './types';
 
 // Grammar pieces (see spec: Grammar).
-const KIND = String.raw`[\p{L}\p{N}][\p{L}\p{N}_-]*`;
-const VALUE_NAME = String.raw`[\p{L}\p{N}_][\p{L}\p{N}_-]*`;
+const NAME = String.raw`[\p{L}\p{N}_][\p{L}\p{N}_-]*`;
 const TAG_RE = new RegExp(
-  String.raw`::(${KIND})([?~]*)(?::(${VALUE_NAME}(?:\.${VALUE_NAME})*|\*))?(?:\[(!?)([^\]\n]*)\])?`,
+  String.raw`::(${NAME})([?~]*)(?::(${NAME}(?:\.${NAME})*|\*))?(?:\[(!?)([^\]\n]*)\])?`,
   'uy',
 );
 const IDENT_START = /[\p{L}_]/u;

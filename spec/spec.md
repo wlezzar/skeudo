@@ -1,6 +1,6 @@
 # Sketch: readable pseudocode for code review
 
-Oct 22, 2026 · @Walid Lezzar
+Oct 22, 2026 · updated Oct 31, 2026 · @Walid Lezzar
 
 ## Purpose and core contract
 
@@ -18,15 +18,15 @@ A sketch is a list of lines nested by indentation. Each line mixes free prose an
 
 | Element | Form | Meaning |
 | --- | --- | --- |
-| Signature | `name(params):` as the first line | Names the function the sketch describes. Its parameters become tracked variables. A `::src` tag on it names the source file. |
+| Signature | `name(params):` as the first line | Names the function the sketch describes. Its parameters become tracked variables. A `::src` tag on it names the source file. The colon can be dropped when indented lines follow. A sketch without a signature is still valid. |
 | Block | A line followed by deeper-indented lines | Opens a block; the deeper-indented lines belong to it. Header words are free: `if`, `for each`, `in parallel`, `if that fails`. Ending the header with `:` is a convention. |
-| Call | `name(args)` or `obj.name(args)` | A reference to real code. Use `…` to elide arguments that don't matter. |
-| Binding | `name = …` at the start of a line | Names a value. The name becomes a tracked variable. |
+| Call | `name(args)`, `obj.name(args)` or `mod::name(args)`, closed on the same line | A reference to real code. Use `…` to elide arguments that don't matter. |
+| Binding | `name = …` at the start of a line | Names a value. The name becomes a tracked variable. Only a plain name binds, so `order.status = paid` and `a == b` are not bindings. |
 | Tag | `::kind:value`, see Markers | Effects, failures, labels and anything else worth highlighting. The only marker syntax. |
 | Note | `[free text]` attached to a tag, as in `::write:redis[5 min ttl]` | Free-text details about that tag, such as a timeout or an access pattern. `[!…]` flags a danger. |
 | Prose | Everything else, including brackets not attached to a tag | Logic, intent, invariants and summaries of several source lines. |
 
-Indentation must be consistent within a sketch, at 2 or 4 spaces per level. By convention, a plain-language summary of the function's purpose may follow the signature.
+Indentation must be consistent within a sketch, at 2 or 4 spaces per level. The first indented line sets the unit, and a tab counts as 4 spaces. A sketch indented as a whole, such as one nested in a list item, keeps its shape. By convention, a plain-language summary of the function's purpose may follow the signature.
 
 ```sketch
 get_profile(user_id):
@@ -51,8 +51,8 @@ Every marker is a tag: `::kind`, optionally followed by `:value` and an attached
 | `::read?:sys` | A read that happens only under a condition the sketch doesn't show. |
 | `::write?:sys` | A write that happens only under a hidden condition, as in `get_or_create`. |
 | `::fail:Name` | The flow ends abnormally with this outcome. The condition follows in prose. |
-| `::untrusted:name` | Labels a variable as outside input that hasn't been validated. |
-| `::secret:name` | Labels a variable as sensitive: passwords, tokens, personal data. |
+| `::untrusted:name` | Labels a variable as outside input that hasn't been validated. See Variables and labels. |
+| `::secret:name` | Labels a variable as sensitive: passwords, tokens, personal data. See Variables and labels. |
 | `::danger[note]` | Flags something on the line a reviewer should stop at. |
 | `::unsure[note]` | The author isn't sure the line is accurate. |
 | `::src[location]` | Links the line to its source. With a call name as value, `::src:name[location]` links that call to its definition. |
@@ -81,6 +81,8 @@ Modifiers describe the action, so they sit right after the kind. `::read?:sys` a
 
 A tag starts at the beginning of a line or after whitespace, so paths in real code such as `std::io` or `Vec::new()` stay plain text. A note belongs to the tag it touches. Tags can sit anywhere in a line, and a line can carry several, in execution order: `stream it ::read:s3 ::write:gcs`.
 
+Tags that come after everything else on a line are its trailing tags, and renderers line them up in a column. A line made only of tags, such as `::fail:BookingFailed`, has no trailing tags; its tags are the line.
+
 ### Source links
 
 `::src` links a sketch to the code it describes. Its note holds a location instead of free words: `path:start-end`, `path:line`, `path`, or a bare line or range.
@@ -105,26 +107,65 @@ get_profile(user_id):                    ::src[app/profile.py:12-24]
 
 Renderers hide `::src` tags and turn them into links. In plain text they add clutter, so a tool posting a sketch where nothing renders can leave them out.
 
+## Variables and labels
+
+Tracked variables let a renderer highlight every use of a value, and let a tool follow labeled data to the effects it reaches. Three things create one:
+
+| Source | Example | Tracked name |
+| --- | --- | --- |
+| Parameter | `get_profile(user_id):` | `user_id`. Write parameters as plain names; a type or default after the name, as in `limit: int = 10`, is ignored. |
+| Binding | `row = load_user(user_id)` | `row` |
+| Label | `::secret:token` | `token`, even when nothing binds it |
+
+A variable belongs to the whole sketch, not to the block that binds it.
+
+A use is any whole word that matches a tracked name, in code or in prose, so `if cached:` and `for each order:` use `cached` and `order`. Matching is case-sensitive. Three positions are not uses:
+
+- After a dot: `user.id` uses `user`, not `id`.
+- Inside a hyphenated word: `token-rotated` doesn't use `token`.
+- Before `::`: `token::Kind` is a path, not a use of `token`.
+
+### Labels
+
+`::untrusted` and `::secret` are labels: their value names a variable instead of a system. A label applies to that variable everywhere in the sketch, wherever the tag sits; by convention it goes on the line where the value enters, as in `body = request.json()  ::untrusted:body`. Tools may let teams declare other label kinds, such as `::pii`.
+
+Labeled data reaches an effect when the labeled variable is used on a line that carries a `::read` or `::write` tag. In the signup example below, `log_event("signup", body)  ::write:logs` sends the untrusted `body` to the logs. Defining a variable is not a use: in `token = refresh(account)  ::write:oauth  ::secret:token`, the write produces the token rather than receiving it.
+
+Labels don't follow bindings. After `user = get_or_create(body.email)`, `user` is not untrusted. Label a derived value too when it should be tracked.
+
 ## Grammar
 
 The grammar covers only tags, notes, calls, bindings and blocks; any other text is prose. Written in EBNF:
 
 ```ebnf
-name       = alnum , { alnum | "-" | "_" } ;
+(* Names in tags: letters and digits in any script. *)
+name       = ( alnum | "_" ) , { alnum | "-" | "_" } ;
 value      = name , { "." , name } | "*" ;
 modifier   = "?" | "~" ;
 note       = "[" , [ "!" ] , text-without-"]" , "]" ;
 
 tag        = "::" , name , { modifier } , [ ":" , value ] , [ note ] ;
 
-call       = name , { "." , name } , "(" , text , ")" ;
-binding    = line-start , name , "=" ;
+(* Names in code follow code rules: no "-", no leading digit. *)
+ident      = ( letter | "_" ) , { alnum | "_" } ;
+call       = ident , { ( "." | "::" ) , ident } , "(" , text , ")" ;   (* ")" on the same line *)
+binding    = line-start , ident , "=" ;                             (* not "==" or "=>" *)
+signature  = first-line , call , ( ":" | block ) ;
 block      = line followed by a deeper-indented line ;
 ```
 
-A value is a system, a variable, a failure name or a call name, depending on the kind.
+A value is a system, a variable, a failure name or a call name, depending on the kind. Tag names may contain `-`, as in `legacy-billing`, but code names can't, so `token-rotated` in prose is one word.
 
 Position resolves the edge cases. A tag starts at the beginning of a line or after whitespace. A note belongs to the tag it touches; brackets anywhere else are prose. A block header may end in `:`, but its deeper-indented lines are what make it a block.
+
+## Warnings
+
+A sketch always renders. Problems are warnings attached to their line, never errors, so a half-written sketch can still be read. A parser warns when:
+
+- Indentation isn't 2 or 4 spaces per level, changes unit partway, or doesn't line up with an enclosing block.
+- A note has no closing `]`. The `[` and what follows stay prose.
+- `::read` or `::write` has no system, `::fail` has no name, or a label has no variable.
+- `::src` has no location, or its location has no file and the signature names none.
 
 ## Authoring rules
 
@@ -144,7 +185,7 @@ These rules apply to anyone writing a sketch, human or AI. The first two carry t
 
 ## Rendering
 
-A highlighter works only from tags, the shape of calls and bindings, and position, so it needs no vocabulary. Five colors are always on: violet, blue, aqua, orange and red, plus amber for dangers.
+A highlighter works only from tags, the shape of calls and bindings, and position, so it needs no vocabulary. Five colors are always on: violet, blue, aqua, orange and red. Amber marks dangers, and pink and purple mark the two labels.
 
 | Element | Rendering |
 | --- | --- |
@@ -156,15 +197,39 @@ A highlighter works only from tags, the shape of calls and bindings, and positio
 | Note attached to a tag | Muted text right after the pill |
 | Danger note `[!…]` or `::danger` tag | Amber |
 | Failure tag | Red; the rest of the line stays normal |
+| `::untrusted` tag | Pink pill |
+| `::secret` tag | Purple pill |
+| `::unsure` tag | Neutral pill with a dotted outline |
+| Function name on the signature | Bold blue |
 | Call | Blue with a dotted underline; linked to its definition when a `::src` tag gives it |
-| First word of a prose line or block header | Violet |
+| First word of a prose line or block header | Violet; see First words |
 | Binding or parameter | Bold; colored across all its uses on hover or click |
-| Labeled variable | Persistent underline in the label's color |
+| Labeled variable | Persistent underline in the label's color: wavy pink for untrusted, solid purple for secret |
 | Other kinds | Neutral pill, unless the renderer assigns a color |
-| `::src` tag | Hidden; the line links to its source, and calls link to their definitions |
-| Tag at the end of a line | Aligned into a right-hand tag column, with its note |
+| `::src` tag | Hidden; the line links to its source, and calls link to their definitions. A line made only of `::src` tags is hidden entirely. The file named on the signature appears at the end of that line. |
+| Trailing tags | Aligned into a right-hand tag column, with their notes. When the column doesn't fit, a renderer may move them under the line. |
 
-Colors are defined for both light and dark themes.
+### First words
+
+The first word of a line is violet, which makes free words like `if`, `return` or `retry` stand out without a keyword list. A word starts with a letter and may contain letters, digits, `_`, `-` and apostrophes, so `re-check` and `don't` are single words.
+
+There is no violet first word when the line is the signature, starts with a binding, a tag or a tracked variable, or when the word is followed by `(`, `.` or `::`, which makes it code. So `return row` and `else:` start violet, while `cache.set(…)`, `row = …` and, once `cached` is bound, `cached is stale` don't.
+
+### Palette
+
+Renderers may change these, but should keep each role distinct.
+
+| Color | Used for | Light | Dark |
+| --- | --- | --- | --- |
+| Violet | First words | `#6d28d9` | `#a78bfa` |
+| Blue | Calls, the signature's name | `#1d4ed8` | `#93c5fd` |
+| Aqua | Reads | `#0f766e` | `#5eead4` |
+| Orange | Writes | `#c2410c` | `#fdba74` |
+| Red | Failures | `#b91c1c` | `#fca5a5` |
+| Amber | Dangers | `#a15c07` | `#fcd34d` |
+| Pink | Untrusted | `#be185d` | `#f9a8d4` |
+| Purple | Secret | `#7c3aed` | `#c4b5fd` |
+| Neutral | `::unsure` and other kinds | `#556070` | `#a3acbd` |
 
 ## Examples
 
@@ -259,6 +324,10 @@ These changes make the format consistent with what was sketched in discussion, a
 | Logs | A kept log line carried no tag | A kept log is tagged, as in `::write:logs` | The contract never hides an effect |
 | Kind colors | Fixed by the spec | The spec sets defaults; renderers may style any kind | Teams can highlight their own kinds without a spec change |
 | Source anchoring | Each line linked to a range of source lines, with no syntax for it | `::src` gives a line's source or a call's definition | Links use the same tag mechanism, with no grammar change |
+| Names in code | Calls and bindings used the tag `name` rule, which allows `-` | Code names follow code rules; tag names keep `-` | `token-rotated` in prose is one word, not a use of `token` |
+| Label flows | Not specified | Labeled data reaches an effect when the variable is used on the effect's line; labels don't follow bindings | Tools can point at the exact line, and nothing is inferred behind the author's back |
+| Label colors | Not specified | Pink for untrusted, purple for secret | The two labels stay distinct from each other and from effects |
+| Problems in a sketch | Not specified | Warnings on the line; a sketch always renders | A half-written sketch is still worth reading |
 
 | Open question | Current default |
 | --- | --- |
@@ -267,4 +336,5 @@ These changes make the format consistent with what was sketched in discussion, a
 | Zoom levels: one line, block level, near source | Block level only |
 | Whether model calls need their own kind, for cost and nondeterminism | Treated as reads |
 | Whether shorthands such as `->sys` come back as sugar for tags | Tags only |
+| Whether labels follow bindings, so `user = find(body.email)` makes `user` untrusted | No; the author labels a derived value explicitly |
 | A final name for the format | "Sketch" is a working name |
