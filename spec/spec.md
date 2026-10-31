@@ -35,7 +35,8 @@ get_profile(user_id):
         return cached
     else:
         row = load_user(user_id)   ::read:postgres.users[lookup by key]
-        ::fail:NotFound if no row
+        if no row:
+            ::fail:NotFound
         cache.set(user_id, row)    ::write:redis[5 min ttl]
         return row
 ```
@@ -50,7 +51,7 @@ Every marker is a tag: `::kind`, optionally followed by `:value` and an attached
 | `::write:sys` | Changes state outside the process. |
 | `::read?:sys` | A read that happens only under a condition the sketch doesn't show. |
 | `::write?:sys` | A write that happens only under a hidden condition, as in `get_or_create`. |
-| `::fail:Name` | The flow ends abnormally with this outcome. The condition follows in prose. |
+| `::fail:Name` | The flow ends abnormally with this outcome. Its condition is written as an `if …:` block around it. |
 | `::untrusted:name` | Labels a variable as outside input that hasn't been validated. See Variables and labels. |
 | `::secret:name` | Labels a variable as sensitive: passwords, tokens, personal data. See Variables and labels. |
 | `::danger[note]` | Flags something on the line a reviewer should stop at. |
@@ -98,7 +99,8 @@ get_profile(user_id):                    ::src[app/profile.py:12-24]
         return cached
     else:                                ::src[16-23]
         row = load_user(user_id)         ::read:postgres.users[lookup by key]
-        ::fail:NotFound if no row
+        if no row:
+            ::fail:NotFound
         cache.set(user_id, row)          ::write:redis[5 min ttl]
         return row
     ::src:load_user[app/users.py:88]
@@ -175,7 +177,7 @@ These rules apply to anyone writing a sketch, human or AI. The first two carry t
 | --- | --- |
 | Mark every effect where it happens | Any line that reads or changes outside state carries a tag, whether it is prose or a call. Effects inside a called function are tagged on the call. |
 | Keep effects separate and in order | One tag per effect, in execution order. Never fold several effects into untagged words like "undo both". |
-| Name the failures the function raises or handles | Each one is `::fail:Name`, with its condition in prose. Failures from callees that simply propagate need no tag. A swallowed failure is noted on its effect, as in `::write:sendgrid[failure ignored]`. |
+| Name the failures the function raises or handles | Each one is `::fail:Name`, inside an `if …:` block for its condition. Failures from callees that simply propagate need no tag. A swallowed failure is noted on its effect, as in `::write:sendgrid[failure ignored]`. |
 | Anchor what a reviewer may open | Use real function names for calls worth jumping to. Write everything else as prose. When the source is known, link lines and calls with `::src`. |
 | Use prose for intent | Invariants, purposes and summaries go in plain words, such as "only one refresh at a time". |
 | Flag doubt instead of guessing | Add `~` or `::unsure[…]` when a claim isn't verified. When a detail like an access pattern is a guess, say "probably" in its note. |
@@ -240,9 +242,11 @@ Each example below surfaces at least one issue a reviewer would catch from the s
 ```sketch
 signup(request):
     body = request.json()                 ::untrusted:body
-    ::fail:InvalidEmail if body.email is malformed
+    if body.email is malformed:
+        ::fail:InvalidEmail
     user = get_or_create(body.email)      ::write?:postgres.users
-    ::fail:AlreadyExists if user is verified
+    if user is verified:
+        ::fail:AlreadyExists
     hash = bcrypt(body.password)          ::secret:hash
     set_password(user, hash)              ::write:postgres.users
     send_verification(user)               ::write:sendgrid
@@ -312,7 +316,7 @@ These changes make the format consistent with what was sketched in discussion, a
 | Modifier position | `?` inside the arrow, `~` at the end | Modifiers follow the kind: `::write?:sys`, `::read~:sys` | Modifiers describe the action, so they sit next to it |
 | Access patterns | `:key`, `:range` and `:scan` qualifiers | Free-text notes attached to the tag | No hidden vocabulary, and notes can say more |
 | Dangers | Only scans were flagged | `[!…]` on any tag, or `::danger[…]` for a whole line | Any warning can be flagged |
-| Failure names | `! free text`, with no clear end to the name | `::fail:Name`, with the condition in prose | The name has a clear end |
+| Failure names | `! free text`, with no clear end to the name | `::fail:Name`, with the condition as an `if …:` block around it | The name has a clear end, and the condition reads before the outcome, as in code |
 | Failures to name | Every abnormal exit | Only failures the function raises or handles | Propagated failures would put a tag on nearly every call |
 | Conditional reads | Only writes could be conditional | `::read?:sys` added | Symmetry with `::write?` |
 | Parts of a system | Not specified | A dot narrows the system: `postgres.orders` | Reviewers often need to know which table |

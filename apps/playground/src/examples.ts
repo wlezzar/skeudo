@@ -4,6 +4,37 @@ export interface Example {
   id: string;
   title: string;
   source: string;
+  /** Base URL for `::src` links, such as a GitHub blob URL at a commit. */
+  srcBase?: string;
+  /** Loaded from `local-examples/`, which is gitignored. */
+  local?: boolean;
+}
+
+/**
+ * Private examples: Markdown files in `apps/playground/local-examples/`, which is gitignored.
+ * Optional front matter sets the menu title and the source link base:
+ *   ---
+ *   title: ovia 6b8da71
+ *   srcBase: https://github.com/org/repo/blob/<sha>/
+ *   ---
+ */
+const localFiles = import.meta.glob<string>('../local-examples/*.md', { query: '?raw', import: 'default', eager: true });
+
+function localExample(path: string, raw: string): Example {
+  const name = path.slice(path.lastIndexOf('/') + 1).replace(/\.md$/, '');
+  const front = /^---\r?\n([\s\S]*?)\r?\n---\r?\n?/.exec(raw);
+  const meta: Record<string, string> = {};
+  for (const line of front?.[1].split(/\r?\n/) ?? []) {
+    const kv = /^(\w+):\s*(.*)$/.exec(line.trim());
+    if (kv) meta[kv[1]] = kv[2];
+  }
+  return {
+    id: `local:${name}`,
+    title: meta.title || name,
+    source: front ? raw.slice(front[0].length) : raw,
+    srcBase: meta.srcBase || undefined,
+    local: true,
+  };
 }
 
 const refreshToken = `refresh_token(account_id):                      ::src[auth/tokens.py:40-78]
@@ -16,7 +47,8 @@ const refreshToken = `refresh_token(account_id):                      ::src[auth
     fresh = oauth.refresh(token.refresh_token)    ::write:google[rotates the refresh token] ::secret:fresh ::src[49]
     if that fails:                                ::src[50-55]
         release the lock                          ::write:redis
-        ::fail:Revoked if the provider says the grant is gone
+        if the provider says the grant is gone:
+            ::fail:Revoked
     save_token(account_id, fresh)                 ::write:postgres.tokens[!no retry]
     publish token-rotated event                   ::write~:kafka.token-rotated ::unsure[may be async]
     audit(account_id, fresh)                      ::write:logs ::danger[secret reaches the audit log]
@@ -33,7 +65,8 @@ const getProfile = `get_profile(user_id):                    ::src[app/profile.p
         return cached
     else:                                ::src[16-23]
         row = load_user(user_id)         ::read:postgres.users[lookup by key]
-        ::fail:NotFound if no row
+        if no row:
+            ::fail:NotFound
         cache.set(user_id, row)          ::write:redis[5 min ttl]
         return row
     ::src:load_user[app/users.py:88]
@@ -42,9 +75,11 @@ const getProfile = `get_profile(user_id):                    ::src[app/profile.p
 
 const signup = `signup(request):
     body = request.json()                 ::untrusted:body
-    ::fail:InvalidEmail if body.email is malformed
+    if body.email is malformed:
+        ::fail:InvalidEmail
     user = get_or_create(body.email)      ::write?:postgres.users
-    ::fail:AlreadyExists if user is verified
+    if user is verified:
+        ::fail:AlreadyExists
     hash = bcrypt(body.password)          ::secret:hash
     set_password(user, hash)              ::write:postgres.users
     send_verification(user)               ::write:sendgrid
@@ -93,7 +128,8 @@ const realCode = `load_config(path):
     paths = [path, "~/.config/app.toml"]
     if !text.is_empty():
         cfg = toml::from_str(&text)
-        ::fail:InvalidConfig if parsing fails
+        if that fails:
+            ::fail:InvalidConfig
     $user->save()                           ::write:postgres.users ::unsure[only in legacy mode?]
     stream it to the mirror                 ::read:s3.configs ::write:gcs.configs
 `;
@@ -140,4 +176,7 @@ export const examples: Example[] = [
   { id: 'real-code', title: 'Real code stays plain (load_config)', source: realCode },
   { id: 'pr-comment', title: 'Markdown: a review comment', source: prComment },
   { id: 'spec', title: 'Markdown: the spec itself', source: spec },
+  ...Object.entries(localFiles)
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([path, raw]) => localExample(path, raw)),
 ];

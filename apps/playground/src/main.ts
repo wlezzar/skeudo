@@ -277,7 +277,10 @@ editor.addEventListener('keydown', (e) => {
 });
 
 // ---------- Controls ----------
-for (const ex of examples) exampleSelect.add(new Option(ex.title, ex.id));
+const localGroup = document.createElement('optgroup');
+localGroup.label = 'Local (gitignored)';
+for (const ex of examples) (ex.local ? localGroup : exampleSelect).append(new Option(ex.title, ex.id));
+if (localGroup.children.length) exampleSelect.append(localGroup);
 const custom = new Option('Custom (edited)', 'custom');
 
 function loadExample(id: string) {
@@ -285,8 +288,11 @@ function loadExample(id: string) {
   exampleSelect.value = ex.id;
   custom.remove();
   editor.value = ex.source;
+  // Source links belong to the example: real repos bring their base, fictional ones have none.
+  srcBaseInput.value = ex.srcBase ?? '';
   store.set('example', ex.id);
   store.set('source', ex.source);
+  store.set('src-base', srcBaseInput.value);
   render();
 }
 
