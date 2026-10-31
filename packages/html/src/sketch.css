@@ -1,0 +1,268 @@
+/* Sketch renderer styles. Colors follow the spec: violet, blue, aqua, orange, red, plus amber for dangers. */
+
+:root {
+  --sk-font: ui-monospace, 'JetBrains Mono', 'SF Mono', SFMono-Regular, Menlo, Consolas, monospace;
+  --sk-bg: #fbfbfd;
+  --sk-fg: #1f2330;
+  --sk-muted: #5b6275;
+  --sk-faint: #9aa1b2;
+  --sk-border: #e3e5ec;
+  --sk-guide: #e6e8ee;
+  --sk-row-hover: #f1f2f7;
+
+  --sk-violet: #6d28d9;
+  --sk-blue: #1d4ed8;
+  --sk-aqua: #0f766e;
+  --sk-orange: #c2410c;
+  --sk-red: #b91c1c;
+  --sk-amber: #a15c07;
+  --sk-neutral: #556070;
+  --sk-untrusted: #be185d;
+  --sk-secret: #7c3aed;
+
+  --sk-hl-bg: #fde68a;
+  --sk-pin-bg: #fcd34d;
+  --sk-indent: 4ch;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --sk-bg: #171a21;
+    --sk-fg: #e4e6ee;
+    --sk-muted: #9aa1b4;
+    --sk-faint: #5e6578;
+    --sk-border: #2a2f3a;
+    --sk-guide: #272c37;
+    --sk-row-hover: #1e222b;
+
+    --sk-violet: #c4b5fd;
+    --sk-blue: #93c5fd;
+    --sk-aqua: #5eead4;
+    --sk-orange: #fdba74;
+    --sk-red: #fca5a5;
+    --sk-amber: #fcd34d;
+    --sk-neutral: #a3acbd;
+    --sk-untrusted: #f9a8d4;
+    --sk-secret: #c4b5fd;
+
+    --sk-hl-bg: #5b4a12;
+    --sk-pin-bg: #7a5f0e;
+  }
+}
+
+:root[data-theme='dark'] {
+  --sk-bg: #171a21;
+  --sk-fg: #e4e6ee;
+  --sk-muted: #9aa1b4;
+  --sk-faint: #5e6578;
+  --sk-border: #2a2f3a;
+  --sk-guide: #272c37;
+  --sk-row-hover: #1e222b;
+
+  --sk-violet: #c4b5fd;
+  --sk-blue: #93c5fd;
+  --sk-aqua: #5eead4;
+  --sk-orange: #fdba74;
+  --sk-red: #fca5a5;
+  --sk-amber: #fcd34d;
+  --sk-neutral: #a3acbd;
+  --sk-untrusted: #f9a8d4;
+  --sk-secret: #c4b5fd;
+
+  --sk-hl-bg: #5b4a12;
+  --sk-pin-bg: #7a5f0e;
+}
+
+/* ---------- Layout ---------- */
+
+.sketch {
+  display: grid;
+  grid-template-columns: auto max-content minmax(max-content, 1fr);
+  font-family: var(--sk-font);
+  font-size: 13.5px;
+  line-height: 1.8;
+  color: var(--sk-fg);
+  background: var(--sk-bg);
+  border: 1px solid var(--sk-border);
+  border-radius: 8px;
+  padding: 0.6rem 0;
+  overflow-x: auto;
+  text-align: left;
+}
+
+.sk-row {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
+}
+.sk-row:hover { background: var(--sk-row-hover); }
+.sk-has-diag { box-shadow: inset 3px 0 var(--sk-amber); }
+
+.sk-gut {
+  grid-column: 1;
+  padding-left: 1rem;
+  text-align: right;
+  color: var(--sk-faint);
+  font-size: 0.78em;
+  user-select: none;
+}
+.sketch.sk-gutter .sk-gut { min-width: 3ch; padding-right: 1.5ch; }
+.sk-src { color: inherit; text-decoration: none; }
+a.sk-src:hover { color: var(--sk-blue); text-decoration: underline; }
+.sk-src-inherited { opacity: 0.6; }
+
+.sk-code {
+  grid-column: 2;
+  position: relative;
+  white-space: pre;
+}
+.sk-code::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: calc(var(--d, 0) * var(--sk-indent));
+  background: repeating-linear-gradient(to right, var(--sk-guide) 0 1px, transparent 1px var(--sk-indent));
+  background-position: 0.5ch 0;
+  pointer-events: none;
+}
+
+.sk-tags {
+  grid-column: 3;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding-left: 3ch;
+  padding-right: 1rem;
+  white-space: nowrap;
+}
+
+/* ---------- Tags ---------- */
+
+.sk-x {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: pre;
+}
+
+.sk-tagw { white-space: nowrap; }
+
+.sk-tag {
+  --sk-c: var(--sk-neutral);
+  display: inline-flex;
+  align-items: baseline;
+  font-family: var(--sk-font);
+  font-size: 0.8em;
+  line-height: 1.5;
+  padding: 0 0.5em;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--sk-c) 38%, transparent);
+  background: color-mix(in srgb, var(--sk-c) 13%, transparent);
+  color: var(--sk-c);
+  vertical-align: 0.08em;
+}
+.sk-kind { font-weight: 650; }
+.sk-mod { font-weight: 800; margin-left: 0.05em; }
+.sk-val {
+  margin-left: 0.4em;
+  padding-left: 0.4em;
+  border-left: 1px solid color-mix(in srgb, var(--sk-c) 38%, transparent);
+}
+
+.sk-k-read { --sk-c: var(--sk-aqua); }
+.sk-k-write { --sk-c: var(--sk-orange); }
+.sk-k-fail { --sk-c: var(--sk-red); }
+.sk-k-danger { --sk-c: var(--sk-amber); }
+.sk-k-untrusted { --sk-c: var(--sk-untrusted); }
+.sk-k-secret { --sk-c: var(--sk-secret); }
+.sk-k-unsure { --sk-c: var(--sk-neutral); border-style: dotted; }
+.sk-k-src { --sk-c: var(--sk-blue); }
+
+/* Conditional (?): dashed outline in the effect's color. */
+.sk-cond {
+  background: transparent;
+  border-style: dashed;
+  border-color: var(--sk-c);
+}
+/* Unverified (~): lighter fill; the ~ stays visible. */
+.sk-unv {
+  background: color-mix(in srgb, var(--sk-c) 5%, transparent);
+  border-color: color-mix(in srgb, var(--sk-c) 22%, transparent);
+}
+.sk-unv .sk-kind,
+.sk-unv .sk-val { opacity: 0.8; }
+/* Runtime system (*): dashed outline, so it stands out. */
+.sk-rt .sk-val {
+  border-left: none;
+  margin-left: 0.35em;
+  padding: 0 0.35em;
+  outline: 1.5px dashed var(--sk-c);
+  outline-offset: -1px;
+  border-radius: 999px;
+  font-weight: 800;
+}
+
+.sk-note {
+  margin-left: 0.4em;
+  font-size: 0.8em;
+  color: var(--sk-muted);
+}
+.sk-note-danger {
+  color: var(--sk-amber);
+  font-weight: 650;
+}
+.sk-bang { margin-right: 0.25em; font-weight: 800; }
+
+/* ---------- Code ---------- */
+
+.sk-word { color: var(--sk-violet); }
+.sk-fn { color: var(--sk-blue); font-weight: 700; }
+
+.sk-call {
+  color: var(--sk-blue);
+  text-decoration: underline dotted color-mix(in srgb, var(--sk-blue) 60%, transparent);
+  text-underline-offset: 3px;
+}
+a.sk-call:hover { text-decoration-style: solid; }
+.sk-call.sk-linked { cursor: pointer; }
+
+.sk-var {
+  font-weight: 700;
+  border-radius: 3px;
+  cursor: pointer;
+}
+.sk-def { font-weight: 800; }
+.sk-lbl-untrusted {
+  text-decoration: underline wavy var(--sk-untrusted);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+.sk-lbl-secret {
+  text-decoration: underline solid var(--sk-secret);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+
+.sk-hl { background: var(--sk-hl-bg); }
+.sk-pin { background: var(--sk-pin-bg); }
+.sk-val.sk-hl,
+.sk-val.sk-pin { border-radius: 3px; }
+
+.sk-file {
+  color: var(--sk-muted);
+  font-size: 0.78em;
+  text-decoration: none;
+}
+a.sk-file:hover { color: var(--sk-blue); text-decoration: underline; }
+
+/* Inline code made only of tags, as rendered by markdown-it-sketch. */
+code.sk-inline {
+  background: none;
+  padding: 0;
+  border: 0;
+  white-space: nowrap;
+}

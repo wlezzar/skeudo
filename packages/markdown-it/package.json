@@ -1,0 +1,19 @@
+{
+  "name": "markdown-it-sketch",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@sketch/core": "workspace:*",
+    "@sketch/html": "workspace:*"
+  },
+  "peerDependencies": {
+    "markdown-it": ">=14"
+  },
+  "devDependencies": {
+    "markdown-it": "^15.0.3"
+  }
+}

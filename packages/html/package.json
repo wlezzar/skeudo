@@ -1,0 +1,11 @@
+{
+  "name": "@sketch/html",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./sketch.css": "./src/sketch.css"
+  },
+  "dependencies": { "@sketch/core": "workspace:*" }
+}

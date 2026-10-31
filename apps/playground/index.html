@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sketch Playground</title>
+  </head>
+  <body>
+    <header class="bar">
+      <div class="brand"><span class="brand-mark">::</span>Sketch <span class="brand-sub">playground</span></div>
+      <label class="field">
+        <span>Example</span>
+        <select id="example"></select>
+      </label>
+      <label class="field">
+        <span>Mode</span>
+        <select id="mode">
+          <option value="auto">Auto</option>
+          <option value="sketch">Sketch</option>
+          <option value="markdown">Markdown</option>
+        </select>
+      </label>
+      <label class="field grow">
+        <span>Source links</span>
+        <input id="src-base" type="url" placeholder="Base URL, e.g. https://github.com/org/repo/blob/main/" />
+      </label>
+      <button id="theme" class="icon-btn" type="button" title="Toggle theme" aria-label="Toggle theme">◐</button>
+    </header>
+    <main class="split">
+      <section class="pane">
+        <div class="pane-head">
+          <span>Source</span>
+          <span id="status" class="status"></span>
+        </div>
+        <textarea id="editor" spellcheck="false" autocapitalize="off" autocomplete="off"></textarea>
+      </section>
+      <section class="pane">
+        <div class="pane-head tabs" role="tablist">
+          <button role="tab" data-tab="preview" aria-selected="true">Preview</button>
+          <button role="tab" data-tab="review">Review <span id="review-count" class="count"></span></button>
+          <button role="tab" data-tab="ast">AST</button>
+        </div>
+        <div class="panels">
+          <div id="preview" class="panel" data-panel="preview"></div>
+          <div id="review" class="panel" data-panel="review" hidden></div>
+          <div id="ast" class="panel" data-panel="ast" hidden><pre></pre></div>
+        </div>
+      </section>
+    </main>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

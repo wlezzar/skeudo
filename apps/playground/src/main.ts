@@ -1,0 +1,326 @@
+import markdownit, { type MarkdownIt } from 'markdown-it';
+import { analyze, formatLocation, parse, parseTagsOnly, type ResolvedSrc, type Review, type Sketch } from '@sketch/core';
+import { enhance, escapeHtml as esc, tagHtml, toHtml, type HtmlOptions } from '@sketch/html';
+import markdownItSketch, { sketchFences } from 'markdown-it-sketch';
+import '@sketch/html/sketch.css';
+import './style.css';
+import { examples } from './examples';
+
+const $ = <T extends HTMLElement>(sel: string) => document.querySelector(sel) as T;
+const editor = $<HTMLTextAreaElement>('#editor');
+const exampleSelect = $<HTMLSelectElement>('#example');
+const modeSelect = $<HTMLSelectElement>('#mode');
+const srcBaseInput = $<HTMLInputElement>('#src-base');
+const preview = $<HTMLDivElement>('#preview');
+const review = $<HTMLDivElement>('#review');
+const ast = $<HTMLPreElement>('#ast pre');
+const status = $<HTMLSpanElement>('#status');
+const reviewCount = $<HTMLSpanElement>('#review-count');
+
+// ---------- Persistence (per-viewer convenience only) ----------
+const store = {
+  get(key: string): string | null {
+    try {
+      return localStorage.getItem(`sketch-playground:${key}`);
+    } catch {
+      return null;
+    }
+  },
+  set(key: string, value: string) {
+    try {
+      localStorage.setItem(`sketch-playground:${key}`, value);
+    } catch {
+      /* storage unavailable */
+    }
+  },
+};
+
+// ---------- Theme ----------
+const applyTheme = (theme: string | null) => {
+  if (theme === 'light' || theme === 'dark') document.documentElement.dataset.theme = theme;
+  else delete document.documentElement.dataset.theme;
+};
+applyTheme(store.get('theme'));
+$('#theme').addEventListener('click', () => {
+  const dark =
+    document.documentElement.dataset.theme === 'dark' ||
+    (!document.documentElement.dataset.theme && matchMedia('(prefers-color-scheme: dark)').matches);
+  const next = dark ? 'light' : 'dark';
+  applyTheme(next);
+  store.set('theme', next);
+});
+
+// ---------- Rendering options ----------
+function htmlOptions(): HtmlOptions {
+  const base = srcBaseInput.value.trim();
+  return {
+    srcHref: base ? (loc: ResolvedSrc) => sourceUrl(base, loc) : undefined,
+  };
+}
+
+function sourceUrl(base: string, loc: ResolvedSrc): string | undefined {
+  if (!loc.path) return undefined;
+  const root = base.endsWith('/') ? base : `${base}/`;
+  let url = root + loc.path.replace(/^\.?\//, '');
+  if (loc.start !== undefined) url += `#L${loc.start}` + (loc.end !== undefined && loc.end !== loc.start ? `-L${loc.end}` : '');
+  return url;
+}
+
+function makeMarkdown(opts: HtmlOptions): MarkdownIt {
+  return markdownit({ html: false, linkify: true }).use(markdownItSketch, opts);
+}
+
+function detectMode(source: string): 'sketch' | 'markdown' {
+  if (modeSelect.value === 'sketch' || modeSelect.value === 'markdown') return modeSelect.value;
+  return /^\s*(```|~~~)\s*sketch\b/m.test(source) || /^#{1,6}\s/m.test(source) ? 'markdown' : 'sketch';
+}
+
+// ---------- Legend ----------
+const LEGEND = [
+  ['::read:postgres.users[lookup by key]', 'reads outside state'],
+  ['::write:redis[5 min ttl]', 'changes outside state'],
+  ['::write?:postgres.users', 'only under a hidden condition'],
+  ['::write~:kafka.events', 'unverified'],
+  ['::write:*', 'target decided at runtime'],
+  ['::read:postgres.orders[!full scan]', 'danger note'],
+  ['::fail:NotFound', 'abnormal outcome'],
+  ['::danger[shared across tenants]', 'whole-line danger'],
+  ['::untrusted:body', 'unvalidated input'],
+  ['::secret:token', 'sensitive value'],
+  ['::unsure[maybe async]', 'author is unsure'],
+  ['::todo[ask about retries]', 'any other kind'],
+];
+const legendHtml = () =>
+  `<details class="legend"><summary>Legend</summary><dl>` +
+  LEGEND.map(([src, label]) => `<dt>${(parseTagsOnly(src) ?? []).map((t) => tagHtml(t)).join(' ')}</dt><dd>${label}</dd>`).join('') +
+  `<dt><span class="sk-word">if</span> <span class="sk-call">load_user</span>(<span class="sk-var">user_id</span>)</dt><dd>prose word · call · variable (hover or click it)</dd>` +
+  `</dl></details>`;
+
+// ---------- Review ----------
+interface Parsed {
+  sketch: Sketch;
+  review: Review;
+  /** Line in the editor where the sketch starts (markdown mode). */
+  offset: number;
+}
+
+function reviewHtml(items: Parsed[], markdown: boolean): string {
+  if (!items.length) return `<p class="empty">No sketches found. In Markdown mode, put sketches in <code>\`\`\`sketch</code> fences.</p>`;
+  return items.map((item, index) => reviewSection(item, index, markdown)).join('');
+}
+
+function reviewSection({ sketch, review: r, offset }: Parsed, index: number, markdown: boolean): string {
+  const ln = (line: number) => `<span class="rv-ln">L${line + offset - 1}</span>`;
+  const row = (line: number, body: string) => `<li class="rv-row" data-sketch-index="${index}" data-line="${line}">${ln(line)}<span class="rv-body">${body}</span></li>`;
+  const reads = r.effects.filter((e) => e.direction === 'read').length;
+  const writes = r.effects.length - reads;
+  const dangers = r.flags.filter((f) => f.kind === 'danger').length;
+  const stat = (n: number, label: string, cls = '') => `<span class="rv-stat ${n ? cls : 'zero'}"><b>${n}</b> ${label}${n === 1 ? '' : 's'}</span>`;
+
+  const title = sketch.signature ? sketch.signature.name : `Sketch at line ${offset}`;
+  let html = `<section class="rv" data-sketch-scope>`;
+  if (markdown) html += `<h2>${esc(title)}</h2>`;
+  html += `<div class="rv-stats">${stat(reads, 'read', 'aqua')}${stat(writes, 'write', 'orange')}${stat(r.failures.length, 'failure', 'red')}${stat(dangers, 'danger', 'amber')}${stat(r.diagnostics.length, 'warning', 'amber')}</div>`;
+
+  if (r.systems.length) {
+    html += `<h3>Systems touched</h3><table class="rv-table"><thead><tr><th>System</th><th>Parts</th><th>Reads</th><th>Writes</th></tr></thead><tbody>`;
+    for (const s of r.systems) {
+      html += `<tr><td><b>${esc(s.name)}</b></td><td>${s.parts.map(esc).join(', ') || '<span class="muted">—</span>'}</td><td class="num aqua">${s.reads || ''}</td><td class="num orange">${s.writes || ''}</td></tr>`;
+    }
+    html += `</tbody></table>`;
+  }
+
+  if (r.effects.length) {
+    html += `<h3>Effects, in order</h3><ol class="rv-list">`;
+    for (const e of r.effects) html += row(e.line, `${tagHtml(e.tag)}<span class="rv-ctx">${esc(e.context)}</span>`);
+    html += `</ol>`;
+  } else {
+    html += `<h3>Effects</h3><p class="empty">No effects tagged. Under the contract, that claims this code touches nothing outside the process.</p>`;
+  }
+
+  if (r.failures.length) {
+    html += `<h3>Failures</h3><ol class="rv-list">`;
+    for (const f of r.failures) html += row(f.line, `${tagHtml(f.tag)}<span class="rv-ctx">${esc(f.condition || 'no condition given')}</span>`);
+    html += `</ol>`;
+  }
+
+  if (r.flows.length) {
+    html += `<h3>Labeled data reaching effects</h3><ol class="rv-list">`;
+    for (const f of r.flows) {
+      const labels = f.labels.map((l) => `sk-lbl sk-lbl-${l}`).join(' ');
+      html += row(
+        f.line,
+        `<span class="sk-var ${labels}" data-var="${esc(f.variable)}">${esc(f.variable)}</span> <span class="muted">(${esc(f.labels.join(', '))})</span> <span class="arrow">→</span> ${tagHtml(f.effect.tag)}`,
+      );
+    }
+    html += `</ol>`;
+  }
+
+  if (r.flags.length) {
+    html += `<h3>Stop here</h3><ol class="rv-list">`;
+    for (const f of r.flags) html += row(f.line, `<span class="rv-flag rv-flag-${f.kind}">${f.kind}</span><span class="rv-ctx">${esc(f.text)}</span>`);
+    html += `</ol>`;
+  }
+
+  if (r.others.length) {
+    html += `<h3>Other tags</h3><ol class="rv-list">`;
+    for (const o of r.others) html += row(o.line, `${tagHtml(o.tag)}<span class="rv-ctx">${esc(o.context)}</span>`);
+    html += `</ol>`;
+  }
+
+  const calls = Object.entries(sketch.callSources);
+  if (calls.length) {
+    html += `<h3>Call definitions</h3><ul class="rv-list plain">`;
+    for (const [name, loc] of calls) html += `<li><span class="sk-call">${esc(name)}</span> <span class="muted">${esc(formatLocation(loc))}</span></li>`;
+    html += `</ul>`;
+  }
+
+  if (r.diagnostics.length) {
+    html += `<h3>Diagnostics</h3><ol class="rv-list">`;
+    for (const d of r.diagnostics) html += row(d.line, `<span class="rv-flag rv-flag-warning">${d.severity}</span><span class="rv-ctx">${esc(d.message)}</span>`);
+    html += `</ol>`;
+  }
+
+  return html + `</section>`;
+}
+
+// ---------- Render loop ----------
+function render() {
+  const source = editor.value;
+  const opts = htmlOptions();
+  const mode = detectMode(source);
+  let parsed: Parsed[];
+
+  if (mode === 'markdown') {
+    const md = makeMarkdown(opts);
+    preview.innerHTML = `<article class="md">${md.render(source)}</article>`;
+    parsed = sketchFences(md, source).map((f) => {
+      const sketch = parse(f.content);
+      return { sketch, review: analyze(sketch), offset: f.line + 1 };
+    });
+  } else {
+    const sketch = parse(source);
+    parsed = [{ sketch, review: analyze(sketch), offset: 1 }];
+    preview.innerHTML = toHtml(sketch, opts) + legendHtml();
+  }
+
+  review.innerHTML = reviewHtml(parsed, mode === 'markdown');
+  ast.textContent = JSON.stringify(
+    parsed.map(({ sketch }) => {
+      const { source: _source, ...rest } = sketch;
+      return rest;
+    }),
+    null,
+    2,
+  );
+
+  const warnings = parsed.reduce((n, p) => n + p.review.diagnostics.length, 0);
+  const effects = parsed.reduce((n, p) => n + p.review.effects.length, 0);
+  reviewCount.textContent = String(effects);
+  status.innerHTML =
+    (mode === 'markdown' ? `Markdown · ${parsed.length} sketch${parsed.length === 1 ? '' : 'es'}` : `Sketch · ${source.split('\n').length} lines`) +
+    (warnings ? ` · <span class="warn">${warnings} warning${warnings === 1 ? '' : 's'}</span>` : '');
+}
+
+let timer: number | undefined;
+const scheduleRender = () => {
+  clearTimeout(timer);
+  timer = window.setTimeout(render, 80);
+};
+
+// ---------- Tabs ----------
+function showTab(name: string) {
+  document.querySelectorAll<HTMLButtonElement>('[data-tab]').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.tab === name)));
+  document.querySelectorAll<HTMLElement>('[data-panel]').forEach((p) => (p.hidden = p.dataset.panel !== name));
+  store.set('tab', name);
+}
+document.querySelectorAll<HTMLButtonElement>('[data-tab]').forEach((b) => b.addEventListener('click', () => showTab(b.dataset.tab!)));
+
+// Clicking a review row jumps to that line in the preview.
+review.addEventListener('click', (e) => {
+  const row = (e.target as Element).closest<HTMLElement>('.rv-row');
+  if (!row || (e.target as Element).closest('[data-var], a')) return;
+  showTab('preview');
+  const sketchEl = preview.querySelectorAll('[data-sketch]')[Number(row.dataset.sketchIndex)];
+  const lineEl = sketchEl?.querySelector<HTMLElement>(`[data-line="${row.dataset.line}"]`);
+  if (!lineEl) return;
+  lineEl.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  lineEl.classList.remove('flash');
+  void lineEl.offsetWidth;
+  lineEl.classList.add('flash');
+});
+
+// ---------- Editor ----------
+editor.addEventListener('input', () => {
+  store.set('source', editor.value);
+  scheduleRender();
+});
+
+// Tab / Shift+Tab indent and dedent the selected lines by 4 spaces.
+editor.addEventListener('keydown', (e) => {
+  if (e.key !== 'Tab' || e.ctrlKey || e.metaKey || e.altKey) return;
+  e.preventDefault();
+  const { value, selectionStart: start, selectionEnd: end } = editor;
+  const lineStart = value.lastIndexOf('\n', start - 1) + 1;
+  if (start === end && !e.shiftKey) {
+    editor.setRangeText('    ', start, end, 'end');
+  } else {
+    const block = value.slice(lineStart, end);
+    const lines = block.split('\n');
+    const changed = lines.map((l) => (e.shiftKey ? l.replace(/^ {1,4}/, '') : `    ${l}`));
+    editor.setRangeText(changed.join('\n'), lineStart, end, 'preserve');
+    const firstDelta = changed[0].length - lines[0].length;
+    editor.selectionStart = Math.max(lineStart, start + firstDelta);
+    editor.selectionEnd = end + changed.join('\n').length - block.length;
+  }
+  editor.dispatchEvent(new Event('input'));
+});
+
+// ---------- Controls ----------
+for (const ex of examples) exampleSelect.add(new Option(ex.title, ex.id));
+const custom = new Option('Custom (edited)', 'custom');
+
+function loadExample(id: string) {
+  const ex = examples.find((x) => x.id === id) ?? examples[0];
+  exampleSelect.value = ex.id;
+  custom.remove();
+  editor.value = ex.source;
+  store.set('example', ex.id);
+  store.set('source', ex.source);
+  render();
+}
+
+exampleSelect.addEventListener('change', () => loadExample(exampleSelect.value));
+editor.addEventListener('input', () => {
+  if (exampleSelect.value !== 'custom') {
+    exampleSelect.add(custom);
+    exampleSelect.value = 'custom';
+    store.set('example', 'custom');
+  }
+});
+modeSelect.addEventListener('change', () => {
+  store.set('mode', modeSelect.value);
+  render();
+});
+srcBaseInput.addEventListener('input', () => {
+  store.set('src-base', srcBaseInput.value);
+  scheduleRender();
+});
+
+// ---------- Boot ----------
+modeSelect.value = store.get('mode') ?? 'auto';
+srcBaseInput.value = store.get('src-base') ?? '';
+enhance(preview);
+enhance(review);
+showTab(store.get('tab') ?? 'preview');
+
+const savedExample = store.get('example');
+const savedSource = store.get('source');
+if (savedExample === 'custom' && savedSource) {
+  exampleSelect.add(custom);
+  exampleSelect.value = 'custom';
+  editor.value = savedSource;
+  render();
+} else {
+  loadExample(savedExample ?? examples[0].id);
+}
