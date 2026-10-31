@@ -1,0 +1,10 @@
+
+handle(event):
+    if event is new:
+        store(event)        ::write:postgres.events
+
+        notify(event)       ::write:sns
+
+    return
+
+

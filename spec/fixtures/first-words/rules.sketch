@@ -1,0 +1,16 @@
+check(cached):
+    return cached
+    else:
+    re-check the lock
+    don't retry
+    Über cool
+    cached is stale
+    cache.set(key)
+    validate(input)
+    std::mem::take(buf)
+    row = load()
+    ::fail:Nope
+    42 is the answer
+    "quoted" text
+    _private stuff
+    Done.

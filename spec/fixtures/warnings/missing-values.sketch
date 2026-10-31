@@ -1,0 +1,10 @@
+f():
+    ::read
+    ::write[some note]
+    ::read?:
+    ::fail
+    ::untrusted
+    ::secret[the token]
+    ::src
+    ::src[]
+    ::src:helper

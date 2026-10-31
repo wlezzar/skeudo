@@ -1,0 +1,12 @@
+get_profile(user_id):                    ::src[app/profile.py:12-24]
+    cached = cache.get(user_id)          ::read:redis[lookup by key] ::src[13]
+    if cached:
+        return cached
+    else:                                ::src[16-23]
+        row = load_user(user_id)         ::read:postgres.users[lookup by key]
+        if no row:
+            ::fail:NotFound
+        cache.set(user_id, row)          ::write:redis[5 min ttl]
+        return row
+    ::src:load_user[app/users.py:88]
+    ::src:cache.set[lib/cache.py:31]

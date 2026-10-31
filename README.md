@@ -8,6 +8,7 @@ The format spec lives in [spec/spec.md](spec/spec.md).
 ```
 spec/
   spec.md        # the format: syntax, variables and labels, rendering
+  fixtures/      # .sketch inputs and the .json the parser must produce
 skills/
   sketch/        # agent skill that writes sketches of code, commits and PRs
 packages/
@@ -25,6 +26,7 @@ Packages export their TypeScript sources directly; there is no build step until 
 ```sh
 pnpm install
 pnpm dev         # http://localhost:5173
+pnpm test        # parser fixtures, see spec/fixtures/README.md
 pnpm typecheck
 pnpm build       # static playground in apps/playground/dist
 ```

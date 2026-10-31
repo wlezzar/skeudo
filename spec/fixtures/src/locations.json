@@ -1,0 +1,161 @@
+{
+  "signature": { "name": "f", "params": ["x"], "line": 1 },
+  "file": "app/f.py",
+  "indentUnit": 4,
+  "callSources": {
+    "x.y": { "path": "lib/xy.py", "start": 1, "end": 1 },
+    "helper": { "start": 88, "end": 88, "path": "app/f.py" }
+  },
+  "variables": { "x": { "origin": "param", "line": 1 } },
+  "lines": [
+    {
+      "number": 1,
+      "depth": 0,
+      "text": "f(x):                                ::src[app/f.py:1-50]",
+      "signature": true,
+      "header": true,
+      "src": { "path": "app/f.py", "start": 1, "end": 50 },
+      "tags": [
+        {
+          "raw": "::src[app/f.py:1-50]",
+          "kind": "src",
+          "note": { "text": "app/f.py:1-50" },
+          "trailing": true
+        }
+      ],
+      "segments": [
+        { "type": "fn", "text": "f" },
+        { "type": "text", "text": "(" },
+        { "type": "var", "text": "x", "name": "x", "definition": true },
+        { "type": "text", "text": "):" }
+      ]
+    },
+    {
+      "number": 2,
+      "depth": 1,
+      "text": "a                                ::src[app/other.py]",
+      "parent": 1,
+      "src": { "path": "app/other.py" },
+      "tags": [
+        {
+          "raw": "::src[app/other.py]",
+          "kind": "src",
+          "note": { "text": "app/other.py" },
+          "trailing": true
+        }
+      ],
+      "segments": [{ "type": "word", "text": "a" }]
+    },
+    {
+      "number": 3,
+      "depth": 1,
+      "text": "b                                ::src[app/other.py:7]",
+      "parent": 1,
+      "src": { "path": "app/other.py", "start": 7, "end": 7 },
+      "tags": [
+        {
+          "raw": "::src[app/other.py:7]",
+          "kind": "src",
+          "note": { "text": "app/other.py:7" },
+          "trailing": true
+        }
+      ],
+      "segments": [{ "type": "word", "text": "b" }]
+    },
+    {
+      "number": 4,
+      "depth": 1,
+      "text": "c                                ::src[app/other.py:7-9]",
+      "parent": 1,
+      "src": { "path": "app/other.py", "start": 7, "end": 9 },
+      "tags": [
+        {
+          "raw": "::src[app/other.py:7-9]",
+          "kind": "src",
+          "note": { "text": "app/other.py:7-9" },
+          "trailing": true
+        }
+      ],
+      "segments": [{ "type": "word", "text": "c" }]
+    },
+    {
+      "number": 5,
+      "depth": 1,
+      "text": "d                                ::src[7–9]",
+      "parent": 1,
+      "src": { "start": 7, "end": 9, "path": "app/f.py" },
+      "tags": [{ "raw": "::src[7–9]", "kind": "src", "note": { "text": "7–9" }, "trailing": true }],
+      "segments": [{ "type": "word", "text": "d" }]
+    },
+    {
+      "number": 6,
+      "depth": 1,
+      "text": "e                                ::src[12]",
+      "parent": 1,
+      "src": { "start": 12, "end": 12, "path": "app/f.py" },
+      "tags": [{ "raw": "::src[12]", "kind": "src", "note": { "text": "12" }, "trailing": true }],
+      "segments": [{ "type": "word", "text": "e" }]
+    },
+    {
+      "number": 7,
+      "depth": 1,
+      "text": "g                                ::src[ 12 - 14 ]",
+      "parent": 1,
+      "src": { "start": 12, "end": 14, "path": "app/f.py" },
+      "tags": [
+        {
+          "raw": "::src[ 12 - 14 ]",
+          "kind": "src",
+          "note": { "text": "12 - 14" },
+          "trailing": true
+        }
+      ],
+      "segments": [{ "type": "word", "text": "g" }]
+    },
+    {
+      "number": 8,
+      "depth": 1,
+      "text": "h                                ::src[C:\\code\\f.py:3]",
+      "parent": 1,
+      "src": { "path": "C:\\code\\f.py", "start": 3, "end": 3 },
+      "tags": [
+        {
+          "raw": "::src[C:\\code\\f.py:3]",
+          "kind": "src",
+          "note": { "text": "C:\\code\\f.py:3" },
+          "trailing": true
+        }
+      ],
+      "segments": [{ "type": "word", "text": "h" }]
+    },
+    {
+      "number": 9,
+      "depth": 1,
+      "text": "::src:x.y[lib/xy.py:1]",
+      "hidden": true,
+      "parent": 1,
+      "src": { "path": "app/f.py", "start": 1, "end": 50, "inherited": true },
+      "tags": [
+        {
+          "raw": "::src:x.y[lib/xy.py:1]",
+          "kind": "src",
+          "value": "x.y",
+          "note": { "text": "lib/xy.py:1" }
+        }
+      ],
+      "segments": [{ "type": "tag", "raw": "::src:x.y[lib/xy.py:1]" }]
+    },
+    {
+      "number": 10,
+      "depth": 1,
+      "text": "::src:helper[88]",
+      "hidden": true,
+      "parent": 1,
+      "src": { "path": "app/f.py", "start": 1, "end": 50, "inherited": true },
+      "tags": [
+        { "raw": "::src:helper[88]", "kind": "src", "value": "helper", "note": { "text": "88" } }
+      ],
+      "segments": [{ "type": "tag", "raw": "::src:helper[88]" }]
+    }
+  ]
+}

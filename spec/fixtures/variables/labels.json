@@ -1,0 +1,113 @@
+{
+  "signature": { "name": "refresh", "params": ["account"], "line": 1 },
+  "indentUnit": 4,
+  "variables": {
+    "account": { "origin": "param", "line": 1, "labels": ["untrusted"] },
+    "token": { "origin": "binding", "line": 3, "labels": ["secret"] },
+    "session": { "origin": "binding", "line": 4 },
+    "apikey": { "origin": "label", "line": 6, "labels": ["secret"] }
+  },
+  "flows": [
+    { "line": 2, "variable": "token", "labels": ["secret"], "effect": "::write:logs" },
+    { "line": 3, "variable": "account", "labels": ["untrusted"], "effect": "::write:oauth" },
+    { "line": 4, "variable": "token", "labels": ["secret"], "effect": "::write:redis" },
+    { "line": 6, "variable": "apikey", "labels": ["secret"], "effect": "::read:vault" },
+    { "line": 6, "variable": "apikey", "labels": ["secret"], "effect": "::write:http" }
+  ],
+  "lines": [
+    {
+      "number": 1,
+      "depth": 0,
+      "text": "refresh(account):                                 ::untrusted:account",
+      "signature": true,
+      "header": true,
+      "tags": [
+        { "raw": "::untrusted:account", "kind": "untrusted", "value": "account", "trailing": true }
+      ],
+      "segments": [
+        { "type": "fn", "text": "refresh" },
+        { "type": "text", "text": "(" },
+        { "type": "var", "text": "account", "name": "account", "definition": true },
+        { "type": "text", "text": "):" }
+      ]
+    },
+    {
+      "number": 2,
+      "depth": 1,
+      "text": "log_event(token)                              ::write:logs",
+      "parent": 1,
+      "tags": [{ "raw": "::write:logs", "kind": "write", "value": "logs", "trailing": true }],
+      "segments": [
+        { "type": "call", "text": "log_event", "name": "log_event" },
+        { "type": "text", "text": "(" },
+        { "type": "var", "text": "token", "name": "token" },
+        { "type": "text", "text": ")" }
+      ]
+    },
+    {
+      "number": 3,
+      "depth": 1,
+      "text": "token = provider.refresh(account)             ::write:oauth ::secret:token",
+      "parent": 1,
+      "binding": "token",
+      "tags": [
+        { "raw": "::write:oauth", "kind": "write", "value": "oauth", "trailing": true },
+        { "raw": "::secret:token", "kind": "secret", "value": "token", "trailing": true }
+      ],
+      "segments": [
+        { "type": "var", "text": "token", "name": "token", "definition": true },
+        { "type": "text", "text": " = " },
+        { "type": "call", "text": "provider.refresh", "name": "provider.refresh" },
+        { "type": "text", "text": "(" },
+        { "type": "var", "text": "account", "name": "account" },
+        { "type": "text", "text": ")" }
+      ]
+    },
+    {
+      "number": 4,
+      "depth": 1,
+      "text": "session = store(token)                        ::write:redis",
+      "parent": 1,
+      "binding": "session",
+      "tags": [{ "raw": "::write:redis", "kind": "write", "value": "redis", "trailing": true }],
+      "segments": [
+        { "type": "var", "text": "session", "name": "session", "definition": true },
+        { "type": "text", "text": " = " },
+        { "type": "call", "text": "store", "name": "store" },
+        { "type": "text", "text": "(" },
+        { "type": "var", "text": "token", "name": "token" },
+        { "type": "text", "text": ")" }
+      ]
+    },
+    {
+      "number": 5,
+      "depth": 1,
+      "text": "send(session)                                 ::write:http",
+      "parent": 1,
+      "tags": [{ "raw": "::write:http", "kind": "write", "value": "http", "trailing": true }],
+      "segments": [
+        { "type": "call", "text": "send", "name": "send" },
+        { "type": "text", "text": "(" },
+        { "type": "var", "text": "session", "name": "session" },
+        { "type": "text", "text": ")" }
+      ]
+    },
+    {
+      "number": 6,
+      "depth": 1,
+      "text": "sign with apikey and send                     ::read:vault ::write:http ::secret:apikey",
+      "parent": 1,
+      "tags": [
+        { "raw": "::read:vault", "kind": "read", "value": "vault", "trailing": true },
+        { "raw": "::write:http", "kind": "write", "value": "http", "trailing": true },
+        { "raw": "::secret:apikey", "kind": "secret", "value": "apikey", "trailing": true }
+      ],
+      "segments": [
+        { "type": "word", "text": "sign" },
+        { "type": "text", "text": " with " },
+        { "type": "var", "text": "apikey", "name": "apikey" },
+        { "type": "text", "text": " and send" }
+      ]
+    }
+  ]
+}

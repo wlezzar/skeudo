@@ -1,0 +1,112 @@
+{
+  "signature": { "name": "run", "params": ["task"], "line": 1 },
+  "indentUnit": 4,
+  "variables": {
+    "task": { "origin": "param", "line": 1 },
+    "messages": { "origin": "binding", "line": 2 },
+    "reply": { "origin": "binding", "line": 3 }
+  },
+  "lines": [
+    {
+      "number": 1,
+      "depth": 0,
+      "text": "run(task):",
+      "signature": true,
+      "header": true,
+      "segments": [
+        { "type": "fn", "text": "run" },
+        { "type": "text", "text": "(" },
+        { "type": "var", "text": "task", "name": "task", "definition": true },
+        { "type": "text", "text": "):" }
+      ]
+    },
+    {
+      "number": 2,
+      "depth": 1,
+      "text": "messages = [task]",
+      "parent": 1,
+      "binding": "messages",
+      "segments": [
+        { "type": "var", "text": "messages", "name": "messages", "definition": true },
+        { "type": "text", "text": " = [" },
+        { "type": "var", "text": "task", "name": "task" },
+        { "type": "text", "text": "]" }
+      ]
+    },
+    {
+      "number": 3,
+      "depth": 1,
+      "text": "reply = model.create(messages)   ::read:anthropic[cached for [some] time]",
+      "parent": 1,
+      "binding": "reply",
+      "tags": [
+        {
+          "raw": "::read:anthropic[cached for [some]",
+          "kind": "read",
+          "value": "anthropic",
+          "note": { "text": "cached for [some" }
+        }
+      ],
+      "segments": [
+        { "type": "var", "text": "reply", "name": "reply", "definition": true },
+        { "type": "text", "text": " = " },
+        { "type": "call", "text": "model.create", "name": "model.create" },
+        { "type": "text", "text": "(" },
+        { "type": "var", "text": "messages", "name": "messages" },
+        { "type": "text", "text": ")   " },
+        { "type": "tag", "raw": "::read:anthropic[cached for [some]" },
+        { "type": "text", "text": " time]" }
+      ]
+    },
+    {
+      "number": 4,
+      "depth": 1,
+      "text": "store(reply) ::write:s3 [archive]",
+      "parent": 1,
+      "tags": [{ "raw": "::write:s3", "kind": "write", "value": "s3" }],
+      "segments": [
+        { "type": "call", "text": "store", "name": "store" },
+        { "type": "text", "text": "(" },
+        { "type": "var", "text": "reply", "name": "reply" },
+        { "type": "text", "text": ") " },
+        { "type": "tag", "raw": "::write:s3" },
+        { "type": "text", "text": " [archive]" }
+      ]
+    },
+    {
+      "number": 5,
+      "depth": 1,
+      "text": "store(reply)                     ::write:s3[!no lifecycle rule]",
+      "parent": 1,
+      "tags": [
+        {
+          "raw": "::write:s3[!no lifecycle rule]",
+          "kind": "write",
+          "value": "s3",
+          "note": { "text": "no lifecycle rule", "danger": true },
+          "trailing": true
+        }
+      ],
+      "segments": [
+        { "type": "call", "text": "store", "name": "store" },
+        { "type": "text", "text": "(" },
+        { "type": "var", "text": "reply", "name": "reply" },
+        { "type": "text", "text": ")" }
+      ]
+    },
+    {
+      "number": 6,
+      "depth": 1,
+      "text": "::danger[!double bang]",
+      "parent": 1,
+      "tags": [
+        {
+          "raw": "::danger[!double bang]",
+          "kind": "danger",
+          "note": { "text": "double bang", "danger": true }
+        }
+      ],
+      "segments": [{ "type": "tag", "raw": "::danger[!double bang]" }]
+    }
+  ]
+}

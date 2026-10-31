@@ -1,0 +1,161 @@
+{
+  "lines": [
+    {
+      "number": 1,
+      "depth": 0,
+      "text": "::read:redis",
+      "tags": [{ "raw": "::read:redis", "kind": "read", "value": "redis" }],
+      "segments": [{ "type": "tag", "raw": "::read:redis" }]
+    },
+    {
+      "number": 2,
+      "depth": 0,
+      "text": "::read:postgres.orders[lookup by key]",
+      "tags": [
+        {
+          "raw": "::read:postgres.orders[lookup by key]",
+          "kind": "read",
+          "value": "postgres.orders",
+          "note": { "text": "lookup by key" }
+        }
+      ],
+      "segments": [{ "type": "tag", "raw": "::read:postgres.orders[lookup by key]" }]
+    },
+    {
+      "number": 3,
+      "depth": 0,
+      "text": "::write?:postgres.users",
+      "tags": [
+        {
+          "raw": "::write?:postgres.users",
+          "kind": "write",
+          "conditional": true,
+          "value": "postgres.users"
+        }
+      ],
+      "segments": [{ "type": "tag", "raw": "::write?:postgres.users" }]
+    },
+    {
+      "number": 4,
+      "depth": 0,
+      "text": "::read~:s3.reports",
+      "tags": [
+        { "raw": "::read~:s3.reports", "kind": "read", "unverified": true, "value": "s3.reports" }
+      ],
+      "segments": [{ "type": "tag", "raw": "::read~:s3.reports" }]
+    },
+    {
+      "number": 5,
+      "depth": 0,
+      "text": "::write~?:legacy-billing.invoices[!no retry]",
+      "tags": [
+        {
+          "raw": "::write~?:legacy-billing.invoices[!no retry]",
+          "kind": "write",
+          "conditional": true,
+          "unverified": true,
+          "value": "legacy-billing.invoices",
+          "note": { "text": "no retry", "danger": true }
+        }
+      ],
+      "segments": [{ "type": "tag", "raw": "::write~?:legacy-billing.invoices[!no retry]" }]
+    },
+    {
+      "number": 6,
+      "depth": 0,
+      "text": "::write:*",
+      "tags": [{ "raw": "::write:*", "kind": "write", "value": "*" }],
+      "segments": [{ "type": "tag", "raw": "::write:*" }]
+    },
+    {
+      "number": 7,
+      "depth": 0,
+      "text": "::fail:NotFound",
+      "tags": [{ "raw": "::fail:NotFound", "kind": "fail", "value": "NotFound" }],
+      "segments": [{ "type": "tag", "raw": "::fail:NotFound" }]
+    },
+    {
+      "number": 8,
+      "depth": 0,
+      "text": "::danger[shared across tenants]",
+      "tags": [
+        {
+          "raw": "::danger[shared across tenants]",
+          "kind": "danger",
+          "note": { "text": "shared across tenants" }
+        }
+      ],
+      "segments": [{ "type": "tag", "raw": "::danger[shared across tenants]" }]
+    },
+    {
+      "number": 9,
+      "depth": 0,
+      "text": "::unsure[maybe cached upstream]",
+      "tags": [
+        {
+          "raw": "::unsure[maybe cached upstream]",
+          "kind": "unsure",
+          "note": { "text": "maybe cached upstream" }
+        }
+      ],
+      "segments": [{ "type": "tag", "raw": "::unsure[maybe cached upstream]" }]
+    },
+    {
+      "number": 10,
+      "depth": 0,
+      "text": "::lock:token-refresh",
+      "tags": [{ "raw": "::lock:token-refresh", "kind": "lock", "value": "token-refresh" }],
+      "segments": [{ "type": "tag", "raw": "::lock:token-refresh" }]
+    },
+    {
+      "number": 11,
+      "depth": 0,
+      "text": "::todo[ask about retries]",
+      "tags": [
+        {
+          "raw": "::todo[ask about retries]",
+          "kind": "todo",
+          "note": { "text": "ask about retries" }
+        }
+      ],
+      "segments": [{ "type": "tag", "raw": "::todo[ask about retries]" }]
+    },
+    {
+      "number": 12,
+      "depth": 0,
+      "text": "::v2:2fa",
+      "tags": [{ "raw": "::v2:2fa", "kind": "v2", "value": "2fa" }],
+      "segments": [{ "type": "tag", "raw": "::v2:2fa" }]
+    },
+    {
+      "number": 13,
+      "depth": 0,
+      "text": "::read:données.clients",
+      "tags": [{ "raw": "::read:données.clients", "kind": "read", "value": "données.clients" }],
+      "segments": [{ "type": "tag", "raw": "::read:données.clients" }]
+    },
+    {
+      "number": 14,
+      "depth": 0,
+      "text": "::read:redis[]",
+      "tags": [
+        { "raw": "::read:redis[]", "kind": "read", "value": "redis", "note": { "text": "" } }
+      ],
+      "segments": [{ "type": "tag", "raw": "::read:redis[]" }]
+    },
+    {
+      "number": 15,
+      "depth": 0,
+      "text": "::read:redis[  padded  ]",
+      "tags": [
+        {
+          "raw": "::read:redis[  padded  ]",
+          "kind": "read",
+          "value": "redis",
+          "note": { "text": "padded" }
+        }
+      ],
+      "segments": [{ "type": "tag", "raw": "::read:redis[  padded  ]" }]
+    }
+  ]
+}

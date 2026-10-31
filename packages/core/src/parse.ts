@@ -20,6 +20,7 @@ const TAG_RE = new RegExp(
 const IDENT_START = /[\p{L}_]/u;
 const IDENT_CHAR = /[\p{L}\p{N}_]/u;
 const IDENT_RE = /[\p{L}_][\p{L}\p{N}_]*/u;
+const LEAD_IDENT_RE = /^[\p{L}_][\p{L}\p{N}_]*/u;
 /** A call or member chain: `a.b.c` or `std::fs::read`. */
 const CHAIN_RE = /[\p{L}_][\p{L}\p{N}_]*(?:(?:\.|::)[\p{L}_][\p{L}\p{N}_]*)*/uy;
 const BINDING_RE = /^([\p{L}_][\p{L}\p{N}_]*)\s*=(?![=>])/u;
@@ -189,9 +190,12 @@ export function parse(source: string, options: ParseOptions = {}): Sketch {
       levels.push(w);
     } else {
       while (levels.length > 1 && levels[levels.length - 1] > w) levels.pop();
-      if (levels[levels.length - 1] !== w) {
+      const top = levels[levels.length - 1];
+      if (top !== w) {
         warn(line.number, `This indentation doesn't line up with any enclosing block.`);
-        levels.push(w);
+        // Less indented than the first line: no block encloses it, so it's at the top level.
+        if (w < top) levels[levels.length - 1] = w;
+        else levels.push(w);
       }
     }
     line.depth = levels.length - 1;
@@ -334,7 +338,12 @@ function tokenize(line: SketchLine, vars: Set<string>): Segment[] {
       const w = m[0];
       const next = text[w.length];
       const codeLike = next === '(' || next === '.' || (next === ':' && text[w.length + 1] === ':');
-      if (!codeLike && !vars.has(w)) {
+      // The line starts with a tracked variable, as in `cached is stale` or `user's team`,
+      // unless it is part of a hyphenated word such as `token-rotated`.
+      const lead = LEAD_IDENT_RE.exec(text)![0];
+      const leadIsVar =
+        vars.has(lead) && !(text[lead.length] === '-' && IDENT_START.test(text[lead.length + 1] ?? ''));
+      if (!codeLike && !leadIsVar) {
         segs.push({ type: 'word', text: w });
         i = w.length;
       }
@@ -355,7 +364,8 @@ function tokenize(line: SketchLine, vars: Set<string>): Segment[] {
       CHAIN_RE.lastIndex = i;
       const chain = CHAIN_RE.exec(text)![0];
       const after = i + chain.length;
-      const afterDot = prev === '.';
+      // Member access, as in `user.id`. A spread or range, as in `...rest` or `0..n`, is not.
+      const afterDot = prev === '.' && text[i - 2] !== '.';
       if (text[after] === '(' && findClose(text, after) !== -1) {
         flush();
         if (fnPending) {

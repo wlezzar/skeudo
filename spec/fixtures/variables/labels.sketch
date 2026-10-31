@@ -1,0 +1,6 @@
+refresh(account):                                 ::untrusted:account
+    log_event(token)                              ::write:logs
+    token = provider.refresh(account)             ::write:oauth ::secret:token
+    session = store(token)                        ::write:redis
+    send(session)                                 ::write:http
+    sign with apikey and send                     ::read:vault ::write:http ::secret:apikey

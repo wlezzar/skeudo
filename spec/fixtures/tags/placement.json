@@ -1,0 +1,123 @@
+{
+  "signature": { "name": "load", "params": ["path"], "line": 1 },
+  "indentUnit": 4,
+  "variables": {
+    "path": { "origin": "param", "line": 1 },
+    "data": { "origin": "binding", "line": 2 },
+    "v": { "origin": "binding", "line": 3 }
+  },
+  "lines": [
+    {
+      "number": 1,
+      "depth": 0,
+      "text": "load(path):",
+      "signature": true,
+      "header": true,
+      "segments": [
+        { "type": "fn", "text": "load" },
+        { "type": "text", "text": "(" },
+        { "type": "var", "text": "path", "name": "path", "definition": true },
+        { "type": "text", "text": "):" }
+      ]
+    },
+    {
+      "number": 2,
+      "depth": 1,
+      "text": "data = std::fs::read(path)        ::read:fs",
+      "parent": 1,
+      "binding": "data",
+      "tags": [{ "raw": "::read:fs", "kind": "read", "value": "fs", "trailing": true }],
+      "segments": [
+        { "type": "var", "text": "data", "name": "data", "definition": true },
+        { "type": "text", "text": " = " },
+        { "type": "call", "text": "std::fs::read", "name": "std::fs::read" },
+        { "type": "text", "text": "(" },
+        { "type": "var", "text": "path", "name": "path" },
+        { "type": "text", "text": ")" }
+      ]
+    },
+    {
+      "number": 3,
+      "depth": 1,
+      "text": "v = Vec::new()",
+      "parent": 1,
+      "binding": "v",
+      "segments": [
+        { "type": "var", "text": "v", "name": "v", "definition": true },
+        { "type": "text", "text": " = " },
+        { "type": "call", "text": "Vec::new", "name": "Vec::new" },
+        { "type": "text", "text": "()" }
+      ]
+    },
+    {
+      "number": 4,
+      "depth": 1,
+      "text": "see a::b and x::read:foo, they are code",
+      "parent": 1,
+      "segments": [
+        { "type": "word", "text": "see" },
+        { "type": "text", "text": " a::b and x::read:foo, they are code" }
+      ]
+    },
+    {
+      "number": 5,
+      "depth": 1,
+      "text": "copy(::read:s3)",
+      "parent": 1,
+      "segments": [
+        { "type": "call", "text": "copy", "name": "copy" },
+        { "type": "text", "text": "(::read:s3)" }
+      ]
+    },
+    {
+      "number": 6,
+      "depth": 1,
+      "text": "fetch ::read:api then parse it",
+      "parent": 1,
+      "tags": [{ "raw": "::read:api", "kind": "read", "value": "api" }],
+      "segments": [
+        { "type": "word", "text": "fetch" },
+        { "type": "text", "text": " " },
+        { "type": "tag", "raw": "::read:api" },
+        { "type": "text", "text": " then parse it" }
+      ]
+    },
+    {
+      "number": 7,
+      "depth": 1,
+      "text": "::write:gcs stream it, then",
+      "parent": 1,
+      "tags": [{ "raw": "::write:gcs", "kind": "write", "value": "gcs" }],
+      "segments": [
+        { "type": "tag", "raw": "::write:gcs" },
+        { "type": "text", "text": " stream it, then" }
+      ]
+    },
+    {
+      "number": 8,
+      "depth": 1,
+      "text": "stream it ::read:s3 ::write:gcs",
+      "parent": 1,
+      "tags": [
+        { "raw": "::read:s3", "kind": "read", "value": "s3", "trailing": true },
+        { "raw": "::write:gcs", "kind": "write", "value": "gcs", "trailing": true }
+      ],
+      "segments": [{ "type": "word", "text": "stream" }, { "type": "text", "text": " it" }]
+    },
+    {
+      "number": 9,
+      "depth": 1,
+      "text": "::read:s3 ::write:gcs",
+      "parent": 1,
+      "tags": [
+        { "raw": "::read:s3", "kind": "read", "value": "s3" },
+        { "raw": "::write:gcs", "kind": "write", "value": "gcs" }
+      ],
+      "segments": [
+        { "type": "tag", "raw": "::read:s3" },
+        { "type": "text", "text": " " },
+        { "type": "tag", "raw": "::write:gcs" }
+      ]
+    }
+  ]
+}

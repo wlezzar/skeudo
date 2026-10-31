@@ -1,0 +1,12 @@
+book_trip(trip, card):
+    seat = hold_seat(trip.flight)           ::write:airline-api
+    room = reserve_room(trip.hotel)         ::write:hotel-api
+    if that fails:
+        release_seat(seat)                  ::write:airline-api
+        ::fail:BookingFailed
+    charge(card, trip.total)                ::write:stripe
+    if that fails:
+        cancel_room(room)                   ::write:hotel-api
+        release_seat(seat)                  ::write:airline-api
+        ::fail:PaymentFailed
+    save_booking(trip, seat, room)          ::write:postgres.bookings

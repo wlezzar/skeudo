@@ -1,0 +1,15 @@
+::read:redis
+::read:postgres.orders[lookup by key]
+::write?:postgres.users
+::read~:s3.reports
+::write~?:legacy-billing.invoices[!no retry]
+::write:*
+::fail:NotFound
+::danger[shared across tenants]
+::unsure[maybe cached upstream]
+::lock:token-refresh
+::todo[ask about retries]
+::v2:2fa
+::read:données.clients
+::read:redis[]
+::read:redis[  padded  ]

@@ -1,0 +1,7 @@
+sync(account):                       ::src[app/sync.py:10-40]
+    if account is stale:             ::src[12-30]
+        for each page:
+            fetch(page)              ::read:crm
+            save(page)               ::write:postgres.pages ::src[20]
+    done
+    ::src:fetch[lib/crm.py:5]

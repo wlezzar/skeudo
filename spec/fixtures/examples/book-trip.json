@@ -1,0 +1,179 @@
+{
+  "signature": { "name": "book_trip", "params": ["trip", "card"], "line": 1 },
+  "indentUnit": 4,
+  "variables": {
+    "trip": { "origin": "param", "line": 1 },
+    "card": { "origin": "param", "line": 1 },
+    "seat": { "origin": "binding", "line": 2 },
+    "room": { "origin": "binding", "line": 3 }
+  },
+  "lines": [
+    {
+      "number": 1,
+      "depth": 0,
+      "text": "book_trip(trip, card):",
+      "signature": true,
+      "header": true,
+      "segments": [
+        { "type": "fn", "text": "book_trip" },
+        { "type": "text", "text": "(" },
+        { "type": "var", "text": "trip", "name": "trip", "definition": true },
+        { "type": "text", "text": ", " },
+        { "type": "var", "text": "card", "name": "card", "definition": true },
+        { "type": "text", "text": "):" }
+      ]
+    },
+    {
+      "number": 2,
+      "depth": 1,
+      "text": "seat = hold_seat(trip.flight)           ::write:airline-api",
+      "parent": 1,
+      "binding": "seat",
+      "tags": [
+        { "raw": "::write:airline-api", "kind": "write", "value": "airline-api", "trailing": true }
+      ],
+      "segments": [
+        { "type": "var", "text": "seat", "name": "seat", "definition": true },
+        { "type": "text", "text": " = " },
+        { "type": "call", "text": "hold_seat", "name": "hold_seat" },
+        { "type": "text", "text": "(" },
+        { "type": "var", "text": "trip", "name": "trip" },
+        { "type": "text", "text": ".flight)" }
+      ]
+    },
+    {
+      "number": 3,
+      "depth": 1,
+      "text": "room = reserve_room(trip.hotel)         ::write:hotel-api",
+      "parent": 1,
+      "binding": "room",
+      "tags": [
+        { "raw": "::write:hotel-api", "kind": "write", "value": "hotel-api", "trailing": true }
+      ],
+      "segments": [
+        { "type": "var", "text": "room", "name": "room", "definition": true },
+        { "type": "text", "text": " = " },
+        { "type": "call", "text": "reserve_room", "name": "reserve_room" },
+        { "type": "text", "text": "(" },
+        { "type": "var", "text": "trip", "name": "trip" },
+        { "type": "text", "text": ".hotel)" }
+      ]
+    },
+    {
+      "number": 4,
+      "depth": 1,
+      "text": "if that fails:",
+      "header": true,
+      "parent": 1,
+      "segments": [{ "type": "word", "text": "if" }, { "type": "text", "text": " that fails:" }]
+    },
+    {
+      "number": 5,
+      "depth": 2,
+      "text": "release_seat(seat)                  ::write:airline-api",
+      "parent": 4,
+      "tags": [
+        { "raw": "::write:airline-api", "kind": "write", "value": "airline-api", "trailing": true }
+      ],
+      "segments": [
+        { "type": "call", "text": "release_seat", "name": "release_seat" },
+        { "type": "text", "text": "(" },
+        { "type": "var", "text": "seat", "name": "seat" },
+        { "type": "text", "text": ")" }
+      ]
+    },
+    {
+      "number": 6,
+      "depth": 2,
+      "text": "::fail:BookingFailed",
+      "parent": 4,
+      "tags": [{ "raw": "::fail:BookingFailed", "kind": "fail", "value": "BookingFailed" }],
+      "segments": [{ "type": "tag", "raw": "::fail:BookingFailed" }]
+    },
+    {
+      "number": 7,
+      "depth": 1,
+      "text": "charge(card, trip.total)                ::write:stripe",
+      "parent": 1,
+      "tags": [{ "raw": "::write:stripe", "kind": "write", "value": "stripe", "trailing": true }],
+      "segments": [
+        { "type": "call", "text": "charge", "name": "charge" },
+        { "type": "text", "text": "(" },
+        { "type": "var", "text": "card", "name": "card" },
+        { "type": "text", "text": ", " },
+        { "type": "var", "text": "trip", "name": "trip" },
+        { "type": "text", "text": ".total)" }
+      ]
+    },
+    {
+      "number": 8,
+      "depth": 1,
+      "text": "if that fails:",
+      "header": true,
+      "parent": 1,
+      "segments": [{ "type": "word", "text": "if" }, { "type": "text", "text": " that fails:" }]
+    },
+    {
+      "number": 9,
+      "depth": 2,
+      "text": "cancel_room(room)                   ::write:hotel-api",
+      "parent": 8,
+      "tags": [
+        { "raw": "::write:hotel-api", "kind": "write", "value": "hotel-api", "trailing": true }
+      ],
+      "segments": [
+        { "type": "call", "text": "cancel_room", "name": "cancel_room" },
+        { "type": "text", "text": "(" },
+        { "type": "var", "text": "room", "name": "room" },
+        { "type": "text", "text": ")" }
+      ]
+    },
+    {
+      "number": 10,
+      "depth": 2,
+      "text": "release_seat(seat)                  ::write:airline-api",
+      "parent": 8,
+      "tags": [
+        { "raw": "::write:airline-api", "kind": "write", "value": "airline-api", "trailing": true }
+      ],
+      "segments": [
+        { "type": "call", "text": "release_seat", "name": "release_seat" },
+        { "type": "text", "text": "(" },
+        { "type": "var", "text": "seat", "name": "seat" },
+        { "type": "text", "text": ")" }
+      ]
+    },
+    {
+      "number": 11,
+      "depth": 2,
+      "text": "::fail:PaymentFailed",
+      "parent": 8,
+      "tags": [{ "raw": "::fail:PaymentFailed", "kind": "fail", "value": "PaymentFailed" }],
+      "segments": [{ "type": "tag", "raw": "::fail:PaymentFailed" }]
+    },
+    {
+      "number": 12,
+      "depth": 1,
+      "text": "save_booking(trip, seat, room)          ::write:postgres.bookings",
+      "parent": 1,
+      "tags": [
+        {
+          "raw": "::write:postgres.bookings",
+          "kind": "write",
+          "value": "postgres.bookings",
+          "trailing": true
+        }
+      ],
+      "segments": [
+        { "type": "call", "text": "save_booking", "name": "save_booking" },
+        { "type": "text", "text": "(" },
+        { "type": "var", "text": "trip", "name": "trip" },
+        { "type": "text", "text": ", " },
+        { "type": "var", "text": "seat", "name": "seat" },
+        { "type": "text", "text": ", " },
+        { "type": "var", "text": "room", "name": "room" },
+        { "type": "text", "text": ")" }
+      ]
+    }
+  ]
+}

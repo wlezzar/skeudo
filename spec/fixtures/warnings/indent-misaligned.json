@@ -1,0 +1,55 @@
+{
+  "signature": { "name": "f", "line": 1 },
+  "indentUnit": 4,
+  "diagnostics": [
+    {
+      "line": 4,
+      "severity": "warning",
+      "message": "This indentation doesn't line up with any enclosing block."
+    },
+    {
+      "line": 5,
+      "severity": "warning",
+      "message": "This indentation doesn't line up with any enclosing block."
+    }
+  ],
+  "lines": [
+    {
+      "number": 1,
+      "depth": 0,
+      "text": "f():",
+      "signature": true,
+      "header": true,
+      "segments": [{ "type": "fn", "text": "f" }, { "type": "text", "text": "():" }]
+    },
+    {
+      "number": 2,
+      "depth": 1,
+      "text": "if a:",
+      "header": true,
+      "parent": 1,
+      "segments": [{ "type": "word", "text": "if" }, { "type": "text", "text": " a:" }]
+    },
+    {
+      "number": 3,
+      "depth": 2,
+      "text": "b",
+      "parent": 2,
+      "segments": [{ "type": "word", "text": "b" }]
+    },
+    {
+      "number": 4,
+      "depth": 2,
+      "text": "c",
+      "parent": 2,
+      "segments": [{ "type": "word", "text": "c" }]
+    },
+    {
+      "number": 5,
+      "depth": 1,
+      "text": "d",
+      "parent": 1,
+      "segments": [{ "type": "word", "text": "d" }]
+    }
+  ]
+}

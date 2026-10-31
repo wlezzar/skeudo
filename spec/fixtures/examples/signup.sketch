@@ -1,0 +1,11 @@
+signup(request):
+    body = request.json()                 ::untrusted:body
+    if body.email is malformed:
+        ::fail:InvalidEmail
+    user = get_or_create(body.email)      ::write?:postgres.users
+    if user is verified:
+        ::fail:AlreadyExists
+    hash = bcrypt(body.password)          ::secret:hash
+    set_password(user, hash)              ::write:postgres.users
+    send_verification(user)               ::write:sendgrid
+    log_event("signup", body)             ::write:logs

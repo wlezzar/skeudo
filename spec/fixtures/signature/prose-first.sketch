@@ -1,0 +1,4 @@
+When a webhook arrives:
+    event = parse(request.body)       ::untrusted:event
+    if event.type is "invoice.paid":
+        mark_paid(event.invoice_id)   ::write:postgres.invoices

@@ -1,0 +1,50 @@
+{
+  "signature": { "name": "get", "params": ["key"], "line": 1 },
+  "indentUnit": 4,
+  "variables": {
+    "key": { "origin": "param", "line": 1 },
+    "value": { "origin": "binding", "line": 2 }
+  },
+  "lines": [
+    {
+      "number": 1,
+      "depth": 0,
+      "text": "get(key):",
+      "signature": true,
+      "header": true,
+      "segments": [
+        { "type": "fn", "text": "get" },
+        { "type": "text", "text": "(" },
+        { "type": "var", "text": "key", "name": "key", "definition": true },
+        { "type": "text", "text": "):" }
+      ]
+    },
+    {
+      "number": 2,
+      "depth": 1,
+      "text": "value = cache.get(key)   ::read:redis",
+      "parent": 1,
+      "binding": "value",
+      "tags": [{ "raw": "::read:redis", "kind": "read", "value": "redis", "trailing": true }],
+      "segments": [
+        { "type": "var", "text": "value", "name": "value", "definition": true },
+        { "type": "text", "text": " = " },
+        { "type": "call", "text": "cache.get", "name": "cache.get" },
+        { "type": "text", "text": "(" },
+        { "type": "var", "text": "key", "name": "key" },
+        { "type": "text", "text": ")" }
+      ]
+    },
+    {
+      "number": 3,
+      "depth": 1,
+      "text": "return value",
+      "parent": 1,
+      "segments": [
+        { "type": "word", "text": "return" },
+        { "type": "text", "text": " " },
+        { "type": "var", "text": "value", "name": "value" }
+      ]
+    }
+  ]
+}

@@ -121,9 +121,9 @@ Tracked variables let a renderer highlight every use of a value, and let a tool 
 
 A variable belongs to the whole sketch, not to the block that binds it.
 
-A use is any whole word that matches a tracked name, in code or in prose, so `if cached:` and `for each order:` use `cached` and `order`. Matching is case-sensitive. Three positions are not uses:
+A use is any whole word that matches a tracked name, in code or in prose, so `if cached:` and `for each order:` use `cached` and `order`. An apostrophe ends the name, so `user's team` uses `user`. Matching is case-sensitive. Three positions are not uses:
 
-- After a dot: `user.id` uses `user`, not `id`.
+- After a dot: `user.id` uses `user`, not `id`. A spread or a range isn't a dot, so `...rest` uses `rest`.
 - Inside a hyphenated word: `token-rotated` doesn't use `token`.
 - Before `::`: `token::Kind` is a path, not a use of `token`.
 

@@ -1,0 +1,23 @@
+{
+  "lines": [
+    {
+      "number": 1,
+      "depth": 0,
+      "text": "refresh(token) runs on a timer",
+      "segments": [
+        { "type": "call", "text": "refresh", "name": "refresh" },
+        { "type": "text", "text": "(token) runs on a timer" }
+      ]
+    },
+    {
+      "number": 2,
+      "depth": 0,
+      "text": "then the cache is warmed      ::write:redis",
+      "tags": [{ "raw": "::write:redis", "kind": "write", "value": "redis", "trailing": true }],
+      "segments": [
+        { "type": "word", "text": "then" },
+        { "type": "text", "text": " the cache is warmed" }
+      ]
+    }
+  ]
+}

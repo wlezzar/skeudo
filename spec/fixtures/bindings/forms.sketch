@@ -1,0 +1,9 @@
+update(order):
+    total = sum of item prices
+    order.status = paid
+    if total == 0:
+        free=true
+    discount => applied later
+    let tax = compute_tax(total)
+    total_2 = total + tax
+    données = export(order)          ::write:s3.exports

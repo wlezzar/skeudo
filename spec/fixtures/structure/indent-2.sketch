@@ -1,0 +1,6 @@
+retry(job):
+  for up to 3 attempts:
+    run(job)       ::write:*
+    if it worked:
+      return
+  ::fail:GaveUp

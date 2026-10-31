@@ -1,0 +1,63 @@
+{
+  "signature": { "name": "search", "params": ["user_id", "limit", "filters", "rest"], "line": 1 },
+  "indentUnit": 4,
+  "variables": {
+    "user_id": { "origin": "param", "line": 1 },
+    "limit": { "origin": "param", "line": 1 },
+    "filters": { "origin": "param", "line": 1 },
+    "rest": { "origin": "param", "line": 1 }
+  },
+  "lines": [
+    {
+      "number": 1,
+      "depth": 0,
+      "text": "search(mut user_id: u64, limit: int = 10, filters: Map<str, list[str]>, ...rest, user_id): returns matches",
+      "signature": true,
+      "header": true,
+      "segments": [
+        { "type": "fn", "text": "search" },
+        { "type": "text", "text": "(mut " },
+        { "type": "var", "text": "user_id", "name": "user_id", "definition": true },
+        { "type": "text", "text": ": u64, " },
+        { "type": "var", "text": "limit", "name": "limit", "definition": true },
+        { "type": "text", "text": ": int = 10, " },
+        { "type": "var", "text": "filters", "name": "filters", "definition": true },
+        { "type": "text", "text": ": Map<str, list[str]>, ..." },
+        { "type": "var", "text": "rest", "name": "rest", "definition": true },
+        { "type": "text", "text": ", " },
+        { "type": "var", "text": "user_id", "name": "user_id", "definition": true },
+        { "type": "text", "text": "): returns matches" }
+      ]
+    },
+    {
+      "number": 2,
+      "depth": 1,
+      "text": "use user_id, limit, filters and rest",
+      "parent": 1,
+      "segments": [
+        { "type": "word", "text": "use" },
+        { "type": "text", "text": " " },
+        { "type": "var", "text": "user_id", "name": "user_id" },
+        { "type": "text", "text": ", " },
+        { "type": "var", "text": "limit", "name": "limit" },
+        { "type": "text", "text": ", " },
+        { "type": "var", "text": "filters", "name": "filters" },
+        { "type": "text", "text": " and " },
+        { "type": "var", "text": "rest", "name": "rest" }
+      ]
+    },
+    {
+      "number": 3,
+      "depth": 1,
+      "text": "forward(...rest) for i in 0..limit",
+      "parent": 1,
+      "segments": [
+        { "type": "call", "text": "forward", "name": "forward" },
+        { "type": "text", "text": "(..." },
+        { "type": "var", "text": "rest", "name": "rest" },
+        { "type": "text", "text": ") for i in 0.." },
+        { "type": "var", "text": "limit", "name": "limit" }
+      ]
+    }
+  ]
+}

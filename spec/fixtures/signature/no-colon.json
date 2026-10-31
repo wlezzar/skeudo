@@ -1,0 +1,48 @@
+{
+  "signature": { "name": "charge", "params": ["card", "amount"], "line": 1 },
+  "indentUnit": 4,
+  "variables": {
+    "card": { "origin": "param", "line": 1 },
+    "amount": { "origin": "param", "line": 1 }
+  },
+  "lines": [
+    {
+      "number": 1,
+      "depth": 0,
+      "text": "charge(card, amount)",
+      "signature": true,
+      "header": true,
+      "segments": [
+        { "type": "fn", "text": "charge" },
+        { "type": "text", "text": "(" },
+        { "type": "var", "text": "card", "name": "card", "definition": true },
+        { "type": "text", "text": ", " },
+        { "type": "var", "text": "amount", "name": "amount", "definition": true },
+        { "type": "text", "text": ")" }
+      ]
+    },
+    {
+      "number": 2,
+      "depth": 1,
+      "text": "stripe.charges.create(card, amount)   ::write:stripe[!no idempotency key]",
+      "parent": 1,
+      "tags": [
+        {
+          "raw": "::write:stripe[!no idempotency key]",
+          "kind": "write",
+          "value": "stripe",
+          "note": { "text": "no idempotency key", "danger": true },
+          "trailing": true
+        }
+      ],
+      "segments": [
+        { "type": "call", "text": "stripe.charges.create", "name": "stripe.charges.create" },
+        { "type": "text", "text": "(" },
+        { "type": "var", "text": "card", "name": "card" },
+        { "type": "text", "text": ", " },
+        { "type": "var", "text": "amount", "name": "amount" },
+        { "type": "text", "text": ")" }
+      ]
+    }
+  ]
+}

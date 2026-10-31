@@ -1,0 +1,10 @@
+get_profile(user_id):
+    cached = cache.get(user_id)    ::read:redis[lookup by key]
+    if cached:
+        return cached
+    else:
+        row = load_user(user_id)   ::read:postgres.users[lookup by key]
+        if no row:
+            ::fail:NotFound
+        cache.set(user_id, row)    ::write:redis[5 min ttl]
+        return row

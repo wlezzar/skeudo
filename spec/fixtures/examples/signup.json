@@ -1,0 +1,178 @@
+{
+  "signature": { "name": "signup", "params": ["request"], "line": 1 },
+  "indentUnit": 4,
+  "variables": {
+    "request": { "origin": "param", "line": 1 },
+    "body": { "origin": "binding", "line": 2, "labels": ["untrusted"] },
+    "user": { "origin": "binding", "line": 5 },
+    "hash": { "origin": "binding", "line": 8, "labels": ["secret"] }
+  },
+  "flows": [
+    { "line": 5, "variable": "body", "labels": ["untrusted"], "effect": "::write?:postgres.users" },
+    { "line": 9, "variable": "hash", "labels": ["secret"], "effect": "::write:postgres.users" },
+    { "line": 11, "variable": "body", "labels": ["untrusted"], "effect": "::write:logs" }
+  ],
+  "lines": [
+    {
+      "number": 1,
+      "depth": 0,
+      "text": "signup(request):",
+      "signature": true,
+      "header": true,
+      "segments": [
+        { "type": "fn", "text": "signup" },
+        { "type": "text", "text": "(" },
+        { "type": "var", "text": "request", "name": "request", "definition": true },
+        { "type": "text", "text": "):" }
+      ]
+    },
+    {
+      "number": 2,
+      "depth": 1,
+      "text": "body = request.json()                 ::untrusted:body",
+      "parent": 1,
+      "binding": "body",
+      "tags": [
+        { "raw": "::untrusted:body", "kind": "untrusted", "value": "body", "trailing": true }
+      ],
+      "segments": [
+        { "type": "var", "text": "body", "name": "body", "definition": true },
+        { "type": "text", "text": " = " },
+        { "type": "call", "text": "request.json", "name": "request.json", "head": "request" },
+        { "type": "text", "text": "()" }
+      ]
+    },
+    {
+      "number": 3,
+      "depth": 1,
+      "text": "if body.email is malformed:",
+      "header": true,
+      "parent": 1,
+      "segments": [
+        { "type": "word", "text": "if" },
+        { "type": "text", "text": " " },
+        { "type": "var", "text": "body", "name": "body" },
+        { "type": "text", "text": ".email is malformed:" }
+      ]
+    },
+    {
+      "number": 4,
+      "depth": 2,
+      "text": "::fail:InvalidEmail",
+      "parent": 3,
+      "tags": [{ "raw": "::fail:InvalidEmail", "kind": "fail", "value": "InvalidEmail" }],
+      "segments": [{ "type": "tag", "raw": "::fail:InvalidEmail" }]
+    },
+    {
+      "number": 5,
+      "depth": 1,
+      "text": "user = get_or_create(body.email)      ::write?:postgres.users",
+      "parent": 1,
+      "binding": "user",
+      "tags": [
+        {
+          "raw": "::write?:postgres.users",
+          "kind": "write",
+          "conditional": true,
+          "value": "postgres.users",
+          "trailing": true
+        }
+      ],
+      "segments": [
+        { "type": "var", "text": "user", "name": "user", "definition": true },
+        { "type": "text", "text": " = " },
+        { "type": "call", "text": "get_or_create", "name": "get_or_create" },
+        { "type": "text", "text": "(" },
+        { "type": "var", "text": "body", "name": "body" },
+        { "type": "text", "text": ".email)" }
+      ]
+    },
+    {
+      "number": 6,
+      "depth": 1,
+      "text": "if user is verified:",
+      "header": true,
+      "parent": 1,
+      "segments": [
+        { "type": "word", "text": "if" },
+        { "type": "text", "text": " " },
+        { "type": "var", "text": "user", "name": "user" },
+        { "type": "text", "text": " is verified:" }
+      ]
+    },
+    {
+      "number": 7,
+      "depth": 2,
+      "text": "::fail:AlreadyExists",
+      "parent": 6,
+      "tags": [{ "raw": "::fail:AlreadyExists", "kind": "fail", "value": "AlreadyExists" }],
+      "segments": [{ "type": "tag", "raw": "::fail:AlreadyExists" }]
+    },
+    {
+      "number": 8,
+      "depth": 1,
+      "text": "hash = bcrypt(body.password)          ::secret:hash",
+      "parent": 1,
+      "binding": "hash",
+      "tags": [{ "raw": "::secret:hash", "kind": "secret", "value": "hash", "trailing": true }],
+      "segments": [
+        { "type": "var", "text": "hash", "name": "hash", "definition": true },
+        { "type": "text", "text": " = " },
+        { "type": "call", "text": "bcrypt", "name": "bcrypt" },
+        { "type": "text", "text": "(" },
+        { "type": "var", "text": "body", "name": "body" },
+        { "type": "text", "text": ".password)" }
+      ]
+    },
+    {
+      "number": 9,
+      "depth": 1,
+      "text": "set_password(user, hash)              ::write:postgres.users",
+      "parent": 1,
+      "tags": [
+        {
+          "raw": "::write:postgres.users",
+          "kind": "write",
+          "value": "postgres.users",
+          "trailing": true
+        }
+      ],
+      "segments": [
+        { "type": "call", "text": "set_password", "name": "set_password" },
+        { "type": "text", "text": "(" },
+        { "type": "var", "text": "user", "name": "user" },
+        { "type": "text", "text": ", " },
+        { "type": "var", "text": "hash", "name": "hash" },
+        { "type": "text", "text": ")" }
+      ]
+    },
+    {
+      "number": 10,
+      "depth": 1,
+      "text": "send_verification(user)               ::write:sendgrid",
+      "parent": 1,
+      "tags": [
+        { "raw": "::write:sendgrid", "kind": "write", "value": "sendgrid", "trailing": true }
+      ],
+      "segments": [
+        { "type": "call", "text": "send_verification", "name": "send_verification" },
+        { "type": "text", "text": "(" },
+        { "type": "var", "text": "user", "name": "user" },
+        { "type": "text", "text": ")" }
+      ]
+    },
+    {
+      "number": 11,
+      "depth": 1,
+      "text": "log_event(\"signup\", body)             ::write:logs",
+      "parent": 1,
+      "tags": [{ "raw": "::write:logs", "kind": "write", "value": "logs", "trailing": true }],
+      "segments": [
+        { "type": "call", "text": "log_event", "name": "log_event" },
+        { "type": "text", "text": "(\"signup\", " },
+        { "type": "var", "text": "body", "name": "body" },
+        { "type": "text", "text": ")" }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,117 @@
+{
+  "signature": { "name": "render", "params": ["page"], "line": 1 },
+  "indentUnit": 4,
+  "variables": {
+    "page": { "origin": "param", "line": 1 },
+    "html": { "origin": "binding", "line": 2 },
+    "body": { "origin": "binding", "line": 3 }
+  },
+  "lines": [
+    {
+      "number": 1,
+      "depth": 0,
+      "text": "render(page):",
+      "signature": true,
+      "header": true,
+      "segments": [
+        { "type": "fn", "text": "render" },
+        { "type": "text", "text": "(" },
+        { "type": "var", "text": "page", "name": "page", "definition": true },
+        { "type": "text", "text": "):" }
+      ]
+    },
+    {
+      "number": 2,
+      "depth": 1,
+      "text": "html = template.render(page, …)",
+      "parent": 1,
+      "binding": "html",
+      "segments": [
+        { "type": "var", "text": "html", "name": "html", "definition": true },
+        { "type": "text", "text": " = " },
+        { "type": "call", "text": "template.render", "name": "template.render" },
+        { "type": "text", "text": "(" },
+        { "type": "var", "text": "page", "name": "page" },
+        { "type": "text", "text": ", …)" }
+      ]
+    },
+    {
+      "number": 3,
+      "depth": 1,
+      "text": "body = std::fs::read_to_string(path)    ::read:fs",
+      "parent": 1,
+      "binding": "body",
+      "tags": [{ "raw": "::read:fs", "kind": "read", "value": "fs", "trailing": true }],
+      "segments": [
+        { "type": "var", "text": "body", "name": "body", "definition": true },
+        { "type": "text", "text": " = " },
+        { "type": "call", "text": "std::fs::read_to_string", "name": "std::fs::read_to_string" },
+        { "type": "text", "text": "(path)" }
+      ]
+    },
+    {
+      "number": 4,
+      "depth": 1,
+      "text": "send(compress(html), headers(page))     ::write:http",
+      "parent": 1,
+      "tags": [{ "raw": "::write:http", "kind": "write", "value": "http", "trailing": true }],
+      "segments": [
+        { "type": "call", "text": "send", "name": "send" },
+        { "type": "text", "text": "(" },
+        { "type": "call", "text": "compress", "name": "compress" },
+        { "type": "text", "text": "(" },
+        { "type": "var", "text": "html", "name": "html" },
+        { "type": "text", "text": "), " },
+        { "type": "call", "text": "headers", "name": "headers" },
+        { "type": "text", "text": "(" },
+        { "type": "var", "text": "page", "name": "page" },
+        { "type": "text", "text": "))" }
+      ]
+    },
+    {
+      "number": 5,
+      "depth": 1,
+      "text": "page.save()                             ::write:postgres.pages",
+      "parent": 1,
+      "tags": [
+        {
+          "raw": "::write:postgres.pages",
+          "kind": "write",
+          "value": "postgres.pages",
+          "trailing": true
+        }
+      ],
+      "segments": [
+        { "type": "call", "text": "page.save", "name": "page.save", "head": "page" },
+        { "type": "text", "text": "()" }
+      ]
+    },
+    {
+      "number": 6,
+      "depth": 1,
+      "text": "client.with(retries=3).get(page.url)    ::read:cdn",
+      "parent": 1,
+      "tags": [{ "raw": "::read:cdn", "kind": "read", "value": "cdn", "trailing": true }],
+      "segments": [
+        { "type": "call", "text": "client.with", "name": "client.with" },
+        { "type": "text", "text": "(retries=3)." },
+        { "type": "call", "text": "get", "name": "get" },
+        { "type": "text", "text": "(" },
+        { "type": "var", "text": "page", "name": "page" },
+        { "type": "text", "text": ".url)" }
+      ]
+    },
+    {
+      "number": 7,
+      "depth": 1,
+      "text": "call log(page with an open paren",
+      "parent": 1,
+      "segments": [
+        { "type": "word", "text": "call" },
+        { "type": "text", "text": " log(" },
+        { "type": "var", "text": "page", "name": "page" },
+        { "type": "text", "text": " with an open paren" }
+      ]
+    }
+  ]
+}

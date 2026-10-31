@@ -1,0 +1,8 @@
+search_orders(user_id, term):
+    user = get_user(user_id)          ::read:postgres.users[lookup by key]
+    orders = recent_orders(user)      ::read:postgres.orders[range on created_at]
+    if a term is given:
+        filter orders by note text    ::read:postgres.orders[!full scan]
+    for each order:
+        items = get_items(order.id)   ::read:postgres.items[!n x lookup by key]
+    count orders by status            ::read:postgres.orders[!full scan, probably]

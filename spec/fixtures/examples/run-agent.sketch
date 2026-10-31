@@ -1,0 +1,9 @@
+run_agent(task):
+    messages = [task]
+    repeat up to 20 turns:
+        reply = claude.create(messages, tools)  ::read:anthropic
+        if no tool calls, return reply.text
+        for each tool call, in parallel:
+            run_tool(call)                      ::write:*
+        append results to messages
+    ::fail:TooManyTurns

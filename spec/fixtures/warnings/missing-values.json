@@ -1,0 +1,132 @@
+{
+  "signature": { "name": "f", "line": 1 },
+  "indentUnit": 4,
+  "diagnostics": [
+    {
+      "line": 2,
+      "severity": "warning",
+      "message": "::read needs the system it touches, as in ::read:postgres."
+    },
+    {
+      "line": 3,
+      "severity": "warning",
+      "message": "::write needs the system it touches, as in ::write:postgres."
+    },
+    {
+      "line": 4,
+      "severity": "warning",
+      "message": "::read needs the system it touches, as in ::read:postgres."
+    },
+    { "line": 5, "severity": "warning", "message": "::fail needs a name, as in ::fail:NotFound." },
+    {
+      "line": 6,
+      "severity": "warning",
+      "message": "::untrusted needs the variable it labels, as in ::untrusted:name."
+    },
+    {
+      "line": 7,
+      "severity": "warning",
+      "message": "::secret needs the variable it labels, as in ::secret:name."
+    },
+    {
+      "line": 8,
+      "severity": "warning",
+      "message": "::src needs a location in its note, as in ::src[app/file.py:12-24]."
+    },
+    {
+      "line": 9,
+      "severity": "warning",
+      "message": "::src needs a location in its note, as in ::src[app/file.py:12-24]."
+    },
+    {
+      "line": 10,
+      "severity": "warning",
+      "message": "::src needs a location in its note, as in ::src[app/file.py:12-24]."
+    }
+  ],
+  "lines": [
+    {
+      "number": 1,
+      "depth": 0,
+      "text": "f():",
+      "signature": true,
+      "header": true,
+      "segments": [{ "type": "fn", "text": "f" }, { "type": "text", "text": "():" }]
+    },
+    {
+      "number": 2,
+      "depth": 1,
+      "text": "::read",
+      "parent": 1,
+      "tags": [{ "raw": "::read", "kind": "read" }],
+      "segments": [{ "type": "tag", "raw": "::read" }]
+    },
+    {
+      "number": 3,
+      "depth": 1,
+      "text": "::write[some note]",
+      "parent": 1,
+      "tags": [{ "raw": "::write[some note]", "kind": "write", "note": { "text": "some note" } }],
+      "segments": [{ "type": "tag", "raw": "::write[some note]" }]
+    },
+    {
+      "number": 4,
+      "depth": 1,
+      "text": "::read?:",
+      "parent": 1,
+      "tags": [{ "raw": "::read?", "kind": "read", "conditional": true }],
+      "segments": [{ "type": "tag", "raw": "::read?" }, { "type": "text", "text": ":" }]
+    },
+    {
+      "number": 5,
+      "depth": 1,
+      "text": "::fail",
+      "parent": 1,
+      "tags": [{ "raw": "::fail", "kind": "fail" }],
+      "segments": [{ "type": "tag", "raw": "::fail" }]
+    },
+    {
+      "number": 6,
+      "depth": 1,
+      "text": "::untrusted",
+      "parent": 1,
+      "tags": [{ "raw": "::untrusted", "kind": "untrusted" }],
+      "segments": [{ "type": "tag", "raw": "::untrusted" }]
+    },
+    {
+      "number": 7,
+      "depth": 1,
+      "text": "::secret[the token]",
+      "parent": 1,
+      "tags": [{ "raw": "::secret[the token]", "kind": "secret", "note": { "text": "the token" } }],
+      "segments": [{ "type": "tag", "raw": "::secret[the token]" }]
+    },
+    {
+      "number": 8,
+      "depth": 1,
+      "text": "::src",
+      "hidden": true,
+      "parent": 1,
+      "tags": [{ "raw": "::src", "kind": "src" }],
+      "segments": [{ "type": "tag", "raw": "::src" }]
+    },
+    {
+      "number": 9,
+      "depth": 1,
+      "text": "::src[]",
+      "hidden": true,
+      "parent": 1,
+      "tags": [{ "raw": "::src[]", "kind": "src", "note": { "text": "" } }],
+      "segments": [{ "type": "tag", "raw": "::src[]" }]
+    },
+    {
+      "number": 10,
+      "depth": 1,
+      "text": "::src:helper",
+      "hidden": true,
+      "parent": 1,
+      "tags": [{ "raw": "::src:helper", "kind": "src", "value": "helper" }],
+      "segments": [{ "type": "tag", "raw": "::src:helper" }]
+    }
+  ]
+}

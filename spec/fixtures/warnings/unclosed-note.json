@@ -1,0 +1,63 @@
+{
+  "signature": { "name": "f", "params": ["x"], "line": 1 },
+  "indentUnit": 4,
+  "diagnostics": [
+    {
+      "line": 2,
+      "severity": "warning",
+      "message": "The note on ::write is missing its closing \"]\"."
+    },
+    {
+      "line": 3,
+      "severity": "warning",
+      "message": "The note on ::write is missing its closing \"]\"."
+    }
+  ],
+  "variables": { "x": { "origin": "param", "line": 1 } },
+  "lines": [
+    {
+      "number": 1,
+      "depth": 0,
+      "text": "f(x):",
+      "signature": true,
+      "header": true,
+      "segments": [
+        { "type": "fn", "text": "f" },
+        { "type": "text", "text": "(" },
+        { "type": "var", "text": "x", "name": "x", "definition": true },
+        { "type": "text", "text": "):" }
+      ]
+    },
+    {
+      "number": 2,
+      "depth": 1,
+      "text": "save(x)     ::write:s3[no closing bracket",
+      "parent": 1,
+      "tags": [{ "raw": "::write:s3", "kind": "write", "value": "s3" }],
+      "segments": [
+        { "type": "call", "text": "save", "name": "save" },
+        { "type": "text", "text": "(" },
+        { "type": "var", "text": "x", "name": "x" },
+        { "type": "text", "text": ")     " },
+        { "type": "tag", "raw": "::write:s3" },
+        { "type": "text", "text": "[no closing bracket" }
+      ]
+    },
+    {
+      "number": 3,
+      "depth": 1,
+      "text": "::read:redis[ok] ::write:redis[also open",
+      "parent": 1,
+      "tags": [
+        { "raw": "::read:redis[ok]", "kind": "read", "value": "redis", "note": { "text": "ok" } },
+        { "raw": "::write:redis", "kind": "write", "value": "redis" }
+      ],
+      "segments": [
+        { "type": "tag", "raw": "::read:redis[ok]" },
+        { "type": "text", "text": " " },
+        { "type": "tag", "raw": "::write:redis" },
+        { "type": "text", "text": "[also open" }
+      ]
+    }
+  ]
+}

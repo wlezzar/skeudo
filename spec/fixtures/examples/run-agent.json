@@ -1,0 +1,119 @@
+{
+  "signature": { "name": "run_agent", "params": ["task"], "line": 1 },
+  "indentUnit": 4,
+  "variables": {
+    "task": { "origin": "param", "line": 1 },
+    "messages": { "origin": "binding", "line": 2 },
+    "reply": { "origin": "binding", "line": 4 }
+  },
+  "lines": [
+    {
+      "number": 1,
+      "depth": 0,
+      "text": "run_agent(task):",
+      "signature": true,
+      "header": true,
+      "segments": [
+        { "type": "fn", "text": "run_agent" },
+        { "type": "text", "text": "(" },
+        { "type": "var", "text": "task", "name": "task", "definition": true },
+        { "type": "text", "text": "):" }
+      ]
+    },
+    {
+      "number": 2,
+      "depth": 1,
+      "text": "messages = [task]",
+      "parent": 1,
+      "binding": "messages",
+      "segments": [
+        { "type": "var", "text": "messages", "name": "messages", "definition": true },
+        { "type": "text", "text": " = [" },
+        { "type": "var", "text": "task", "name": "task" },
+        { "type": "text", "text": "]" }
+      ]
+    },
+    {
+      "number": 3,
+      "depth": 1,
+      "text": "repeat up to 20 turns:",
+      "header": true,
+      "parent": 1,
+      "segments": [
+        { "type": "word", "text": "repeat" },
+        { "type": "text", "text": " up to 20 turns:" }
+      ]
+    },
+    {
+      "number": 4,
+      "depth": 2,
+      "text": "reply = claude.create(messages, tools)  ::read:anthropic",
+      "parent": 3,
+      "binding": "reply",
+      "tags": [
+        { "raw": "::read:anthropic", "kind": "read", "value": "anthropic", "trailing": true }
+      ],
+      "segments": [
+        { "type": "var", "text": "reply", "name": "reply", "definition": true },
+        { "type": "text", "text": " = " },
+        { "type": "call", "text": "claude.create", "name": "claude.create" },
+        { "type": "text", "text": "(" },
+        { "type": "var", "text": "messages", "name": "messages" },
+        { "type": "text", "text": ", tools)" }
+      ]
+    },
+    {
+      "number": 5,
+      "depth": 2,
+      "text": "if no tool calls, return reply.text",
+      "parent": 3,
+      "segments": [
+        { "type": "word", "text": "if" },
+        { "type": "text", "text": " no tool calls, return " },
+        { "type": "var", "text": "reply", "name": "reply" },
+        { "type": "text", "text": ".text" }
+      ]
+    },
+    {
+      "number": 6,
+      "depth": 2,
+      "text": "for each tool call, in parallel:",
+      "header": true,
+      "parent": 3,
+      "segments": [
+        { "type": "word", "text": "for" },
+        { "type": "text", "text": " each tool call, in parallel:" }
+      ]
+    },
+    {
+      "number": 7,
+      "depth": 3,
+      "text": "run_tool(call)                      ::write:*",
+      "parent": 6,
+      "tags": [{ "raw": "::write:*", "kind": "write", "value": "*", "trailing": true }],
+      "segments": [
+        { "type": "call", "text": "run_tool", "name": "run_tool" },
+        { "type": "text", "text": "(call)" }
+      ]
+    },
+    {
+      "number": 8,
+      "depth": 2,
+      "text": "append results to messages",
+      "parent": 3,
+      "segments": [
+        { "type": "word", "text": "append" },
+        { "type": "text", "text": " results to " },
+        { "type": "var", "text": "messages", "name": "messages" }
+      ]
+    },
+    {
+      "number": 9,
+      "depth": 1,
+      "text": "::fail:TooManyTurns",
+      "parent": 1,
+      "tags": [{ "raw": "::fail:TooManyTurns", "kind": "fail", "value": "TooManyTurns" }],
+      "segments": [{ "type": "tag", "raw": "::fail:TooManyTurns" }]
+    }
+  ]
+}

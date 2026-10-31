@@ -1,0 +1,3 @@
+f(x):              ::src[1-10]
+    load(x)        ::read:db ::src[4]
+    ::src:load[40-44]

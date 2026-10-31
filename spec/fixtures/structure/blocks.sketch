@@ -1,0 +1,10 @@
+ship(order):
+    if order is paid:
+        for each item in order
+            reserve(item)               ::write:inventory
+            if that fails:
+                release earlier items   ::write:inventory
+                ::fail:OutOfStock
+    in one transaction:                 ::write:postgres.orders
+        mark order shipped
+    return order

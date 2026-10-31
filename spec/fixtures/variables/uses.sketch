@@ -1,0 +1,12 @@
+rotate(token, user):
+    remember result for later
+    if token is expired:
+        token-rotated event fires
+        pre-token checks run
+        kind = token::Kind::Fresh
+        user.token = issue(user.id)       ::write:oauth
+        Token is not token
+    if kind is set:
+        tell user's team
+        user's session ends
+    result = done

@@ -1,0 +1,24 @@
+{
+  "signature": { "name": "f", "line": 1 },
+  "indentUnit": 3,
+  "diagnostics": [
+    { "line": 2, "severity": "warning", "message": "Indent by 2 or 4 spaces per level, not 3." }
+  ],
+  "lines": [
+    {
+      "number": 1,
+      "depth": 0,
+      "text": "f():",
+      "signature": true,
+      "header": true,
+      "segments": [{ "type": "fn", "text": "f" }, { "type": "text", "text": "():" }]
+    },
+    {
+      "number": 2,
+      "depth": 1,
+      "text": "three spaces",
+      "parent": 1,
+      "segments": [{ "type": "word", "text": "three" }, { "type": "text", "text": " spaces" }]
+    }
+  ]
+}

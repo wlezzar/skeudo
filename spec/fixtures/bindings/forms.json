@@ -1,0 +1,126 @@
+{
+  "signature": { "name": "update", "params": ["order"], "line": 1 },
+  "indentUnit": 4,
+  "variables": {
+    "order": { "origin": "param", "line": 1 },
+    "total": { "origin": "binding", "line": 2 },
+    "free": { "origin": "binding", "line": 5 },
+    "total_2": { "origin": "binding", "line": 8 },
+    "données": { "origin": "binding", "line": 9 }
+  },
+  "lines": [
+    {
+      "number": 1,
+      "depth": 0,
+      "text": "update(order):",
+      "signature": true,
+      "header": true,
+      "segments": [
+        { "type": "fn", "text": "update" },
+        { "type": "text", "text": "(" },
+        { "type": "var", "text": "order", "name": "order", "definition": true },
+        { "type": "text", "text": "):" }
+      ]
+    },
+    {
+      "number": 2,
+      "depth": 1,
+      "text": "total = sum of item prices",
+      "parent": 1,
+      "binding": "total",
+      "segments": [
+        { "type": "var", "text": "total", "name": "total", "definition": true },
+        { "type": "text", "text": " = sum of item prices" }
+      ]
+    },
+    {
+      "number": 3,
+      "depth": 1,
+      "text": "order.status = paid",
+      "parent": 1,
+      "segments": [
+        { "type": "var", "text": "order", "name": "order" },
+        { "type": "text", "text": ".status = paid" }
+      ]
+    },
+    {
+      "number": 4,
+      "depth": 1,
+      "text": "if total == 0:",
+      "header": true,
+      "parent": 1,
+      "segments": [
+        { "type": "word", "text": "if" },
+        { "type": "text", "text": " " },
+        { "type": "var", "text": "total", "name": "total" },
+        { "type": "text", "text": " == 0:" }
+      ]
+    },
+    {
+      "number": 5,
+      "depth": 2,
+      "text": "free=true",
+      "parent": 4,
+      "binding": "free",
+      "segments": [
+        { "type": "var", "text": "free", "name": "free", "definition": true },
+        { "type": "text", "text": "=true" }
+      ]
+    },
+    {
+      "number": 6,
+      "depth": 1,
+      "text": "discount => applied later",
+      "parent": 1,
+      "segments": [
+        { "type": "word", "text": "discount" },
+        { "type": "text", "text": " => applied later" }
+      ]
+    },
+    {
+      "number": 7,
+      "depth": 1,
+      "text": "let tax = compute_tax(total)",
+      "parent": 1,
+      "segments": [
+        { "type": "word", "text": "let" },
+        { "type": "text", "text": " tax = " },
+        { "type": "call", "text": "compute_tax", "name": "compute_tax" },
+        { "type": "text", "text": "(" },
+        { "type": "var", "text": "total", "name": "total" },
+        { "type": "text", "text": ")" }
+      ]
+    },
+    {
+      "number": 8,
+      "depth": 1,
+      "text": "total_2 = total + tax",
+      "parent": 1,
+      "binding": "total_2",
+      "segments": [
+        { "type": "var", "text": "total_2", "name": "total_2", "definition": true },
+        { "type": "text", "text": " = " },
+        { "type": "var", "text": "total", "name": "total" },
+        { "type": "text", "text": " + tax" }
+      ]
+    },
+    {
+      "number": 9,
+      "depth": 1,
+      "text": "données = export(order)          ::write:s3.exports",
+      "parent": 1,
+      "binding": "données",
+      "tags": [
+        { "raw": "::write:s3.exports", "kind": "write", "value": "s3.exports", "trailing": true }
+      ],
+      "segments": [
+        { "type": "var", "text": "données", "name": "données", "definition": true },
+        { "type": "text", "text": " = " },
+        { "type": "call", "text": "export", "name": "export" },
+        { "type": "text", "text": "(" },
+        { "type": "var", "text": "order", "name": "order" },
+        { "type": "text", "text": ")" }
+      ]
+    }
+  ]
+}

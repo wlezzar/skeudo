@@ -1,0 +1,129 @@
+{
+  "signature": { "name": "ship", "params": ["order"], "line": 1 },
+  "indentUnit": 4,
+  "variables": { "order": { "origin": "param", "line": 1 } },
+  "lines": [
+    {
+      "number": 1,
+      "depth": 0,
+      "text": "ship(order):",
+      "signature": true,
+      "header": true,
+      "segments": [
+        { "type": "fn", "text": "ship" },
+        { "type": "text", "text": "(" },
+        { "type": "var", "text": "order", "name": "order", "definition": true },
+        { "type": "text", "text": "):" }
+      ]
+    },
+    {
+      "number": 2,
+      "depth": 1,
+      "text": "if order is paid:",
+      "header": true,
+      "parent": 1,
+      "segments": [
+        { "type": "word", "text": "if" },
+        { "type": "text", "text": " " },
+        { "type": "var", "text": "order", "name": "order" },
+        { "type": "text", "text": " is paid:" }
+      ]
+    },
+    {
+      "number": 3,
+      "depth": 2,
+      "text": "for each item in order",
+      "header": true,
+      "parent": 2,
+      "segments": [
+        { "type": "word", "text": "for" },
+        { "type": "text", "text": " each item in " },
+        { "type": "var", "text": "order", "name": "order" }
+      ]
+    },
+    {
+      "number": 4,
+      "depth": 3,
+      "text": "reserve(item)               ::write:inventory",
+      "parent": 3,
+      "tags": [
+        { "raw": "::write:inventory", "kind": "write", "value": "inventory", "trailing": true }
+      ],
+      "segments": [
+        { "type": "call", "text": "reserve", "name": "reserve" },
+        { "type": "text", "text": "(item)" }
+      ]
+    },
+    {
+      "number": 5,
+      "depth": 3,
+      "text": "if that fails:",
+      "header": true,
+      "parent": 3,
+      "segments": [{ "type": "word", "text": "if" }, { "type": "text", "text": " that fails:" }]
+    },
+    {
+      "number": 6,
+      "depth": 4,
+      "text": "release earlier items   ::write:inventory",
+      "parent": 5,
+      "tags": [
+        { "raw": "::write:inventory", "kind": "write", "value": "inventory", "trailing": true }
+      ],
+      "segments": [
+        { "type": "word", "text": "release" },
+        { "type": "text", "text": " earlier items" }
+      ]
+    },
+    {
+      "number": 7,
+      "depth": 4,
+      "text": "::fail:OutOfStock",
+      "parent": 5,
+      "tags": [{ "raw": "::fail:OutOfStock", "kind": "fail", "value": "OutOfStock" }],
+      "segments": [{ "type": "tag", "raw": "::fail:OutOfStock" }]
+    },
+    {
+      "number": 8,
+      "depth": 1,
+      "text": "in one transaction:                 ::write:postgres.orders",
+      "header": true,
+      "parent": 1,
+      "tags": [
+        {
+          "raw": "::write:postgres.orders",
+          "kind": "write",
+          "value": "postgres.orders",
+          "trailing": true
+        }
+      ],
+      "segments": [
+        { "type": "word", "text": "in" },
+        { "type": "text", "text": " one transaction:" }
+      ]
+    },
+    {
+      "number": 9,
+      "depth": 2,
+      "text": "mark order shipped",
+      "parent": 8,
+      "segments": [
+        { "type": "word", "text": "mark" },
+        { "type": "text", "text": " " },
+        { "type": "var", "text": "order", "name": "order" },
+        { "type": "text", "text": " shipped" }
+      ]
+    },
+    {
+      "number": 10,
+      "depth": 1,
+      "text": "return order",
+      "parent": 1,
+      "segments": [
+        { "type": "word", "text": "return" },
+        { "type": "text", "text": " " },
+        { "type": "var", "text": "order", "name": "order" }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,71 @@
+{
+  "signature": { "name": "f", "params": ["x"], "line": 1 },
+  "indentUnit": 4,
+  "callSources": { "load": { "start": 40, "end": 44 } },
+  "diagnostics": [
+    {
+      "line": 1,
+      "severity": "warning",
+      "message": "This ::src location has no file. Name the file with a ::src tag on the signature."
+    },
+    {
+      "line": 2,
+      "severity": "warning",
+      "message": "This ::src location has no file. Name the file with a ::src tag on the signature."
+    },
+    {
+      "line": 3,
+      "severity": "warning",
+      "message": "This ::src location has no file. Name the file with a ::src tag on the signature."
+    }
+  ],
+  "variables": { "x": { "origin": "param", "line": 1 } },
+  "lines": [
+    {
+      "number": 1,
+      "depth": 0,
+      "text": "f(x):              ::src[1-10]",
+      "signature": true,
+      "header": true,
+      "src": { "start": 1, "end": 10 },
+      "tags": [
+        { "raw": "::src[1-10]", "kind": "src", "note": { "text": "1-10" }, "trailing": true }
+      ],
+      "segments": [
+        { "type": "fn", "text": "f" },
+        { "type": "text", "text": "(" },
+        { "type": "var", "text": "x", "name": "x", "definition": true },
+        { "type": "text", "text": "):" }
+      ]
+    },
+    {
+      "number": 2,
+      "depth": 1,
+      "text": "load(x)        ::read:db ::src[4]",
+      "parent": 1,
+      "src": { "start": 4, "end": 4 },
+      "tags": [
+        { "raw": "::read:db", "kind": "read", "value": "db", "trailing": true },
+        { "raw": "::src[4]", "kind": "src", "note": { "text": "4" }, "trailing": true }
+      ],
+      "segments": [
+        { "type": "call", "text": "load", "name": "load" },
+        { "type": "text", "text": "(" },
+        { "type": "var", "text": "x", "name": "x" },
+        { "type": "text", "text": ")" }
+      ]
+    },
+    {
+      "number": 3,
+      "depth": 1,
+      "text": "::src:load[40-44]",
+      "hidden": true,
+      "parent": 1,
+      "src": { "start": 1, "end": 10, "inherited": true },
+      "tags": [
+        { "raw": "::src:load[40-44]", "kind": "src", "value": "load", "note": { "text": "40-44" } }
+      ],
+      "segments": [{ "type": "tag", "raw": "::src:load[40-44]" }]
+    }
+  ]
+}

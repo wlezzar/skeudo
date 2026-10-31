@@ -1,0 +1,9 @@
+load(path):
+    data = std::fs::read(path)        ::read:fs
+    v = Vec::new()
+    see a::b and x::read:foo, they are code
+    copy(::read:s3)
+    fetch ::read:api then parse it
+    ::write:gcs stream it, then
+    stream it ::read:s3 ::write:gcs
+    ::read:s3 ::write:gcs

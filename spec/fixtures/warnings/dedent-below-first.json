@@ -1,0 +1,26 @@
+{
+  "diagnostics": [
+    {
+      "line": 2,
+      "severity": "warning",
+      "message": "This indentation doesn't line up with any enclosing block."
+    }
+  ],
+  "lines": [
+    {
+      "number": 1,
+      "depth": 0,
+      "text": "the first line is indented more",
+      "segments": [
+        { "type": "word", "text": "the" },
+        { "type": "text", "text": " first line is indented more" }
+      ]
+    },
+    {
+      "number": 2,
+      "depth": 0,
+      "text": "than the second",
+      "segments": [{ "type": "word", "text": "than" }, { "type": "text", "text": " the second" }]
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+render(page):
+    html = template.render(page, …)
+    body = std::fs::read_to_string(path)    ::read:fs
+    send(compress(html), headers(page))     ::write:http
+    page.save()                             ::write:postgres.pages
+    client.with(retries=3).get(page.url)    ::read:cdn
+    call log(page with an open paren

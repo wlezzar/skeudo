@@ -1,0 +1,5 @@
+Billing::Invoice.finalize(invoice, *, notify: bool = true, **opts):   ::src[billing/invoice.rb:40-58]
+    totals = compute(invoice)
+    save(invoice, totals)        ::write:postgres.invoices
+    if notify:
+        send(invoice)            ::write:sendgrid

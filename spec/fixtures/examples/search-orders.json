@@ -1,0 +1,161 @@
+{
+  "signature": { "name": "search_orders", "params": ["user_id", "term"], "line": 1 },
+  "indentUnit": 4,
+  "variables": {
+    "user_id": { "origin": "param", "line": 1 },
+    "term": { "origin": "param", "line": 1 },
+    "user": { "origin": "binding", "line": 2 },
+    "orders": { "origin": "binding", "line": 3 },
+    "items": { "origin": "binding", "line": 7 }
+  },
+  "lines": [
+    {
+      "number": 1,
+      "depth": 0,
+      "text": "search_orders(user_id, term):",
+      "signature": true,
+      "header": true,
+      "segments": [
+        { "type": "fn", "text": "search_orders" },
+        { "type": "text", "text": "(" },
+        { "type": "var", "text": "user_id", "name": "user_id", "definition": true },
+        { "type": "text", "text": ", " },
+        { "type": "var", "text": "term", "name": "term", "definition": true },
+        { "type": "text", "text": "):" }
+      ]
+    },
+    {
+      "number": 2,
+      "depth": 1,
+      "text": "user = get_user(user_id)          ::read:postgres.users[lookup by key]",
+      "parent": 1,
+      "binding": "user",
+      "tags": [
+        {
+          "raw": "::read:postgres.users[lookup by key]",
+          "kind": "read",
+          "value": "postgres.users",
+          "note": { "text": "lookup by key" },
+          "trailing": true
+        }
+      ],
+      "segments": [
+        { "type": "var", "text": "user", "name": "user", "definition": true },
+        { "type": "text", "text": " = " },
+        { "type": "call", "text": "get_user", "name": "get_user" },
+        { "type": "text", "text": "(" },
+        { "type": "var", "text": "user_id", "name": "user_id" },
+        { "type": "text", "text": ")" }
+      ]
+    },
+    {
+      "number": 3,
+      "depth": 1,
+      "text": "orders = recent_orders(user)      ::read:postgres.orders[range on created_at]",
+      "parent": 1,
+      "binding": "orders",
+      "tags": [
+        {
+          "raw": "::read:postgres.orders[range on created_at]",
+          "kind": "read",
+          "value": "postgres.orders",
+          "note": { "text": "range on created_at" },
+          "trailing": true
+        }
+      ],
+      "segments": [
+        { "type": "var", "text": "orders", "name": "orders", "definition": true },
+        { "type": "text", "text": " = " },
+        { "type": "call", "text": "recent_orders", "name": "recent_orders" },
+        { "type": "text", "text": "(" },
+        { "type": "var", "text": "user", "name": "user" },
+        { "type": "text", "text": ")" }
+      ]
+    },
+    {
+      "number": 4,
+      "depth": 1,
+      "text": "if a term is given:",
+      "header": true,
+      "parent": 1,
+      "segments": [
+        { "type": "word", "text": "if" },
+        { "type": "text", "text": " a " },
+        { "type": "var", "text": "term", "name": "term" },
+        { "type": "text", "text": " is given:" }
+      ]
+    },
+    {
+      "number": 5,
+      "depth": 2,
+      "text": "filter orders by note text    ::read:postgres.orders[!full scan]",
+      "parent": 4,
+      "tags": [
+        {
+          "raw": "::read:postgres.orders[!full scan]",
+          "kind": "read",
+          "value": "postgres.orders",
+          "note": { "text": "full scan", "danger": true },
+          "trailing": true
+        }
+      ],
+      "segments": [
+        { "type": "word", "text": "filter" },
+        { "type": "text", "text": " " },
+        { "type": "var", "text": "orders", "name": "orders" },
+        { "type": "text", "text": " by note text" }
+      ]
+    },
+    {
+      "number": 6,
+      "depth": 1,
+      "text": "for each order:",
+      "header": true,
+      "parent": 1,
+      "segments": [{ "type": "word", "text": "for" }, { "type": "text", "text": " each order:" }]
+    },
+    {
+      "number": 7,
+      "depth": 2,
+      "text": "items = get_items(order.id)   ::read:postgres.items[!n x lookup by key]",
+      "parent": 6,
+      "binding": "items",
+      "tags": [
+        {
+          "raw": "::read:postgres.items[!n x lookup by key]",
+          "kind": "read",
+          "value": "postgres.items",
+          "note": { "text": "n x lookup by key", "danger": true },
+          "trailing": true
+        }
+      ],
+      "segments": [
+        { "type": "var", "text": "items", "name": "items", "definition": true },
+        { "type": "text", "text": " = " },
+        { "type": "call", "text": "get_items", "name": "get_items" },
+        { "type": "text", "text": "(order.id)" }
+      ]
+    },
+    {
+      "number": 8,
+      "depth": 1,
+      "text": "count orders by status            ::read:postgres.orders[!full scan, probably]",
+      "parent": 1,
+      "tags": [
+        {
+          "raw": "::read:postgres.orders[!full scan, probably]",
+          "kind": "read",
+          "value": "postgres.orders",
+          "note": { "text": "full scan, probably", "danger": true },
+          "trailing": true
+        }
+      ],
+      "segments": [
+        { "type": "word", "text": "count" },
+        { "type": "text", "text": " " },
+        { "type": "var", "text": "orders", "name": "orders" },
+        { "type": "text", "text": " by status" }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,151 @@
+{
+  "signature": { "name": "check", "params": ["cached"], "line": 1 },
+  "indentUnit": 4,
+  "variables": {
+    "cached": { "origin": "param", "line": 1 },
+    "row": { "origin": "binding", "line": 11 }
+  },
+  "lines": [
+    {
+      "number": 1,
+      "depth": 0,
+      "text": "check(cached):",
+      "signature": true,
+      "header": true,
+      "segments": [
+        { "type": "fn", "text": "check" },
+        { "type": "text", "text": "(" },
+        { "type": "var", "text": "cached", "name": "cached", "definition": true },
+        { "type": "text", "text": "):" }
+      ]
+    },
+    {
+      "number": 2,
+      "depth": 1,
+      "text": "return cached",
+      "parent": 1,
+      "segments": [
+        { "type": "word", "text": "return" },
+        { "type": "text", "text": " " },
+        { "type": "var", "text": "cached", "name": "cached" }
+      ]
+    },
+    {
+      "number": 3,
+      "depth": 1,
+      "text": "else:",
+      "parent": 1,
+      "segments": [{ "type": "word", "text": "else" }, { "type": "text", "text": ":" }]
+    },
+    {
+      "number": 4,
+      "depth": 1,
+      "text": "re-check the lock",
+      "parent": 1,
+      "segments": [{ "type": "word", "text": "re-check" }, { "type": "text", "text": " the lock" }]
+    },
+    {
+      "number": 5,
+      "depth": 1,
+      "text": "don't retry",
+      "parent": 1,
+      "segments": [{ "type": "word", "text": "don't" }, { "type": "text", "text": " retry" }]
+    },
+    {
+      "number": 6,
+      "depth": 1,
+      "text": "Über cool",
+      "parent": 1,
+      "segments": [{ "type": "word", "text": "Über" }, { "type": "text", "text": " cool" }]
+    },
+    {
+      "number": 7,
+      "depth": 1,
+      "text": "cached is stale",
+      "parent": 1,
+      "segments": [
+        { "type": "var", "text": "cached", "name": "cached" },
+        { "type": "text", "text": " is stale" }
+      ]
+    },
+    {
+      "number": 8,
+      "depth": 1,
+      "text": "cache.set(key)",
+      "parent": 1,
+      "segments": [
+        { "type": "call", "text": "cache.set", "name": "cache.set" },
+        { "type": "text", "text": "(key)" }
+      ]
+    },
+    {
+      "number": 9,
+      "depth": 1,
+      "text": "validate(input)",
+      "parent": 1,
+      "segments": [
+        { "type": "call", "text": "validate", "name": "validate" },
+        { "type": "text", "text": "(input)" }
+      ]
+    },
+    {
+      "number": 10,
+      "depth": 1,
+      "text": "std::mem::take(buf)",
+      "parent": 1,
+      "segments": [
+        { "type": "call", "text": "std::mem::take", "name": "std::mem::take" },
+        { "type": "text", "text": "(buf)" }
+      ]
+    },
+    {
+      "number": 11,
+      "depth": 1,
+      "text": "row = load()",
+      "parent": 1,
+      "binding": "row",
+      "segments": [
+        { "type": "var", "text": "row", "name": "row", "definition": true },
+        { "type": "text", "text": " = " },
+        { "type": "call", "text": "load", "name": "load" },
+        { "type": "text", "text": "()" }
+      ]
+    },
+    {
+      "number": 12,
+      "depth": 1,
+      "text": "::fail:Nope",
+      "parent": 1,
+      "tags": [{ "raw": "::fail:Nope", "kind": "fail", "value": "Nope" }],
+      "segments": [{ "type": "tag", "raw": "::fail:Nope" }]
+    },
+    {
+      "number": 13,
+      "depth": 1,
+      "text": "42 is the answer",
+      "parent": 1,
+      "segments": [{ "type": "text", "text": "42 is the answer" }]
+    },
+    {
+      "number": 14,
+      "depth": 1,
+      "text": "\"quoted\" text",
+      "parent": 1,
+      "segments": [{ "type": "text", "text": "\"quoted\" text" }]
+    },
+    {
+      "number": 15,
+      "depth": 1,
+      "text": "_private stuff",
+      "parent": 1,
+      "segments": [{ "type": "text", "text": "_private stuff" }]
+    },
+    {
+      "number": 16,
+      "depth": 1,
+      "text": "Done.",
+      "parent": 1,
+      "segments": [{ "type": "text", "text": "Done." }]
+    }
+  ]
+}

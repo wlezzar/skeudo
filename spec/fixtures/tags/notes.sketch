@@ -1,0 +1,6 @@
+run(task):
+    messages = [task]
+    reply = model.create(messages)   ::read:anthropic[cached for [some] time]
+    store(reply) ::write:s3 [archive]
+    store(reply)                     ::write:s3[!no lifecycle rule]
+    ::danger[!double bang]

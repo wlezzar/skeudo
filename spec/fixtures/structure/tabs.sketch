@@ -1,0 +1,4 @@
+sync(account):
+	fetch(account)	::read:crm
+	if changed:
+		save(account)    ::write:postgres.accounts

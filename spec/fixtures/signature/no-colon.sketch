@@ -1,0 +1,2 @@
+charge(card, amount)
+    stripe.charges.create(card, amount)   ::write:stripe[!no idempotency key]

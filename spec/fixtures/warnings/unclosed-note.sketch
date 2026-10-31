@@ -1,0 +1,3 @@
+f(x):
+    save(x)     ::write:s3[no closing bracket
+    ::read:redis[ok] ::write:redis[also open
