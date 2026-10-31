@@ -94,7 +94,7 @@ Return a Markdown document:
 - <issue or question, pointing at the line that shows it>
 ````
 
-Each item in the last section should be something the sketches make visible: an effect without a failure path, an order of writes that can leave state inconsistent, labeled data reaching a log, a missing idempotency key, an assumption nothing enforces. Say "probably" when you haven't verified it. If the user wants to see it rendered, save the document as a `.md` file; the Sketch playground renders Markdown with sketch fences.
+Each item in the last section should be something the sketches make visible: an effect without a failure path, an order of writes that can leave state inconsistent, labeled data reaching a log, a missing idempotency key, an assumption nothing enforces. Say "probably" when you haven't verified it. If the user wants to see it rendered, save the document as a `.md` file; the Sketch playground and VS Code's Markdown preview, with the Sketch extension, render Markdown with sketch fences.
 
 ## Checklist
 

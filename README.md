@@ -17,9 +17,10 @@ packages/
   markdown-it/   # markdown-it-sketch: renders ```sketch fences and inline tag code
 apps/
   playground/    # live editor: preview, review panel, AST
+  vscode/        # VS Code extension: renders sketches in the Markdown preview
 ```
 
-Packages export their TypeScript sources directly; there is no build step until we publish.
+Packages export their TypeScript sources directly; there is no build step until we publish. The VS Code extension bundles them.
 
 ## Run
 
@@ -29,6 +30,7 @@ pnpm dev         # http://localhost:5173
 pnpm test        # parser fixtures, see spec/fixtures/README.md
 pnpm typecheck
 pnpm build       # static playground in apps/playground/dist
+pnpm package:vscode  # VS Code extension in apps/vscode/sketch-0.0.1.vsix, see apps/vscode/README.md
 ```
 
 Markdown files in `apps/playground/local-examples/` (gitignored) appear in the playground's Example menu, so you can try sketches of private code. Optional front matter sets the menu title and the base URL for source links:

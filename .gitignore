@@ -2,3 +2,4 @@ node_modules/
 dist/
 *.tsbuildinfo
 apps/playground/local-examples/
+*.vsix

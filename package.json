@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "pnpm --filter playground dev",
     "build": "pnpm --filter playground build",
+    "package:vscode": "pnpm --filter sketch package",
     "test": "vitest run",
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },

@@ -1,0 +1,79 @@
+{
+  "name": "sketch",
+  "displayName": "Sketch",
+  "description": "Renders sketch fences in the Markdown preview: pseudocode for code review, with every outside effect tagged.",
+  "version": "0.0.1",
+  "private": true,
+  "publisher": "skeudo",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wlezzar/skeudo",
+    "directory": "apps/vscode"
+  },
+  "engines": {
+    "vscode": "^1.95.0"
+  },
+  "categories": [
+    "Visualization",
+    "Other"
+  ],
+  "keywords": [
+    "markdown",
+    "pseudocode",
+    "code review"
+  ],
+  "main": "./dist/extension.js",
+  "activationEvents": [],
+  "files": [
+    "dist/extension.js",
+    "dist/preview.js",
+    "dist/sketch.css",
+    "README.md"
+  ],
+  "contributes": {
+    "markdown.markdownItPlugins": true,
+    "markdown.previewStyles": [
+      "./dist/sketch.css"
+    ],
+    "markdown.previewScripts": [
+      "./dist/preview.js"
+    ],
+    "configuration": {
+      "title": "Sketch",
+      "properties": {
+        "sketch.labelKinds": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [
+            "untrusted",
+            "secret"
+          ],
+          "markdownDescription": "Tag kinds whose value labels a variable, as `::untrusted:body` labels `body`. Every later use of a labeled variable is marked."
+        },
+        "sketch.kindColors": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "default": {},
+          "markdownDescription": "CSS colors for tag kinds, such as `{ \"todo\": \"#8b5cf6\" }`. They override the default colors."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "build": "node build.mts",
+    "package": "node build.mts && vsce package --no-dependencies --skip-license"
+  },
+  "devDependencies": {
+    "@sketch/core": "workspace:*",
+    "@sketch/html": "workspace:*",
+    "@types/vscode": "1.95.0",
+    "@vscode/vsce": "4.0.0",
+    "esbuild": "0.28.2",
+    "markdown-it": "^15.0.3",
+    "markdown-it-sketch": "workspace:*"
+  }
+}

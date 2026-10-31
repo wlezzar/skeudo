@@ -17,8 +17,10 @@ export default function markdownItSketch(md: MarkdownIt, options: SketchPluginOp
   md.renderer.rules.fence = (tokens, idx, opts, env, self) => {
     const token = tokens[idx];
     const lang = token.info.trim().split(/\s+/)[0];
-    if (langs.has(lang)) return toHtml(token.content, options) + '\n';
-    return fence(tokens, idx, opts, env, self);
+    if (!langs.has(lang)) return fence(tokens, idx, opts, env, self);
+    const html = toHtml(token.content, options);
+    // Keep attributes other plugins put on the fence, such as the source line an editor's preview scrolls to.
+    return (token.attrs?.length ? `<div${self.renderAttrs(token)}>${html}</div>` : html) + '\n';
   };
 
   if (options.inlineTags !== false) {
