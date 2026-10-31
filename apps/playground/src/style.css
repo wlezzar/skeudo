@@ -90,7 +90,7 @@ select:focus, input:focus, textarea:focus { outline: 2px solid var(--focus); out
   flex: 1;
   min-height: 0;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr);
+  grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
 }
 .pane { display: flex; flex-direction: column; min-height: 0; min-width: 0; }
 .pane + .pane { border-left: 1px solid var(--border); }

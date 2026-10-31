@@ -35,7 +35,7 @@
     --sk-guide: #272c37;
     --sk-row-hover: #1e222b;
 
-    --sk-violet: #c4b5fd;
+    --sk-violet: #a78bfa;
     --sk-blue: #93c5fd;
     --sk-aqua: #5eead4;
     --sk-orange: #fdba74;
@@ -59,7 +59,7 @@
   --sk-guide: #272c37;
   --sk-row-hover: #1e222b;
 
-  --sk-violet: #c4b5fd;
+  --sk-violet: #a78bfa;
   --sk-blue: #93c5fd;
   --sk-aqua: #5eead4;
   --sk-orange: #fdba74;
@@ -75,12 +75,13 @@
 
 /* ---------- Layout ---------- */
 
+/* .sketch is the box and the size container; .sk-lines is the grid inside it. */
 .sketch {
-  display: grid;
-  grid-template-columns: auto max-content minmax(max-content, 1fr);
+  --sk-lh: 1.8;
+  container: sketch / inline-size;
   font-family: var(--sk-font);
   font-size: 13.5px;
-  line-height: 1.8;
+  line-height: var(--sk-lh);
   color: var(--sk-fg);
   background: var(--sk-bg);
   border: 1px solid var(--sk-border);
@@ -88,6 +89,14 @@
   padding: 0.6rem 0;
   overflow-x: auto;
   text-align: left;
+}
+.sketch,
+.sketch * { box-sizing: border-box; }
+
+/* Gutter, code, and trailing tags. The tag column takes the remaining width and wraps. */
+.sk-lines {
+  display: grid;
+  grid-template-columns: auto max-content minmax(22ch, 1fr);
 }
 
 .sk-row {
@@ -104,9 +113,11 @@
   text-align: right;
   color: var(--sk-faint);
   font-size: 0.78em;
+  /* Same line box as the code, so the numbers sit on its baseline. */
+  line-height: calc(var(--sk-lh) / 0.78);
   user-select: none;
 }
-.sketch.sk-gutter .sk-gut { min-width: 3ch; padding-right: 1.5ch; }
+.sketch.sk-gutter .sk-gut { min-width: calc(1rem + 4.5ch); padding-right: 1.5ch; }
 .sk-src { color: inherit; text-decoration: none; }
 a.sk-src:hover { color: var(--sk-blue); text-decoration: underline; }
 .sk-src-inherited { opacity: 0.6; }
@@ -128,14 +139,64 @@ a.sk-src:hover { color: var(--sk-blue); text-decoration: underline; }
   pointer-events: none;
 }
 
+/* Tags wrap between each other on tighter lines; the first line stays centered on the code line.
+   A tag never breaks: a note that doesn't fit is cut with an ellipsis (the full tag is the tooltip). */
 .sk-tags {
+  --sk-tag-lh: 1.4;
   grid-column: 3;
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 0.45rem;
-  padding-left: 3ch;
-  padding-right: 1rem;
-  white-space: nowrap;
+  gap: 0.15rem 0.45rem;
+  padding: calc((var(--sk-lh) - var(--sk-tag-lh)) * 0.5em) 1rem calc((var(--sk-lh) - var(--sk-tag-lh)) * 0.5em) 3ch;
+  line-height: var(--sk-tag-lh);
+}
+.sk-tags .sk-tagw {
+  display: inline-flex;
+  align-items: center;
+  min-width: 0;
+  max-width: 100%;
+}
+.sk-tags .sk-tag { flex: none; }
+.sk-tags .sk-note {
+  position: relative; /* clips the hidden brackets too */
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* Danger notes are never cut. */
+.sk-tags .sk-note-danger { flex: none; }
+
+/* Narrow boxes: code wraps (continuation lines hang 2ch past the indentation) and trailing tags
+   move to their own line under the code, one level deeper. Nothing scrolls sideways. */
+@container sketch (max-width: 36rem) {
+  .sk-lines { grid-template-columns: auto minmax(0, 1fr); }
+  .sk-code {
+    --sk-hang: calc(var(--d, 0) * var(--sk-indent) + 2ch);
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    padding-left: var(--sk-hang);
+    padding-right: 1rem;
+    text-indent: calc(-1 * var(--sk-hang));
+  }
+  .sk-code * { text-indent: 0; }
+  .sk-tags {
+    grid-column: 2;
+    position: relative;
+    padding-left: calc((var(--d, 0) + 1) * var(--sk-indent));
+  }
+  .sk-tags:empty { display: none; }
+  .sk-tags::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: calc((var(--d, 0) + 1) * var(--sk-indent));
+    background: repeating-linear-gradient(to right, var(--sk-guide) 0 1px, transparent 1px var(--sk-indent));
+    background-position: 0.5ch 0;
+    pointer-events: none;
+  }
 }
 
 /* ---------- Tags ---------- */
@@ -153,6 +214,7 @@ a.sk-src:hover { color: var(--sk-blue); text-decoration: underline; }
 
 .sk-tag {
   --sk-c: var(--sk-neutral);
+  white-space: nowrap;
   display: inline-flex;
   align-items: baseline;
   font-family: var(--sk-font);
@@ -259,8 +321,9 @@ a.sk-call:hover { text-decoration-style: solid; }
 }
 a.sk-file:hover { color: var(--sk-blue); text-decoration: underline; }
 
-/* Inline code made only of tags, as rendered by markdown-it-sketch. */
-code.sk-inline {
+/* Inline code made only of tags, as rendered by markdown-it-sketch.
+   The doubled class outranks host rules such as `.markdown-body code`. */
+code.sk-inline.sk-inline {
   background: none;
   padding: 0;
   border: 0;

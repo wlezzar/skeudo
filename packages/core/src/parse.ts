@@ -372,7 +372,11 @@ function tokenize(line: SketchLine, vars: Set<string>): Segment[] {
         continue;
       }
       const head = IDENT_RE.exec(chain)![0];
-      if (!afterDot && vars.has(head) && chain[head.length] !== ':') {
+      // `token-rotated` is a hyphenated word, not a use of `token`.
+      const hyphenated =
+        (prev === '-' && IDENT_CHAR.test(text[i - 2] ?? '')) ||
+        (head === chain && text[after] === '-' && IDENT_START.test(text[after + 1] ?? ''));
+      if (!afterDot && !hyphenated && vars.has(head) && chain[head.length] !== ':') {
         flush();
         const definition = (line.binding === head && i === 0) || (line.signature && inParams);
         segs.push({ type: 'var', text: head, name: head, definition });

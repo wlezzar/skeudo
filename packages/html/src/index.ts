@@ -129,9 +129,9 @@ function lineHtml(line: SketchLine, sketch: Sketch, opts: HtmlOptions, gutter: b
   }
 
   return (
-    `<div class="${cls.join(' ')}" data-line="${line.number}"${title}>` +
+    `<div class="${cls.join(' ')}" style="--d:${line.depth}" data-line="${line.number}"${title}>` +
     `<span class="sk-gut">${gutter ? gutterHtml(line.src, opts) : ''}</span>` +
-    `<span class="sk-code" style="--d:${line.depth}">${indent}${code || '&#8203;'}</span>` +
+    `<span class="sk-code">${indent}${code || '&#8203;'}</span>` +
     `<span class="sk-tags">${tags.join('')}</span>` +
     `</div>`
   );
@@ -145,7 +145,10 @@ export function toHtml(input: string | Sketch, opts: HtmlOptions = {}): string {
   const gutter = lines.some((l) => l.src);
   const rows = lines.map((l) => lineHtml(l, sketch, opts, gutter)).join('');
   const style = `--sk-indent:${sketch.indentUnit ?? 4}ch`;
-  return `<div class="sketch${gutter ? ' sk-gutter' : ''}" style="${style}" data-sketch>${rows}</div>`;
+  return (
+    `<div class="sketch${gutter ? ' sk-gutter' : ''}" style="${style}" data-sketch>` +
+    `<div class="sk-lines">${rows}</div></div>`
+  );
 }
 
 /**
