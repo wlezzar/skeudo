@@ -6,6 +6,8 @@
     "dev": "pnpm --filter playground dev",
     "build": "pnpm --filter playground build",
     "package:vscode": "pnpm --filter sketch package",
+    "build:cli": "pnpm --filter skeudo build",
+    "package:cli": "pnpm --filter skeudo package",
     "test": "vitest run",
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },

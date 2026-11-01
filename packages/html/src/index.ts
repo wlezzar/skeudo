@@ -106,6 +106,21 @@ function segmentHtml(seg: Segment, sketch: Sketch, opts: HtmlOptions): string {
   }
 }
 
+/**
+ * A `srcHref` that links source locations under a base URL, such as a GitHub blob URL at a commit
+ * (`https://github.com/org/repo/blob/a1b2c3d/`). Lines become a fragment, as in `#L88-L94`.
+ */
+export function srcBaseHref(base: string): (loc: ResolvedSrc) => string | undefined {
+  const root = base.endsWith('/') ? base : `${base}/`;
+  return (loc) => {
+    if (!loc.path) return undefined;
+    let url = root + loc.path.replace(/^(\.?\/)+/, '').split('/').map(encodeURIComponent).join('/');
+    if (loc.start !== undefined) url += `#L${loc.start}`;
+    if (loc.start !== undefined && loc.end !== undefined && loc.end !== loc.start) url += `-L${loc.end}`;
+    return url;
+  };
+}
+
 function gutterHtml(src: ResolvedSrc | undefined, opts: HtmlOptions): string {
   if (!src) return '';
   const where = formatLocation(src);

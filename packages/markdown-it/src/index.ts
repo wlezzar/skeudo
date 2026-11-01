@@ -33,6 +33,27 @@ export default function markdownItSketch(md: MarkdownIt, options: SketchPluginOp
   }
 }
 
+export interface FrontMatter {
+  /** `key: value` pairs, as plain strings. */
+  data: Record<string, string>;
+  /** The document after the front matter. */
+  body: string;
+  /** Lines the front matter takes, to map a line of `body` back to the document. */
+  lines: number;
+}
+
+/** Splits simple front matter, `key: value` lines between `---` lines, from a Markdown document. */
+export function frontMatter(source: string): FrontMatter {
+  const match = /^---\r?\n([\s\S]*?)\r?\n---[ \t]*(?:\r?\n|$)/.exec(source);
+  if (!match) return { data: {}, body: source, lines: 0 };
+  const data: Record<string, string> = {};
+  for (const line of match[1].split(/\r?\n/)) {
+    const kv = /^(\w+):\s*(.*)$/.exec(line.trim());
+    if (kv) data[kv[1]] = kv[2].replace(/^(["'])(.*)\1$/, '$2');
+  }
+  return { data, body: source.slice(match[0].length), lines: match[0].split('\n').length - 1 };
+}
+
 /** Extracts the source of every sketch fence in a Markdown document. */
 export function sketchFences(md: MarkdownIt, source: string, langs = ['sketch']): { content: string; line: number }[] {
   return md

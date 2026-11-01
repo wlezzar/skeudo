@@ -1,0 +1,32 @@
+{
+  "name": "skeudo",
+  "version": "0.0.1",
+  "description": "Checks sketches, pseudocode for code review with every outside effect tagged, and renders them as standalone HTML pages.",
+  "private": true,
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wlezzar/skeudo",
+    "directory": "apps/cli"
+  },
+  "bin": {
+    "skeudo": "./dist/skeudo.js"
+  },
+  "files": [
+    "dist/skeudo.js"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "node build.mts",
+    "package": "node build.mts && pnpm pack"
+  },
+  "devDependencies": {
+    "@sketch/core": "workspace:*",
+    "@sketch/html": "workspace:*",
+    "esbuild": "0.28.2",
+    "markdown-it": "^15.0.3",
+    "markdown-it-sketch": "workspace:*"
+  }
+}

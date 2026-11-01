@@ -16,11 +16,12 @@ packages/
   html/          # toHtml(), tagHtml(), enhance() + sketch.css
   markdown-it/   # markdown-it-sketch: renders ```sketch fences and inline tag code
 apps/
+  cli/           # skeudo: checks sketches and renders them as standalone HTML pages
   playground/    # live editor: preview, review panel, AST
   vscode/        # VS Code extension: highlights sketches and renders them in the Markdown preview
 ```
 
-Packages export their TypeScript sources directly; there is no build step until we publish. The VS Code extension bundles them.
+Packages export their TypeScript sources directly; there is no build step until we publish. The CLI and the VS Code extension bundle them.
 
 ## Run
 
@@ -31,6 +32,8 @@ pnpm test        # parser fixtures, see spec/fixtures/README.md
 pnpm typecheck
 pnpm build       # static playground in apps/playground/dist
 pnpm package:vscode  # VS Code extension in apps/vscode/sketch-0.0.1.vsix, see apps/vscode/README.md
+pnpm build:cli       # CLI in apps/cli/dist/skeudo.js, see apps/cli/README.md
+pnpm package:cli     # CLI as apps/cli/skeudo-0.0.1.tgz, for npm install -g
 ```
 
 Markdown files in `apps/playground/local-examples/` (gitignored) appear in the playground's Example menu, so you can try sketches of private code. Optional front matter sets the menu title and the base URL for source links:

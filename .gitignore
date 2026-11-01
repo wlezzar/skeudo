@@ -3,3 +3,4 @@ dist/
 *.tsbuildinfo
 apps/playground/local-examples/
 *.vsix
+*.tgz

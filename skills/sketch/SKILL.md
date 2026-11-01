@@ -70,7 +70,7 @@ Sketches go in fenced code blocks tagged `sketch`. Lines nest by indentation, 4 
    - A removed line keeps its effect tags, so the reviewer sees the effects the code no longer has.
    - Put change tags after the line's effect tags and before its `::src` tags.
    - Unchanged lines carry no change tag. Keep the ones needed to follow the flow.
-7. **Review your own sketch** against the checklist below, then write down what a reviewer should check.
+7. **Review your own sketch.** If the `skeudo` command is installed, run `skeudo check doc.md`, or pipe the document to `skeudo check`, and fix every warning it prints. Then go through the checklist below, and write down what a reviewer should check.
 
 ## Output
 
@@ -94,7 +94,7 @@ Return a Markdown document:
 - <issue or question, pointing at the line that shows it>
 ````
 
-Each item in the last section should be something the sketches make visible: an effect without a failure path, an order of writes that can leave state inconsistent, labeled data reaching a log, a missing idempotency key, an assumption nothing enforces. Say "probably" when you haven't verified it. If the user wants to see it rendered, save the document as a `.md` file; the Sketch playground and VS Code's Markdown preview, with the Sketch extension, render Markdown with sketch fences.
+Each item in the last section should be something the sketches make visible: an effect without a failure path, an order of writes that can leave state inconsistent, labeled data reaching a log, a missing idempotency key, an assumption nothing enforces. Say "probably" when you haven't verified it. If the user wants to see it rendered, save the document as a `.md` file; the Sketch playground and VS Code's Markdown preview, with the Sketch extension, render Markdown with sketch fences, and `skeudo render doc.md -o doc.html` writes a standalone HTML page.
 
 ## Checklist
 

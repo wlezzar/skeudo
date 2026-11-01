@@ -1,6 +1,6 @@
 import markdownit, { type MarkdownIt } from 'markdown-it';
-import { analyze, formatLocation, parse, parseTagsOnly, type ResolvedSrc, type Review, type Sketch } from '@sketch/core';
-import { enhance, escapeHtml as esc, tagHtml, toHtml, type HtmlOptions } from '@sketch/html';
+import { analyze, formatLocation, parse, parseTagsOnly, type Review, type Sketch } from '@sketch/core';
+import { enhance, escapeHtml as esc, srcBaseHref, tagHtml, toHtml, type HtmlOptions } from '@sketch/html';
 import markdownItSketch, { sketchFences } from 'markdown-it-sketch';
 import '@sketch/html/sketch.css';
 import './style.css';
@@ -53,17 +53,7 @@ $('#theme').addEventListener('click', () => {
 // ---------- Rendering options ----------
 function htmlOptions(): HtmlOptions {
   const base = srcBaseInput.value.trim();
-  return {
-    srcHref: base ? (loc: ResolvedSrc) => sourceUrl(base, loc) : undefined,
-  };
-}
-
-function sourceUrl(base: string, loc: ResolvedSrc): string | undefined {
-  if (!loc.path) return undefined;
-  const root = base.endsWith('/') ? base : `${base}/`;
-  let url = root + loc.path.replace(/^\.?\//, '');
-  if (loc.start !== undefined) url += `#L${loc.start}` + (loc.end !== undefined && loc.end !== loc.start ? `-L${loc.end}` : '');
-  return url;
+  return { srcHref: base ? srcBaseHref(base) : undefined };
 }
 
 function makeMarkdown(opts: HtmlOptions): MarkdownIt {

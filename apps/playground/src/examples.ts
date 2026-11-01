@@ -1,3 +1,4 @@
+import { frontMatter } from 'markdown-it-sketch';
 import spec from '../../../spec/spec.md?raw';
 
 export interface Example {
@@ -22,17 +23,12 @@ const localFiles = import.meta.glob<string>('../local-examples/*.md', { query: '
 
 function localExample(path: string, raw: string): Example {
   const name = path.slice(path.lastIndexOf('/') + 1).replace(/\.md$/, '');
-  const front = /^---\r?\n([\s\S]*?)\r?\n---\r?\n?/.exec(raw);
-  const meta: Record<string, string> = {};
-  for (const line of front?.[1].split(/\r?\n/) ?? []) {
-    const kv = /^(\w+):\s*(.*)$/.exec(line.trim());
-    if (kv) meta[kv[1]] = kv[2];
-  }
+  const { data, body } = frontMatter(raw);
   return {
     id: `local:${name}`,
-    title: meta.title || name,
-    source: front ? raw.slice(front[0].length) : raw,
-    srcBase: meta.srcBase || undefined,
+    title: data.title || name,
+    source: body,
+    srcBase: data.srcBase || undefined,
     local: true,
   };
 }

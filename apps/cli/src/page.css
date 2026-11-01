@@ -1,0 +1,51 @@
+/* The page around sketches that skeudo render writes. It uses the colors from sketch.css, so it follows
+   the system's light or dark mode with them. */
+
+:root { color-scheme: light; }
+@media (prefers-color-scheme: dark) {
+  :root { color-scheme: dark; }
+}
+
+body {
+  margin: 0;
+  background: var(--sk-bg);
+  color: var(--sk-fg);
+  font: 15px/1.6 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+main { max-width: 920px; margin: 0 auto; padding: 2rem 16px 4rem; }
+main.bare { max-width: 1200px; }
+main > :first-child { margin-top: 0; }
+
+h1, h2, h3, h4 { line-height: 1.25; margin: 1.8em 0 0.6em; }
+h1 { font-size: 1.8em; }
+h2 { font-size: 1.35em; padding-bottom: 0.3em; border-bottom: 1px solid var(--sk-border); }
+h3 { font-size: 1.1em; }
+a { color: var(--sk-blue); }
+hr { border: 0; border-top: 1px solid var(--sk-border); margin: 2rem 0; }
+img { max-width: 100%; }
+blockquote { margin: 1rem 0; padding-left: 1rem; border-left: 3px solid var(--sk-border); color: var(--sk-muted); }
+
+code, pre { font-family: var(--sk-font); }
+code {
+  font-size: 0.86em;
+  background: var(--sk-row-hover);
+  border: 1px solid var(--sk-border);
+  border-radius: 4px;
+  padding: 0.05em 0.3em;
+}
+pre {
+  font-size: 13px;
+  background: var(--sk-row-hover);
+  border: 1px solid var(--sk-border);
+  border-radius: 8px;
+  padding: 0.8rem 1rem;
+  overflow-x: auto;
+}
+pre code { font-size: inherit; background: none; border: 0; padding: 0; }
+
+.sketch { margin: 1rem 0; }
+main.bare .sketch { margin: 0; }
+
+table { border-collapse: collapse; display: block; overflow-x: auto; margin: 1rem 0; font-size: 0.9em; }
+th, td { border: 1px solid var(--sk-border); padding: 0.4rem 0.7rem; text-align: left; vertical-align: top; }
+th { background: var(--sk-row-hover); }
