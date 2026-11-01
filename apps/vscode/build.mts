@@ -39,14 +39,14 @@ export async function build(outdir: string): Promise<void> {
   await mkdir(outdir, { recursive: true });
   const src = (file: string) => fileURLToPath(new URL(`src/${file}`, import.meta.url));
   const common = { bundle: true, target: 'es2022', logLevel: 'warning' } as const;
-  const css = await readFile(new URL(import.meta.resolve('@sketch/html/sketch.css')), 'utf8');
+  const css = await readFile(new URL(import.meta.resolve('@skeudo/html/sketch.css')), 'utf8');
   await Promise.all([
     // VS Code supplies the `vscode` module, and the markdown-it instance the plugin extends.
     bundle({ ...common, entryPoints: [src('extension.ts')], outfile: `${outdir}/extension.js`, platform: 'node', format: 'cjs', external: ['vscode'] }),
     bundle({ ...common, entryPoints: [src('preview.ts')], outfile: `${outdir}/preview.js`, platform: 'browser', format: 'iife' }),
     writeFile(`${outdir}/sketch.css`, previewCss(css)),
-    writeFile(`${outdir}/sketch.tmLanguage.json`, JSON.stringify(sketchGrammar, null, 2) + '\n'),
-    writeFile(`${outdir}/markdown-sketch.tmLanguage.json`, JSON.stringify(markdownInjection, null, 2) + '\n'),
+    writeFile(`${outdir}/skeudo.tmLanguage.json`, JSON.stringify(sketchGrammar, null, 2) + '\n'),
+    writeFile(`${outdir}/markdown-skeudo.tmLanguage.json`, JSON.stringify(markdownInjection, null, 2) + '\n'),
   ]);
 }
 

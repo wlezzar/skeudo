@@ -1,7 +1,7 @@
 import markdownit from 'markdown-it';
-import { parse, type Diagnostic, type Sketch } from '@sketch/core';
-import { escapeHtml, srcBaseHref, toHtml, type HtmlOptions } from '@sketch/html';
-import markdownItSketch, { frontMatter, sketchFences } from 'markdown-it-sketch';
+import { parse, type Diagnostic, type Sketch } from '@skeudo/core';
+import { escapeHtml, srcBaseHref, toHtml, type HtmlOptions } from '@skeudo/html';
+import markdownItSkeudo, { FENCE_LANGS, frontMatter, sketchFences } from 'markdown-it-skeudo';
 
 /** A Markdown document with sketch fences, or a sketch on its own. */
 export interface Doc {
@@ -23,18 +23,18 @@ export interface Problem extends Diagnostic {
 }
 
 const MARKDOWN_EXT = /\.(md|markdown)$/i;
-const SKETCH_EXT = /\.sketch$/i;
-const SKETCH_FENCE = /^ {0,3}(`{3,}|~{3,})[ \t]*sketch(\s|$)/m;
+const SKEUDO_EXT = /\.skeudo$/i;
+const SKETCH_FENCE = new RegExp(`^ {0,3}(\`{3,}|~{3,})[ \\t]*(${FENCE_LANGS.join('|')})(\\s|$)`, 'm');
 
 /** Files a directory is searched for. */
-export const isSketchFile = (path: string) => MARKDOWN_EXT.test(path) || SKETCH_EXT.test(path);
+export const isSketchFile = (path: string) => MARKDOWN_EXT.test(path) || SKEUDO_EXT.test(path);
 
 /**
- * A `.md` or `.markdown` file is Markdown and a `.sketch` file is a sketch. Anything else, stdin included,
+ * A `.md` or `.markdown` file is Markdown and a `.skeudo` file is a sketch. Anything else, stdin included,
  * is Markdown when it has a sketch fence, and a sketch otherwise.
  */
 export function load(name: string, source: string): Doc {
-  const markdown = MARKDOWN_EXT.test(name) || (!SKETCH_EXT.test(name) && SKETCH_FENCE.test(source));
+  const markdown = MARKDOWN_EXT.test(name) || (!SKEUDO_EXT.test(name) && SKETCH_FENCE.test(source));
   if (!markdown) {
     const sketches = source.trim() ? [{ sketch: parse(source), line: 1 }] : [];
     return { name, markdown, meta: {}, body: source, offset: 0, sketches };
@@ -68,7 +68,7 @@ export function renderPage(doc: Doc, opts: PageOptions): string {
   let body: string;
   let heading: string | undefined;
   if (doc.markdown) {
-    const md = markdownit({ html: false, linkify: true }).use(markdownItSketch, html);
+    const md = markdownit({ html: false, linkify: true }).use(markdownItSkeudo, html);
     const env = {};
     const tokens = md.parse(doc.body, env);
     const h1 = tokens.findIndex((t) => t.type === 'heading_open' && t.tag === 'h1');

@@ -1,6 +1,6 @@
 # skeudo
 
-Checks sketches and renders them as standalone HTML pages. A sketch is pseudocode for code review where every outside effect is tagged; the format is defined in [spec/spec.md](https://github.com/wlezzar/skeudo/blob/main/spec/spec.md).
+Checks sketches and renders them as standalone HTML pages. A sketch is pseudocode for code review where every outside effect is tagged. The format, Skeudo, is defined in [spec/spec.md](https://github.com/wlezzar/skeudo/blob/main/spec/spec.md).
 
 ```sh
 skeudo check docs/                  # warnings in every sketch under docs/
@@ -9,10 +9,10 @@ skeudo render pr-123.md -o pr.html  # a page to send to someone
 
 ## Input
 
-- A `.md` or `.markdown` file is Markdown: every ` ```sketch ` fence in it is a sketch.
-- A `.sketch` file is a sketch.
+- A `.md` or `.markdown` file is Markdown: every ` ```skeudo ` fence in it is a sketch (` ```sketch ` works too).
+- A `.skeudo` file is a sketch.
 - A directory is searched for both, skipping hidden folders and `node_modules`.
-- With no path, or with `-`, the input is read from stdin. Any input other than a `.md`, `.markdown` or `.sketch` file is Markdown when it has a sketch fence, and a sketch otherwise.
+- With no path, or with `-`, the input is read from stdin. Any input other than a `.md`, `.markdown` or `.skeudo` file is Markdown when it has a sketch fence, and a sketch otherwise.
 
 ## check
 

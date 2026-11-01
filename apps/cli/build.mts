@@ -13,7 +13,7 @@ export async function build(outdir: string): Promise<string> {
 
   const manifest = JSON.parse(await readFile(new URL('package.json', import.meta.url), 'utf8'));
   // Rendered pages inline sketch.css with the page's own styles, and the script that highlights variables.
-  const css = (await readFile(new URL(import.meta.resolve('@sketch/html/sketch.css')), 'utf8')) + '\n' + (await readFile(src('page.css'), 'utf8'));
+  const css = (await readFile(new URL(import.meta.resolve('@skeudo/html/sketch.css')), 'utf8')) + '\n' + (await readFile(src('page.css'), 'utf8'));
   const script = await bundle({ ...common, entryPoints: [src('page.ts')], write: false, platform: 'browser', format: 'iife', minify: true });
 
   const outfile = `${outdir}/skeudo.js`;

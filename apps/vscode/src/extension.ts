@@ -1,13 +1,13 @@
 import * as vscode from 'vscode';
 import type { MarkdownIt } from 'markdown-it';
-import markdownItSketch, { type SketchPluginOptions } from 'markdown-it-sketch';
+import markdownItSkeudo, { type SkeudoPluginOptions } from 'markdown-it-skeudo';
 import { srcHref } from './links';
 
 export function activate(context: vscode.ExtensionContext) {
   // The plugin reads these options each time it renders a sketch, so updating them applies new settings.
-  const options: SketchPluginOptions = { srcHref };
+  const options: SkeudoPluginOptions = { srcHref };
   const readSettings = () => {
-    const settings = vscode.workspace.getConfiguration('sketch');
+    const settings = vscode.workspace.getConfiguration('skeudo');
     options.labelKinds = settings.get<string[]>('labelKinds');
     options.kindColors = settings.get<Record<string, string>>('kindColors');
   };
@@ -15,12 +15,12 @@ export function activate(context: vscode.ExtensionContext) {
 
   context.subscriptions.push(
     vscode.workspace.onDidChangeConfiguration((e) => {
-      if (!e.affectsConfiguration('sketch')) return;
+      if (!e.affectsConfiguration('skeudo')) return;
       readSettings();
       void vscode.commands.executeCommand('markdown.preview.refresh');
     }),
   );
 
   // VS Code's Markdown preview calls this with its markdown-it instance.
-  return { extendMarkdownIt: (md: MarkdownIt) => md.use(markdownItSketch, options) };
+  return { extendMarkdownIt: (md: MarkdownIt) => md.use(markdownItSkeudo, options) };
 }

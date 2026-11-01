@@ -15,7 +15,7 @@ Usage:
   skeudo check [path...]         Report the warnings in sketches. Exits with 1 when there are any.
   skeudo render [file] [-o out]  Render a sketch or a Markdown document as a standalone HTML page.
 
-A path is a Markdown file, whose \`\`\`sketch fences are checked, a .sketch file, or a directory
+A path is a Markdown file, whose \`\`\`skeudo fences are checked, a .skeudo file, or a directory
 to search for both. With no path, or with -, the input is read from stdin, and it is Markdown
 when it has a sketch fence.
 
@@ -53,7 +53,7 @@ async function readDoc(path: string): Promise<Doc> {
   }
 }
 
-/** Expands directories into the Markdown and .sketch files under them, skipping hidden folders and node_modules. */
+/** Expands directories into the Markdown and .skeudo files under them, skipping hidden folders and node_modules. */
 async function expand(paths: string[]): Promise<string[]> {
   const files: string[] = [];
   for (const path of paths) {

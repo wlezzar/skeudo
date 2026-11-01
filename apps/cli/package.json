@@ -23,10 +23,10 @@
     "package": "node build.mts && pnpm pack"
   },
   "devDependencies": {
-    "@sketch/core": "workspace:*",
-    "@sketch/html": "workspace:*",
+    "@skeudo/core": "workspace:*",
+    "@skeudo/html": "workspace:*",
     "esbuild": "0.28.2",
     "markdown-it": "^15.0.3",
-    "markdown-it-sketch": "workspace:*"
+    "markdown-it-skeudo": "workspace:*"
   }
 }

@@ -10,7 +10,7 @@ import { format, project } from './fixture';
 // would freeze, so a new fixture would not run until this file changed.
 const ROOT = fileURLToPath(new URL('../../../', import.meta.url));
 const FIXTURES = join(ROOT, 'spec/fixtures');
-const fixtures = globSync('**/*.sketch', { cwd: FIXTURES }).sort();
+const fixtures = globSync('**/*.skeudo', { cwd: FIXTURES }).sort();
 
 describe('spec fixtures', () => {
   test('exist', () => {
@@ -20,17 +20,17 @@ describe('spec fixtures', () => {
   for (const name of fixtures) {
     test(name, async () => {
       const source = readFileSync(join(FIXTURES, name), 'utf8');
-      const expected = join(FIXTURES, name.replace(/\.sketch$/, '.json'));
+      const expected = join(FIXTURES, name.replace(/\.skeudo$/, '.json'));
       await expect(format(project(source)) + '\n').toMatchFileSnapshot(expected);
     });
   }
 });
 
 describe('sketches in the docs parse without warnings', () => {
-  for (const doc of ['spec/spec.md', 'skills/sketch/SKILL.md']) {
+  for (const doc of ['spec/spec.md', 'skills/skeudo/SKILL.md']) {
     const text = readFileSync(join(ROOT, doc), 'utf8');
     // The skill's output template holds a placeholder fence whose body is just "...".
-    const blocks = [...text.matchAll(/^```sketch\n([\s\S]*?)^```/gm)]
+    const blocks = [...text.matchAll(/^```skeudo\n([\s\S]*?)^```/gm)]
       .map((m) => m[1])
       .filter((b) => b.trim() !== '...');
 

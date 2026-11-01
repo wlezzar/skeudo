@@ -39,7 +39,7 @@ const DOC = [
   '',
   'Reads `::read:redis` first.',
   '',
-  '```sketch',
+  '```skeudo',
   'get_profile(user_id):                    ::src[app/profile.py:12-24]',
   '    cached = cache.get(user_id)          ::read:redis ::src[13]',
   '    row = load_user(user_id)             ::read:postgres.users',
@@ -82,6 +82,10 @@ describe('Markdown preview', () => {
     expect(html).toContain('<pre><code data-line="11" class="code-line language-python">');
   });
 
+  test('renders the sketch fences of documents written before the rename', () => {
+    expect(preview().render('```sketch\nget_profile(user_id):\n    ::read:redis\n```\n')).toContain('data-sketch');
+  });
+
   test('keeps the source line on the sketch, so the preview can scroll to it', () => {
     expect(preview().render(DOC)).toMatch(/<div data-line="4" class="code-line"><div class="sketch[^"]*"/);
   });
@@ -93,16 +97,16 @@ describe('Markdown preview', () => {
   });
 
   test('applies the settings, and refreshes the preview when they change', () => {
-    vscode.state.settings['sketch.labelKinds'] = ['untrusted', 'secret'];
+    vscode.state.settings['skeudo.labelKinds'] = ['untrusted', 'secret'];
     const md = preview();
     expect(md.render(DOC)).not.toContain('--sk-c:#8b5cf6');
 
-    vscode.changeSetting('sketch.kindColors', { todo: '#8b5cf6' });
+    vscode.changeSetting('skeudo.kindColors', { todo: '#8b5cf6' });
     expect(vscode.commands.executeCommand).toHaveBeenCalledWith('markdown.preview.refresh');
     expect(md.render(DOC)).toContain('--sk-c:#8b5cf6');
 
-    vscode.changeSetting('sketch.labelKinds', ['pii']);
-    expect(md.render('```sketch\nf(x):    ::pii:x\n    g(x)\n```\n')).toContain('sk-lbl-pii');
+    vscode.changeSetting('skeudo.labelKinds', ['pii']);
+    expect(md.render('```skeudo\nf(x):    ::pii:x\n    g(x)\n```\n')).toContain('sk-lbl-pii');
   });
 
   test('ignores changes to other settings', () => {
@@ -148,7 +152,7 @@ describe('language configuration', () => {
 describe('build', () => {
   let out: string;
   beforeAll(async () => {
-    out = await mkdtemp(join(tmpdir(), 'sketch-vscode-'));
+    out = await mkdtemp(join(tmpdir(), 'skeudo-vscode-'));
     await build(out);
   });
   afterAll(() => rm(out, { recursive: true, force: true }));

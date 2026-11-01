@@ -1,4 +1,4 @@
-/* Sketch renderer styles. Colors follow the spec: violet, blue, aqua, orange, red, plus amber for dangers
+/* Skeudo renderer styles. Colors follow the spec: violet, blue, aqua, orange, red, plus amber for dangers
    and green, blue and red for changes. */
 
 :root {
@@ -354,7 +354,7 @@ a.sk-call:hover { text-decoration-style: solid; }
 }
 a.sk-file:hover { color: var(--sk-blue); text-decoration: underline; }
 
-/* Inline code made only of tags, as rendered by markdown-it-sketch.
+/* Inline code made only of tags, as rendered by markdown-it-skeudo.
    The doubled class outranks host rules such as `.markdown-body code`. */
 code.sk-inline.sk-inline {
   background: none;

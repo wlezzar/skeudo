@@ -1,4 +1,4 @@
-import { frontMatter } from 'markdown-it-sketch';
+import { frontMatter } from 'markdown-it-skeudo';
 import spec from '../../../spec/spec.md?raw';
 
 export interface Example {
@@ -145,7 +145,7 @@ const prComment = `### Review: \`book_trip\` after #482
 
 The new payment step looks right, but one write has no failure path:
 
-\`\`\`sketch
+\`\`\`skeudo
 book_trip(trip, card):
     seat = hold_seat(trip.flight)           ::write:airline-api
     room = reserve_room(trip.hotel)         ::write:hotel-api
@@ -165,7 +165,7 @@ book_trip(trip, card):
 
 Suggested shape:
 
-\`\`\`sketch
+\`\`\`skeudo
     save_booking(trip, seat, room)          ::write:postgres.bookings
     if that fails:
         refund(card, trip.total)            ::write:stripe

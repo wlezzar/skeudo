@@ -1,16 +1,16 @@
-# Sketch: readable pseudocode for code review
+# Skeudo: readable pseudocode for code review
 
-Oct 22, 2026 · updated Oct 31, 2026 · @Walid Lezzar
+Oct 22, 2026 · updated Nov 1, 2026 · @Walid Lezzar
 
 ## Purpose and core contract
 
-Sketch is a pseudocode format for reviewing code. Logic is written freely, and every interaction with the outside world is marked so a reviewer can find it at a glance.
+Skeudo is a pseudocode format for reviewing code. Logic is written freely, and every interaction with the outside world is marked so a reviewer can find it at a glance.
 
 The core contract is **loose about logic, strict about effects**. A sketch may merge, reorder or drop internal steps such as loops, mapping, null checks and logging. It may never hide, merge or reorder an effect, meaning anything that reads or changes state outside the running process.
 
 Three principles keep the format small. **Free words:** there is no keyword list; block headers, conditions and summaries use whatever words fit. **One marker form:** anything the tool should highlight or parse, beyond calls and bindings, is written as a `::kind:value` tag, with no shorthands. **One extension point:** a new kind is just a new tag, so it needs no change to the grammar, and a renderer can give it its own color.
 
-Sketches live in fenced code blocks tagged `sketch`, so any editor or chat client with the grammar installed can highlight them.
+Sketches live in fenced code blocks tagged `skeudo`, so any editor or chat client with the grammar installed can highlight them. Renderers also accept `sketch`, the format's former working name.
 
 ## Line structure
 
@@ -28,7 +28,7 @@ A sketch is a list of lines nested by indentation. Each line mixes free prose an
 
 Indentation must be consistent within a sketch, at 2 or 4 spaces per level. The first indented line sets the unit, and a tab counts as 4 spaces. A sketch indented as a whole, such as one nested in a list item, keeps its shape. By convention, a plain-language summary of the function's purpose may follow the signature.
 
-```sketch
+```skeudo
 get_profile(user_id):
     cached = cache.get(user_id)    ::read:redis[lookup by key]
     if cached:
@@ -95,7 +95,7 @@ Without a value, `::src` gives the source of the line it sits on, as in `::src[a
 
 With a call name as its value, `::src` gives that call's definition, as in `::src:load_user[app/users.py:88]`. It applies to every call of that name in the sketch, wherever the tag sits. By convention these tags go at the end of the sketch.
 
-```sketch
+```skeudo
 get_profile(user_id):                    ::src[app/profile.py:12-24]
     cached = cache.get(user_id)          ::read:redis[lookup by key] ::src[13]
     if cached:
@@ -154,7 +154,7 @@ A removed line stays where the behavior used to run, and keeps its effect tags. 
 
 By convention, change tags follow a line's effect tags and come before its `::src` tags. In a sketch of a change, `::src` locations refer to the code after the change.
 
-```sketch
+```skeudo
 cancel_order(order_id):
     order = load_order(order_id)            ::read:postgres.orders[lookup by key]
     if order is shipped:
@@ -277,7 +277,7 @@ Each example below surfaces at least one issue a reviewer would catch from the s
 
 ### Signup: labels and conditional writes
 
-```sketch
+```skeudo
 signup(request):
     body = request.json()                 ::untrusted:body
     if body.email is malformed:
@@ -295,7 +295,7 @@ The untrusted `body` flows into the log write, so the plain-text password gets l
 
 ### Order search: access patterns
 
-```sketch
+```skeudo
 search_orders(user_id, term):
     user = get_user(user_id)          ::read:postgres.users[lookup by key]
     orders = recent_orders(user)      ::read:postgres.orders[range on created_at]
@@ -310,7 +310,7 @@ The notes say how each query touches the table, in the author's own words. `get_
 
 ### Trip booking: failure blocks
 
-```sketch
+```skeudo
 book_trip(trip, card):
     seat = hold_seat(trip.flight)           ::write:airline-api
     room = reserve_room(trip.hotel)         ::write:hotel-api
@@ -329,7 +329,7 @@ The final write has no failure block. If saving fails after the charge succeeds,
 
 ### Agent loop: effects decided at runtime
 
-```sketch
+```skeudo
 run_agent(task):
     messages = [task]
     repeat up to 20 turns:
@@ -371,6 +371,7 @@ These changes make the format consistent with what was sketched in discussion, a
 | Label colors | Not specified | Pink for untrusted, purple for secret | The two labels stay distinct from each other and from effects |
 | Problems in a sketch | Not specified | Warnings on the line; a sketch always renders | A half-written sketch is still worth reading |
 | Changes | Not designed; sketches of commits used provisional `::new`, `::changed` and `::removed` tags | The three tags are defined. New and removed cover their block, and removed effects stay visible but don't count | Commits and pull requests are what gets sketched most, and tags need no grammar change |
+| Format name | "Sketch" was a working name, with `` ```sketch `` fences and `.sketch` files | Skeudo, with `` ```skeudo `` fences (`` ```sketch `` still accepted) and `.skeudo` files | `.sketch` belongs to the Sketch design app, and "sketch" alone is a common word other tools also use |
 
 | Open question | Current default |
 | --- | --- |
@@ -379,4 +380,3 @@ These changes make the format consistent with what was sketched in discussion, a
 | Whether model calls need their own kind, for cost and nondeterminism | Treated as reads |
 | Whether shorthands such as `->sys` come back as sugar for tags | Tags only |
 | Whether labels follow bindings, so `user = find(body.email)` makes `user` untrusted | No; the author labels a derived value explicitly |
-| A final name for the format | "Sketch" is a working name |

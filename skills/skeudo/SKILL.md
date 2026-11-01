@@ -1,9 +1,9 @@
 ---
-name: sketch
-description: Write a Sketch, readable pseudocode for code review where every outside effect is tagged, for a function, a file, a commit or a pull request. Use when the user asks to "sketch" code, to explain a commit, PR or flow as pseudocode, or for a reviewable summary of what code reads and writes (databases, APIs, storage, queues, devices).
+name: skeudo
+description: Write a Skeudo sketch, readable pseudocode for code review where every outside effect is tagged, for a function, a file, a commit or a pull request. Use when the user asks to "sketch" code, to explain a commit, PR or flow as pseudocode, or for a reviewable summary of what code reads and writes (databases, APIs, storage, queues, devices).
 ---
 
-# Sketch
+# Skeudo
 
 A sketch is pseudocode for code review. Logic is written freely; every interaction with the outside world is tagged so a reviewer finds it at a glance.
 
@@ -11,7 +11,7 @@ The contract: **loose about logic, strict about effects.** You may merge, reorde
 
 ## Syntax
 
-Sketches go in fenced code blocks tagged `sketch`. Lines nest by indentation, 4 spaces per level.
+Sketches go in fenced code blocks tagged `skeudo`. Lines nest by indentation, 4 spaces per level.
 
 | Element | Form | Notes |
 | --- | --- | --- |
@@ -85,7 +85,7 @@ Return a Markdown document:
 
 <one sentence of context>
 
-```sketch
+```skeudo
 ...
 ```
 
@@ -94,7 +94,7 @@ Return a Markdown document:
 - <issue or question, pointing at the line that shows it>
 ````
 
-Each item in the last section should be something the sketches make visible: an effect without a failure path, an order of writes that can leave state inconsistent, labeled data reaching a log, a missing idempotency key, an assumption nothing enforces. Say "probably" when you haven't verified it. If the user wants to see it rendered, save the document as a `.md` file; the Sketch playground and VS Code's Markdown preview, with the Sketch extension, render Markdown with sketch fences, and `skeudo render doc.md -o doc.html` writes a standalone HTML page.
+Each item in the last section should be something the sketches make visible: an effect without a failure path, an order of writes that can leave state inconsistent, labeled data reaching a log, a missing idempotency key, an assumption nothing enforces. Say "probably" when you haven't verified it. If the user wants to see it rendered, save the document as a `.md` file; the Skeudo playground and VS Code's Markdown preview, with the Skeudo extension, render Markdown with skeudo fences, and `skeudo render doc.md -o doc.html` writes a standalone HTML page.
 
 ## Checklist
 
@@ -108,7 +108,7 @@ Each item in the last section should be something the sketches make visible: an 
 
 ## Example
 
-```sketch
+```skeudo
 get_profile(user_id):                    ::src[app/profile.py:12-24]
     Returns a user's profile, cached for 5 minutes.
     cached = cache.get(user_id)          ::read:redis[lookup by key] ::src[13]

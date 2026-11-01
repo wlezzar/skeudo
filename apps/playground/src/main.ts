@@ -1,8 +1,8 @@
 import markdownit, { type MarkdownIt } from 'markdown-it';
-import { analyze, formatLocation, parse, parseTagsOnly, type Review, type Sketch } from '@sketch/core';
-import { enhance, escapeHtml as esc, srcBaseHref, tagHtml, toHtml, type HtmlOptions } from '@sketch/html';
-import markdownItSketch, { sketchFences } from 'markdown-it-sketch';
-import '@sketch/html/sketch.css';
+import { analyze, formatLocation, parse, parseTagsOnly, type Review, type Sketch } from '@skeudo/core';
+import { enhance, escapeHtml as esc, srcBaseHref, tagHtml, toHtml, type HtmlOptions } from '@skeudo/html';
+import markdownItSkeudo, { FENCE_LANGS, sketchFences } from 'markdown-it-skeudo';
+import '@skeudo/html/sketch.css';
 import './style.css';
 import { examples } from './examples';
 
@@ -21,14 +21,14 @@ const reviewCount = $<HTMLSpanElement>('#review-count');
 const store = {
   get(key: string): string | null {
     try {
-      return localStorage.getItem(`sketch-playground:${key}`);
+      return localStorage.getItem(`skeudo-playground:${key}`);
     } catch {
       return null;
     }
   },
   set(key: string, value: string) {
     try {
-      localStorage.setItem(`sketch-playground:${key}`, value);
+      localStorage.setItem(`skeudo-playground:${key}`, value);
     } catch {
       /* storage unavailable */
     }
@@ -57,12 +57,15 @@ function htmlOptions(): HtmlOptions {
 }
 
 function makeMarkdown(opts: HtmlOptions): MarkdownIt {
-  return markdownit({ html: false, linkify: true }).use(markdownItSketch, opts);
+  return markdownit({ html: false, linkify: true }).use(markdownItSkeudo, opts);
 }
+
+// A fence of a sketch, in any of the fence languages the plugin renders.
+const SKETCH_FENCE = new RegExp(`^\\s*(\`\`\`|~~~)\\s*(${FENCE_LANGS.join('|')})\\b`, 'm');
 
 function detectMode(source: string): 'sketch' | 'markdown' {
   if (modeSelect.value === 'sketch' || modeSelect.value === 'markdown') return modeSelect.value;
-  return /^\s*(```|~~~)\s*sketch\b/m.test(source) || /^#{1,6}\s/m.test(source) ? 'markdown' : 'sketch';
+  return SKETCH_FENCE.test(source) || /^#{1,6}\s/m.test(source) ? 'markdown' : 'sketch';
 }
 
 // ---------- Legend ----------
@@ -98,7 +101,7 @@ interface Parsed {
 }
 
 function reviewHtml(items: Parsed[], markdown: boolean): string {
-  if (!items.length) return `<p class="empty">No sketches found. In Markdown mode, put sketches in <code>\`\`\`sketch</code> fences.</p>`;
+  if (!items.length) return `<p class="empty">No sketches found. In Markdown mode, put sketches in <code>\`\`\`skeudo</code> fences.</p>`;
   return items.map((item, index) => reviewSection(item, index, markdown)).join('');
 }
 

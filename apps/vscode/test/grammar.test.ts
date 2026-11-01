@@ -3,7 +3,8 @@ import { globSync, readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { parse, type Sketch, type SketchLine } from '@sketch/core';
+import { parse, type Sketch, type SketchLine } from '@skeudo/core';
+import { FENCE_LANGS } from 'markdown-it-skeudo';
 import { OnigScanner, OnigString, loadWASM } from 'vscode-oniguruma';
 import { INITIAL, Registry, type IGrammar, type IRawGrammar } from 'vscode-textmate';
 import { beforeAll, describe, expect, test } from 'vitest';
@@ -14,8 +15,8 @@ const require = createRequire(import.meta.url);
 
 // VS Code's tokenizer, with VS Code's Markdown grammar.
 const GRAMMARS: Record<string, unknown> = {
-  'source.sketch': sketchGrammar,
-  'markdown.sketch.codeblock': markdownInjection,
+  'source.skeudo': sketchGrammar,
+  'markdown.skeudo.codeblock': markdownInjection,
   'text.html.markdown': JSON.parse(readFileSync(new URL('grammars/markdown.tmLanguage.json', import.meta.url), 'utf8')),
 };
 const onigLib = Promise.resolve({ createOnigScanner: (p: string[]) => new OnigScanner(p), createOnigString: (s: string) => new OnigString(s) });
@@ -29,9 +30,9 @@ beforeAll(async () => {
   const registry = new Registry({
     onigLib,
     loadGrammar,
-    getInjections: (scope) => (scope === 'text.html.markdown' ? ['markdown.sketch.codeblock'] : undefined),
+    getInjections: (scope) => (scope === 'text.html.markdown' ? ['markdown.skeudo.codeblock'] : undefined),
   });
-  sketchTm = (await registry.loadGrammar('source.sketch'))!;
+  sketchTm = (await registry.loadGrammar('source.skeudo'))!;
   markdownTm = (await registry.loadGrammar('text.html.markdown'))!;
 });
 
@@ -143,17 +144,17 @@ function allowedDifferences(sketch: Sketch, line: SketchLine, raw: string, marks
 }
 
 const docSketches = (doc: string) =>
-  [...readFileSync(join(ROOT, doc), 'utf8').matchAll(/^```sketch\n([\s\S]*?)^```/gm)]
+  [...readFileSync(join(ROOT, doc), 'utf8').matchAll(/^```skeudo\n([\s\S]*?)^```/gm)]
     .map((m) => m[1].replace(/\n$/, ''))
     .filter((b) => b.trim() !== '...')
     .map((source, i) => ({ name: `${doc} #${i + 1}`, source }));
 
 const SKETCHES = [
-  ...globSync('**/*.sketch', { cwd: join(ROOT, 'spec/fixtures') })
+  ...globSync('**/*.skeudo', { cwd: join(ROOT, 'spec/fixtures') })
     .sort()
     .map((name) => ({ name, source: readFileSync(join(ROOT, 'spec/fixtures', name), 'utf8').replace(/\n$/, '') })),
   ...docSketches('spec/spec.md'),
-  ...docSketches('skills/sketch/SKILL.md'),
+  ...docSketches('skills/skeudo/SKILL.md'),
 ];
 
 describe('agrees with the parser', () => {
@@ -183,77 +184,77 @@ describe('agrees with the parser', () => {
 
 describe('scopes', () => {
   test.each([
-    ['::read:redis', 'support.type.read.sketch'],
-    ['::write:redis', 'entity.name.write.sketch'],
-    ['::fail:NotFound', 'invalid.fail.sketch'],
-    ['::untrusted:body', 'variable.other.constant.untrusted.sketch'],
-    ['::secret:token', 'variable.other.constant.secret.sketch'],
-    ['::danger[shared]', 'markup.bold.danger.sketch'],
-    ['::new', 'markup.inserted.new.sketch'],
-    ['::changed[was x]', 'markup.changed.sketch'],
-    ['::removed', 'markup.deleted.removed.sketch'],
-    ['::src[app/a.py:3]', 'comment.src.sketch'],
-    ['::todo[ask]', 'entity.name.label.todo.sketch'],
-    ['::unsure[maybe]', 'entity.name.label.unsure.sketch'],
+    ['::read:redis', 'support.type.read.skeudo'],
+    ['::write:redis', 'entity.name.write.skeudo'],
+    ['::fail:NotFound', 'invalid.fail.skeudo'],
+    ['::untrusted:body', 'variable.other.constant.untrusted.skeudo'],
+    ['::secret:token', 'variable.other.constant.secret.skeudo'],
+    ['::danger[shared]', 'markup.bold.danger.skeudo'],
+    ['::new', 'markup.inserted.new.skeudo'],
+    ['::changed[was x]', 'markup.changed.skeudo'],
+    ['::removed', 'markup.deleted.removed.skeudo'],
+    ['::src[app/a.py:3]', 'comment.src.skeudo'],
+    ['::todo[ask]', 'entity.name.label.todo.skeudo'],
+    ['::unsure[maybe]', 'entity.name.label.unsure.skeudo'],
   ])('%s', (tag, scope) => {
     expect(sketchScopes(`x  ${tag}`, tag)).toContain(scope);
   });
 
   test('a write is orange in themes that color entity names, and like a string in those that do not', () => {
     expect(sketchScopes('x  ::write:redis', 'write')).toEqual(
-      expect.arrayContaining(['meta.tag.write.sketch', 'string.other.write.sketch', 'entity.name.write.sketch']),
+      expect.arrayContaining(['meta.tag.write.skeudo', 'string.other.write.skeudo', 'entity.name.write.skeudo']),
     );
   });
 
   test('a tag of a longer kind is not the shorter kind', () => {
-    expect(sketchScopes('x  ::reader:redis', 'reader')).toContain('entity.name.label.reader.sketch');
+    expect(sketchScopes('x  ::reader:redis', 'reader')).toContain('entity.name.label.reader.skeudo');
   });
 
   test('notes are muted, unless they flag a danger', () => {
     const source = 'x  ::read:pg[lookup by key] ::write:stripe[!no key]';
-    expect(sketchScopes(source, 'lookup')).toContain('comment.note.sketch');
-    expect(sketchScopes(source, 'no key')).toEqual(expect.arrayContaining(['markup.bold.danger.sketch', 'constant.character.escape.danger.sketch']));
-    expect(sketchScopes(source, '!no')).toContain('punctuation.definition.danger.sketch');
+    expect(sketchScopes(source, 'lookup')).toContain('comment.note.skeudo');
+    expect(sketchScopes(source, 'no key')).toEqual(expect.arrayContaining(['markup.bold.danger.skeudo', 'constant.character.escape.danger.skeudo']));
+    expect(sketchScopes(source, '!no')).toContain('punctuation.definition.danger.skeudo');
   });
 
   test('::src locations are underlined like links', () => {
-    expect(sketchScopes('x  ::src:load[app/users.py:88]', 'app/')).toEqual(expect.arrayContaining(['comment.src.sketch', 'markup.underline.link.sketch']));
+    expect(sketchScopes('x  ::src:load[app/users.py:88]', 'app/')).toEqual(expect.arrayContaining(['comment.src.skeudo', 'markup.underline.link.skeudo']));
   });
 
   test('modifiers and the runtime system', () => {
     const source = 'run(call)  ::write?~:*';
-    expect(sketchScopes(source, '?')).toEqual(expect.arrayContaining(['entity.name.write.sketch', 'storage.modifier.conditional.sketch']));
-    expect(sketchScopes(source, '~')).toContain('storage.modifier.unverified.sketch');
-    expect(sketchScopes(source, '*')).toEqual(expect.arrayContaining(['entity.name.write.sketch', 'constant.language.wildcard.sketch']));
+    expect(sketchScopes(source, '?')).toEqual(expect.arrayContaining(['entity.name.write.skeudo', 'storage.modifier.conditional.skeudo']));
+    expect(sketchScopes(source, '~')).toContain('storage.modifier.unverified.skeudo');
+    expect(sketchScopes(source, '*')).toEqual(expect.arrayContaining(['entity.name.write.skeudo', 'constant.language.wildcard.skeudo']));
   });
 
   test('the signature, its parameters, bindings, calls and first words', () => {
     const source = ['get_profile(mut user_id: int = 1):', '    cached = cache.get(user_id)', '    if cached:'].join('\n');
-    expect(sketchScopes(source, 'get_profile')).toEqual(['source.sketch', 'meta.function.signature.sketch', 'entity.name.function.sketch']);
-    expect(sketchScopes(source, 'mut')).toContain('storage.modifier.sketch');
-    expect(sketchScopes(source, 'user_id:')).toContain('variable.parameter.sketch');
-    expect(sketchScopes(source, 'int')).not.toContain('variable.parameter.sketch');
-    expect(sketchScopes(source, 'cached =')).toContain('entity.name.variable.sketch');
-    expect(sketchScopes(source, 'cache.get')).toEqual(expect.arrayContaining(['meta.function-call.sketch', 'entity.name.function.sketch']));
-    expect(sketchScopes(source, '.get')).toContain('punctuation.accessor.sketch');
-    expect(sketchScopes(source, 'if')).toContain('keyword.control.first-word.sketch');
+    expect(sketchScopes(source, 'get_profile')).toEqual(['source.skeudo', 'meta.function.signature.skeudo', 'entity.name.function.skeudo']);
+    expect(sketchScopes(source, 'mut')).toContain('storage.modifier.skeudo');
+    expect(sketchScopes(source, 'user_id:')).toContain('variable.parameter.skeudo');
+    expect(sketchScopes(source, 'int')).not.toContain('variable.parameter.skeudo');
+    expect(sketchScopes(source, 'cached =')).toContain('entity.name.variable.skeudo');
+    expect(sketchScopes(source, 'cache.get')).toEqual(expect.arrayContaining(['meta.function-call.skeudo', 'entity.name.function.skeudo']));
+    expect(sketchScopes(source, '.get')).toContain('punctuation.accessor.skeudo');
+    expect(sketchScopes(source, 'if')).toContain('keyword.control.first-word.skeudo');
   });
 
   test('finds the signature on the first line only', () => {
     const source = ['first, a prose line', 'cache.set(key):', '    then this'].join('\n');
-    expect(sketchScopes(source, 'cache.set')).toContain('meta.function-call.sketch');
-    expect(sketchScopes(source, 'cache.set')).not.toContain('meta.function.signature.sketch');
-    expect(sketchScopes(source, 'key')).not.toContain('variable.parameter.sketch');
+    expect(sketchScopes(source, 'cache.set')).toContain('meta.function-call.skeudo');
+    expect(sketchScopes(source, 'cache.set')).not.toContain('meta.function.signature.skeudo');
+    expect(sketchScopes(source, 'key')).not.toContain('variable.parameter.skeudo');
   });
 
   test('finds the signature of a sketch indented as a whole, after blank lines', () => {
     const source = ['', '    charge(card, amount):', '        stripe.charges.create(card, amount)'].join('\n');
-    expect(sketchScopes(source, 'charge')).toContain('meta.function.signature.sketch');
-    expect(sketchScopes(source, 'amount)')).toContain('variable.parameter.sketch');
+    expect(sketchScopes(source, 'charge')).toContain('meta.function.signature.skeudo');
+    expect(sketchScopes(source, 'amount)')).toContain('variable.parameter.skeudo');
   });
 
   test('takes the first word of a sketch indented as a whole', () => {
-    expect(sketchScopes('    When a webhook arrives:', 'When')).toContain('keyword.control.first-word.sketch');
+    expect(sketchScopes('    When a webhook arrives:', 'When')).toContain('keyword.control.first-word.skeudo');
   });
 });
 
@@ -270,7 +271,7 @@ describe('in a theme', () => {
         ],
       },
     });
-    const grammar = (await registry.loadGrammar('source.sketch'))!;
+    const grammar = (await registry.loadGrammar('source.skeudo'))!;
     const { tokens } = grammar.tokenizeLine2(source, INITIAL);
     const colorMap = registry.getColorMap();
     const out: Record<string, string> = {};
@@ -292,7 +293,7 @@ describe('in a theme', () => {
   });
 
   test('a rule for the scope the README gives recolors the head of a tag, not its note', async () => {
-    const theme = { string: '#ce9178', 'entity.name': '#ffa657', comment: '#6a9955', 'entity.name.write.sketch': '#c2410c' };
+    const theme = { string: '#ce9178', 'entity.name': '#ffa657', comment: '#6a9955', 'entity.name.write.skeudo': '#c2410c' };
     expect(await colors('x  ::write?:redis[5 min ttl]', theme)).toEqual({ x: '#000000', '::write?:redis': '#c2410c', '[5 min ttl]': '#6a9955' });
   });
 });
@@ -305,7 +306,7 @@ describe('in Markdown', () => {
     '',
     'Reads `::read:redis` first.',
     '',
-    '```sketch', // 5
+    '```skeudo', // 5
     'get_profile(user_id):                    ::src[app/profile.py:12-24]',
     '    cached = cache.get(user_id)          ::read:redis',
     '```',
@@ -316,13 +317,13 @@ describe('in Markdown', () => {
     '',
     '- a list item:',
     '', // 15
-    '  ~~~~sketch title="refresh"',
+    '  ~~~~skeudo title="refresh"',
     '  refresh(token):',
     '      ::write:oauth',
     '  ~~~~',
     '', // 20
     '````text',
-    '```sketch',
+    '```skeudo',
     'not(a): sketch',
     '```',
     '````', // 25
@@ -345,41 +346,54 @@ describe('in Markdown', () => {
 
   test('embeds a sketch in a sketch fence', () => {
     expect(at(5, '```')).toEqual(['text.html.markdown', 'markup.fenced_code.block.markdown', 'punctuation.definition.markdown']);
-    expect(at(5, 'sketch')).toContain('fenced_code.block.language.markdown');
+    expect(at(5, 'skeudo')).toContain('fenced_code.block.language.markdown');
     expect(at(6, 'get_profile')).toEqual([
       'text.html.markdown',
       'markup.fenced_code.block.markdown',
-      'meta.embedded.block.sketch',
-      'meta.function.signature.sketch',
-      'entity.name.function.sketch',
+      'meta.embedded.block.skeudo',
+      'meta.function.signature.skeudo',
+      'entity.name.function.skeudo',
     ]);
-    expect(at(7, '::read')).toContain('support.type.read.sketch');
+    expect(at(7, '::read')).toContain('support.type.read.skeudo');
+  });
+
+  test('embeds the sketch fences of documents written before the rename', () => {
+    expect(at(27, 'sketch')).toContain('fenced_code.block.language.markdown');
+    expect(at(28, 'a prose line')).toContain('meta.embedded.block.skeudo');
+  });
+
+  test('embeds every fence language the markdown-it plugin renders', () => {
+    for (const lang of FENCE_LANGS) {
+      const [fence, code] = tokenize(markdownTm, `\`\`\`${lang}\nf(x):\n\`\`\`\n`);
+      expect(fence.find((t) => t.text === lang)?.scopes).toContain('fenced_code.block.language.markdown');
+      expect(code.flatMap((t) => t.scopes)).toContain('meta.embedded.block.skeudo');
+    }
   });
 
   test('ends the sketch at the closing fence', () => {
     expect(at(8, '```')).toEqual(['text.html.markdown', 'markup.fenced_code.block.markdown', 'punctuation.definition.markdown']);
-    expect(at(31, 'x = y').join(' ')).not.toContain('sketch');
+    expect(at(31, 'x = y').join(' ')).not.toContain('skeudo');
   });
 
   test('leaves other fences and inline code alone', () => {
-    expect(at(3, '::read').join(' ')).not.toContain('sketch');
-    expect(at(11, '::read').join(' ')).not.toContain('sketch');
+    expect(at(3, '::read').join(' ')).not.toContain('skeudo');
+    expect(at(11, '::read').join(' ')).not.toContain('skeudo');
   });
 
   test('embeds an indented tilde fence with attributes, in a list item', () => {
     expect(at(16, 'title')).toContain('fenced_code.block.language.attributes.markdown');
-    expect(at(17, 'refresh')).toContain('meta.function.signature.sketch');
-    expect(at(18, '::write')).toContain('entity.name.write.sketch');
+    expect(at(17, 'refresh')).toContain('meta.function.signature.skeudo');
+    expect(at(18, '::write')).toContain('entity.name.write.skeudo');
     expect(at(19, '~~~~')).toContain('punctuation.definition.markdown');
   });
 
   test('leaves a sketch fence inside another code block alone', () => {
-    expect(at(23, 'not').join(' ')).not.toContain('sketch');
+    expect(at(23, 'not').join(' ')).not.toContain('skeudo');
   });
 
   test('finds the signature on the first line of each fence only', () => {
-    expect(at(28, 'a')).toContain('keyword.control.first-word.sketch');
-    expect(at(29, 'b(')).toContain('meta.function-call.sketch');
-    expect(at(29, 'b(')).not.toContain('meta.function.signature.sketch');
+    expect(at(28, 'a')).toContain('keyword.control.first-word.skeudo');
+    expect(at(29, 'b(')).toContain('meta.function-call.skeudo');
+    expect(at(29, 'b(')).not.toContain('meta.function.signature.skeudo');
   });
 });

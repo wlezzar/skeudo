@@ -1,7 +1,7 @@
 {
-  "name": "sketch",
-  "displayName": "Sketch",
-  "description": "Highlights sketches in .sketch files and Markdown fences, and renders them in the Markdown preview: pseudocode for code review, with every outside effect tagged.",
+  "name": "skeudo-vscode",
+  "displayName": "Skeudo",
+  "description": "Highlights sketches in .skeudo files and Markdown fences, and renders them in the Markdown preview: pseudocode for code review, with every outside effect tagged.",
   "version": "0.0.1",
   "private": true,
   "publisher": "skeudo",
@@ -29,8 +29,8 @@
     "dist/extension.js",
     "dist/preview.js",
     "dist/sketch.css",
-    "dist/sketch.tmLanguage.json",
-    "dist/markdown-sketch.tmLanguage.json",
+    "dist/skeudo.tmLanguage.json",
+    "dist/markdown-skeudo.tmLanguage.json",
     "language-configuration.json",
     "README.md"
   ],
@@ -44,37 +44,37 @@
     ],
     "languages": [
       {
-        "id": "sketch",
+        "id": "skeudo",
         "aliases": [
-          "Sketch"
+          "Skeudo"
         ],
         "extensions": [
-          ".sketch"
+          ".skeudo"
         ],
         "configuration": "./language-configuration.json"
       }
     ],
     "grammars": [
       {
-        "language": "sketch",
-        "scopeName": "source.sketch",
-        "path": "./dist/sketch.tmLanguage.json"
+        "language": "skeudo",
+        "scopeName": "source.skeudo",
+        "path": "./dist/skeudo.tmLanguage.json"
       },
       {
-        "scopeName": "markdown.sketch.codeblock",
-        "path": "./dist/markdown-sketch.tmLanguage.json",
+        "scopeName": "markdown.skeudo.codeblock",
+        "path": "./dist/markdown-skeudo.tmLanguage.json",
         "injectTo": [
           "text.html.markdown"
         ],
         "embeddedLanguages": {
-          "meta.embedded.block.sketch": "sketch"
+          "meta.embedded.block.skeudo": "skeudo"
         }
       }
     ],
     "configuration": {
-      "title": "Sketch",
+      "title": "Skeudo",
       "properties": {
-        "sketch.labelKinds": {
+        "skeudo.labelKinds": {
           "type": "array",
           "items": {
             "type": "string"
@@ -85,7 +85,7 @@
           ],
           "markdownDescription": "Tag kinds whose value labels a variable, as `::untrusted:body` labels `body`. Every later use of a labeled variable is marked."
         },
-        "sketch.kindColors": {
+        "skeudo.kindColors": {
           "type": "object",
           "additionalProperties": {
             "type": "string"
@@ -101,13 +101,13 @@
     "package": "node build.mts && vsce package --no-dependencies --skip-license"
   },
   "devDependencies": {
-    "@sketch/core": "workspace:*",
-    "@sketch/html": "workspace:*",
+    "@skeudo/core": "workspace:*",
+    "@skeudo/html": "workspace:*",
     "@types/vscode": "1.95.0",
     "@vscode/vsce": "4.0.0",
     "esbuild": "0.28.2",
     "markdown-it": "^15.0.3",
-    "markdown-it-sketch": "workspace:*",
+    "markdown-it-skeudo": "workspace:*",
     "vscode-oniguruma": "2.0.1",
     "vscode-textmate": "9.3.2"
   }

@@ -1,6 +1,6 @@
 /**
- * TextMate grammars for sketches: `source.sketch` for .sketch files, and an injection that embeds it in
- * Markdown's ```sketch fences. The build writes them to dist/ as JSON.
+ * TextMate grammars for sketches: `source.skeudo` for .skeudo files, and an injection that embeds it in
+ * Markdown's ```skeudo fences, and the ```sketch fences older documents use. The build writes them to dist/ as JSON.
  *
  * TextMate grammars match one line at a time with regular expressions, so this follows the parser
  * (packages/core/src/parse.ts) as far as that allows, with two gaps:
@@ -32,7 +32,7 @@ const LINE_START = String.raw`(?:^|\G)\s*`;
 const NEVER = String.raw`(?!)`;
 
 /** Bold, in the color themes give escape sequences: amber in dark themes, red in light ones. */
-const DANGER = 'markup.bold.danger.sketch constant.character.escape.danger.sketch';
+const DANGER = 'markup.bold.danger.skeudo constant.character.escape.danger.skeudo';
 
 interface Family {
   /** Tag kinds, or undefined for any kind no other family takes. */
@@ -46,42 +46,42 @@ interface Family {
 }
 
 const FAMILIES: Record<string, Family> = {
-  read: { kinds: ['read'], head: 'support.type.read.sketch' },
+  read: { kinds: ['read'], head: 'support.type.read.skeudo' },
   // Orange in VS Code's 2026 themes through `entity.name`, which the older default themes don't color,
   // so they fall back to `string`, which they color orange.
-  write: { kinds: ['write'], head: 'string.other.write.sketch entity.name.write.sketch' },
-  fail: { kinds: ['fail'], head: 'invalid.fail.sketch' },
-  label: { kinds: ['untrusted', 'secret'], head: 'variable.other.constant.$kind.sketch markup.underline.$kind.sketch' },
+  write: { kinds: ['write'], head: 'string.other.write.skeudo entity.name.write.skeudo' },
+  fail: { kinds: ['fail'], head: 'invalid.fail.skeudo' },
+  label: { kinds: ['untrusted', 'secret'], head: 'variable.other.constant.$kind.skeudo markup.underline.$kind.skeudo' },
   danger: { kinds: ['danger'], head: DANGER, note: 'danger' },
-  new: { kinds: ['new'], head: 'markup.inserted.new.sketch' },
-  changed: { kinds: ['changed'], head: 'markup.changed.sketch' },
+  new: { kinds: ['new'], head: 'markup.inserted.new.skeudo' },
+  changed: { kinds: ['changed'], head: 'markup.changed.skeudo' },
   // Themes often color deletions like strings, as they do writes, so it's also struck through.
-  removed: { kinds: ['removed'], head: 'markup.deleted.removed.sketch markup.strikethrough.removed.sketch' },
+  removed: { kinds: ['removed'], head: 'markup.deleted.removed.skeudo markup.strikethrough.removed.skeudo' },
   // Renderers hide ::src tags, so they're muted, with the location underlined like a link.
-  src: { kinds: ['src'], tag: 'comment.src.sketch', note: 'location' },
-  other: { head: 'entity.name.label.$kind.sketch' },
+  src: { kinds: ['src'], tag: 'comment.src.skeudo', note: 'location' },
+  other: { head: 'entity.name.label.$kind.skeudo' },
 };
 
 const MODIFIERS: Rule[] = [
-  { match: String.raw`\?`, name: 'storage.modifier.conditional.sketch' },
-  { match: '~', name: 'storage.modifier.unverified.sketch' },
+  { match: String.raw`\?`, name: 'storage.modifier.conditional.skeudo' },
+  { match: '~', name: 'storage.modifier.unverified.skeudo' },
 ];
 
 /** A note's rules: `[`, an optional `!`, the text and `]`, whose scopes depend on the tag's family. */
 function notePatterns(note: Family['note'] = 'words'): Rule[] {
   const rule = (bang: string, name: string, text?: Rule): Rule => ({
     match: String.raw`(\[)(${bang})([^\]\n]*)(\])`,
-    name: ['meta.note.sketch', name].filter(Boolean).join(' '),
+    name: ['meta.note.skeudo', name].filter(Boolean).join(' '),
     captures: {
-      1: { name: 'punctuation.definition.note.begin.sketch' },
-      2: { name: 'punctuation.definition.danger.sketch' },
+      1: { name: 'punctuation.definition.note.begin.skeudo' },
+      2: { name: 'punctuation.definition.danger.skeudo' },
       ...(text && { 3: text }),
-      4: { name: 'punctuation.definition.note.end.sketch' },
+      4: { name: 'punctuation.definition.note.end.skeudo' },
     },
   });
   if (note === 'danger') return [rule('!?', DANGER)];
-  if (note === 'location') return [rule('', '', { name: 'markup.underline.link.sketch' })];
-  return [rule('!', DANGER), rule('', 'comment.note.sketch')];
+  if (note === 'location') return [rule('', '', { name: 'markup.underline.link.skeudo' })];
+  return [rule('!', DANGER), rule('', 'comment.note.skeudo')];
 }
 
 /** A tag rule for one family. A tag starts at the beginning of a line or after whitespace. */
@@ -90,20 +90,20 @@ function tagRule(family: string, { kinds, head, tag, note }: Family): Rule {
   const headScopes = head?.replaceAll('$kind', '$3') ?? '';
   return {
     match: String.raw`(?<!\S)((::)(${kind})([?~]*+)(?:(:)(${VALUE}))?)(\[[^\]\n]*\])?`,
-    name: [`meta.tag.${family}.sketch`, tag].filter(Boolean).join(' '),
+    name: [`meta.tag.${family}.skeudo`, tag].filter(Boolean).join(' '),
     // A capture with its own patterns loses the scopes of the captures around it, so those repeat the head's.
     captures: {
       1: { name: headScopes },
-      2: { name: 'punctuation.definition.kind.sketch' },
+      2: { name: 'punctuation.definition.kind.skeudo' },
       4: { name: headScopes, patterns: MODIFIERS },
-      5: { name: 'punctuation.separator.value.sketch' },
-      6: { name: `${headScopes} meta.value.sketch`.trim(), patterns: [{ match: String.raw`\*`, name: 'constant.language.wildcard.sketch' }] },
+      5: { name: 'punctuation.separator.value.skeudo' },
+      6: { name: `${headScopes} meta.value.skeudo`.trim(), patterns: [{ match: String.raw`\*`, name: 'constant.language.wildcard.skeudo' }] },
       7: { patterns: notePatterns(note) },
     },
   };
 }
 
-const ACCESSORS: Rule[] = [{ match: String.raw`\.|::`, name: 'punctuation.accessor.sketch' }];
+const ACCESSORS: Rule[] = [{ match: String.raw`\.|::`, name: 'punctuation.accessor.skeudo' }];
 
 /** Brackets inside parameters, whose commas don't separate parameters. */
 const NESTED: Rule[] = [
@@ -124,15 +124,15 @@ const grammarRepository = {
       // Only a plain name binds, so `order.status = paid` and `a == b` are not bindings.
       {
         match: String.raw`${LINE_START}(${IDENT})\s*(=)(?![=>])`,
-        captures: { 1: { name: 'entity.name.variable.sketch' }, 2: { name: 'keyword.operator.assignment.sketch' } },
+        captures: { 1: { name: 'entity.name.variable.skeudo' }, 2: { name: 'keyword.operator.assignment.skeudo' } },
       },
       // The first word of a line, unless it's code: followed by `(`, `.` or `::`.
-      { match: String.raw`${LINE_START}((?>${WORD}))(?!\(|\.|::)`, captures: { 1: { name: 'keyword.control.first-word.sketch' } } },
+      { match: String.raw`${LINE_START}((?>${WORD}))(?!\(|\.|::)`, captures: { 1: { name: 'keyword.control.first-word.skeudo' } } },
       // A call closes its parentheses on the same line.
       {
         match: String.raw`(?<![\p{L}\p{N}_])(${CHAIN})(?=(${PARENS}))`,
-        name: 'meta.function-call.sketch',
-        captures: { 1: { name: 'entity.name.function.sketch', patterns: ACCESSORS } },
+        name: 'meta.function-call.skeudo',
+        captures: { 1: { name: 'entity.name.function.skeudo', patterns: ACCESSORS } },
       },
     ],
   },
@@ -143,16 +143,16 @@ const grammarRepository = {
       // A parameter is the first name after `(` or a comma, so a type or a default after it is ignored.
       {
         match: String.raw`(?<=[(,])\s*(?:(mut|const|let|var|final|readonly)\s+)?[^\p{L}_,()\[\]{}<>]*(${IDENT})`,
-        captures: { 1: { name: 'storage.modifier.sketch' }, 2: { name: 'variable.parameter.sketch' } },
+        captures: { 1: { name: 'storage.modifier.skeudo' }, 2: { name: 'variable.parameter.skeudo' } },
       },
     ],
   },
 };
 
 export const sketchGrammar = {
-  name: 'Sketch',
-  scopeName: 'source.sketch',
-  fileTypes: ['sketch'],
+  name: 'Skeudo',
+  scopeName: 'source.skeudo',
+  fileTypes: ['skeudo'],
   // The first line is either a signature or the start of a signature-less sketch. Both rules run to the
   // end of the sketch, so the signature can only be found on the first line.
   patterns: [
@@ -160,10 +160,10 @@ export const sketchGrammar = {
       begin: String.raw`${LINE_START}(${CHAIN})(\()((?:[^()]|(${PARENS}))*)(\))(?=\s*(?::|$))`,
       // Each capture names the signature, since one with its own patterns loses the scopes of those around it.
       beginCaptures: {
-        1: { name: 'meta.function.signature.sketch entity.name.function.sketch', patterns: ACCESSORS },
-        2: { name: 'meta.function.signature.sketch punctuation.definition.parameters.begin.sketch' },
-        3: { name: 'meta.function.signature.sketch meta.parameters.sketch', patterns: [{ include: '#parameters' }] },
-        5: { name: 'meta.function.signature.sketch punctuation.definition.parameters.end.sketch' },
+        1: { name: 'meta.function.signature.skeudo entity.name.function.skeudo', patterns: ACCESSORS },
+        2: { name: 'meta.function.signature.skeudo punctuation.definition.parameters.begin.skeudo' },
+        3: { name: 'meta.function.signature.skeudo meta.parameters.skeudo', patterns: [{ include: '#parameters' }] },
+        5: { name: 'meta.function.signature.skeudo punctuation.definition.parameters.end.skeudo' },
       },
       end: NEVER,
       patterns: [{ include: '#line' }],
@@ -174,18 +174,18 @@ export const sketchGrammar = {
 };
 
 /**
- * Embeds `source.sketch` in Markdown's ```sketch fences. It copies the shape of the fence rules in VS Code's
+ * Embeds `source.skeudo` in Markdown's ```skeudo and ```sketch fences. It copies the shape of the fence rules in VS Code's
  * Markdown grammar: the `while` rule ends the sketch at the closing fence, even though the sketch's own
- * rules never end.
+ * rules never end. Its fence languages must match FENCE_LANGS in markdown-it-skeudo, which a test checks.
  */
 export const markdownInjection = {
-  scopeName: 'markdown.sketch.codeblock',
-  // L: puts it ahead of Markdown's own rules. It stays out of code, where a ```sketch line is just text.
+  scopeName: 'markdown.skeudo.codeblock',
+  // L: puts it ahead of Markdown's own rules. It stays out of code, where a ```skeudo line is just text.
   injectionSelector: 'L:text.html.markdown -markup.fenced_code -markup.raw -meta.embedded',
   patterns: [{ include: '#sketch-fence' }],
   repository: {
     'sketch-fence': {
-      begin: String.raw`(^|\G)(\s*)(\`{3,}|~{3,})\s*(sketch)(\s+[^\`]*)?$`,
+      begin: String.raw`(^|\G)(\s*)(\`{3,}|~{3,})\s*(skeudo|sketch)(\s+[^\`]*)?$`,
       beginCaptures: {
         3: { name: 'punctuation.definition.markdown' },
         4: { name: 'fenced_code.block.language.markdown' },
@@ -198,8 +198,8 @@ export const markdownInjection = {
         {
           begin: String.raw`(^|\G)(\s*)(.*)`,
           while: String.raw`(^|\G)(?!\s*([\`~]{3,})\s*$)`,
-          contentName: 'meta.embedded.block.sketch',
-          patterns: [{ include: 'source.sketch' }],
+          contentName: 'meta.embedded.block.skeudo',
+          patterns: [{ include: 'source.skeudo' }],
         },
       ],
     },

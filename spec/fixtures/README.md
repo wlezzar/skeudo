@@ -1,6 +1,6 @@
 # Parser fixtures
 
-Each `.sketch` file is an input, and the `.json` file next to it is what the parser must produce for it. Together they pin down the rules in [spec.md](../spec.md), including the cases the spec leaves to the parser.
+Each `.skeudo` file is an input, and the `.json` file next to it is what the parser must produce for it. Together they pin down the rules in [spec.md](../spec.md), including the cases the spec leaves to the parser.
 
 - `examples/` holds the spec's examples, copied word for word.
 - The other folders hold edge cases, grouped by spec section. `warnings/` holds sketches that must produce warnings.
@@ -9,7 +9,7 @@ Each `.sketch` file is an input, and the `.json` file next to it is what the par
 
 The JSON is the parser's AST (`Sketch` in `packages/core/src/types.ts`), with these changes:
 
-- `source` is removed, since it's the `.sketch` file.
+- `source` is removed, since it's the `.skeudo` file.
 - Lines lose `children` and `trailingStart`, which follow from `parent` and the tags' `trailing` flags.
 - Tags lose their `start` and `end` offsets.
 - A tag inside a line's segments is written as `{ "type": "tag", "raw": … }` instead of repeating the whole tag.
@@ -27,6 +27,6 @@ pnpm test        # compare every fixture
 pnpm test -u     # rewrite the .json files after an intended change
 ```
 
-A new `.sketch` file gets its `.json` written the first time the tests run, except in CI. Read it against the spec before committing. The test only checks that the parser keeps doing what it does now, so a wrong `.json` locks a bug in.
+A new `.skeudo` file gets its `.json` written the first time the tests run, except in CI. Read it against the spec before committing. The test only checks that the parser keeps doing what it does now, so a wrong `.json` locks a bug in.
 
-The same test run also checks that every sketch in `spec/spec.md` and `skills/sketch/SKILL.md` parses without warnings.
+The same test run also checks that every sketch in `spec/spec.md` and `skills/skeudo/SKILL.md` parses without warnings.

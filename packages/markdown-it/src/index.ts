@@ -1,17 +1,20 @@
 import type { MarkdownIt } from 'markdown-it';
-import { parseTagsOnly } from '@sketch/core';
-import { tagHtml, toHtml, type HtmlOptions } from '@sketch/html';
+import { parseTagsOnly } from '@skeudo/core';
+import { tagHtml, toHtml, type HtmlOptions } from '@skeudo/html';
 
-export interface SketchPluginOptions extends HtmlOptions {
-  /** Fence languages rendered as sketches. Defaults to `['sketch']`. */
+/** Fence languages that hold a sketch: skeudo, and sketch, the format's working name, which older documents use. */
+export const FENCE_LANGS = ['skeudo', 'sketch'];
+
+export interface SkeudoPluginOptions extends HtmlOptions {
+  /** Fence languages rendered as sketches. Defaults to FENCE_LANGS. */
   langs?: string[];
   /** Render inline code made only of tags, such as `::read:postgres`, as pills. Defaults to true. */
   inlineTags?: boolean;
 }
 
-/** markdown-it plugin: renders ```sketch fences with the Sketch renderer. */
-export default function markdownItSketch(md: MarkdownIt, options: SketchPluginOptions = {}): void {
-  const langs = new Set(options.langs ?? ['sketch']);
+/** markdown-it plugin: renders ```skeudo fences (and ```sketch) with the Skeudo renderer. */
+export default function markdownItSkeudo(md: MarkdownIt, options: SkeudoPluginOptions = {}): void {
+  const langs = new Set(options.langs ?? FENCE_LANGS);
 
   const fence = md.renderer.rules.fence!;
   md.renderer.rules.fence = (tokens, idx, opts, env, self) => {
@@ -55,7 +58,7 @@ export function frontMatter(source: string): FrontMatter {
 }
 
 /** Extracts the source of every sketch fence in a Markdown document. */
-export function sketchFences(md: MarkdownIt, source: string, langs = ['sketch']): { content: string; line: number }[] {
+export function sketchFences(md: MarkdownIt, source: string, langs: readonly string[] = FENCE_LANGS): { content: string; line: number }[] {
   return md
     .parse(source, {})
     .filter((t) => t.type === 'fence' && langs.includes(t.info.trim().split(/\s+/)[0]))

@@ -1,5 +1,5 @@
 {
-  "name": "markdown-it-sketch",
+  "name": "markdown-it-skeudo",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -7,8 +7,8 @@
     ".": "./src/index.ts"
   },
   "dependencies": {
-    "@sketch/core": "workspace:*",
-    "@sketch/html": "workspace:*"
+    "@skeudo/core": "workspace:*",
+    "@skeudo/html": "workspace:*"
   },
   "peerDependencies": {
     "markdown-it": ">=14"

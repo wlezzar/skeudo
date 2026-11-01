@@ -8,7 +8,7 @@ import {
   type Sketch,
   type SketchLine,
   type Tag,
-} from '@sketch/core';
+} from '@skeudo/core';
 
 export interface HtmlOptions extends ParseOptions {
   /** Builds a link for a source location. Return undefined to show the location as a tooltip only. */

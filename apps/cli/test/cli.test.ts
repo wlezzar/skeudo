@@ -40,14 +40,14 @@ const DOC = lines(
   '',
   'Reads `::read:postgres.orders` first.',
   '',
-  '```sketch',
+  '```skeudo',
   'cancel_order(order_id):                  ::src[shop/orders.py:40-60]',
   '    order = load_order(order_id)         ::read:postgres.orders ::src[42]',
   '    refund(order.payment)                ::write:stripe',
   '    ::fail',
   '```',
   '',
-  '```sketch',
+  '```skeudo',
   'notify(order):',
   '   send it                              ::write',
   '```',
@@ -70,9 +70,23 @@ describe('check', () => {
     });
   });
 
+  test('checks ```sketch fences too, as documents written before the rename have them', async () => {
+    await files({ 'old.md': DOC.replaceAll('```skeudo', '```sketch') });
+    expect(skeudo(['check', 'old.md'])).toEqual({
+      code: 1,
+      stdout: lines(
+        'old.md:13: warning: ::fail needs a name, as in ::fail:NotFound.',
+        'old.md:18: warning: Indent by 2 or 4 spaces per level, not 3.',
+        'old.md:18: warning: ::write needs the system it touches, as in ::write:postgres.',
+        'Checked 2 sketches: 3 warnings.',
+      ),
+      stderr: '',
+    });
+  });
+
   test('exits with 0 when there are no warnings', async () => {
-    await files({ 'clean.sketch': CLEAN });
-    expect(skeudo(['check', 'clean.sketch'])).toEqual({ code: 0, stdout: 'Checked 1 sketch: no warnings.\n', stderr: '' });
+    await files({ 'clean.skeudo': CLEAN });
+    expect(skeudo(['check', 'clean.skeudo'])).toEqual({ code: 0, stdout: 'Checked 1 sketch: no warnings.\n', stderr: '' });
   });
 
   test('says so when there are no sketches', async () => {
@@ -80,13 +94,14 @@ describe('check', () => {
     expect(skeudo(['check', 'plain.md'])).toMatchObject({ code: 0, stdout: 'No sketches found.\n' });
   });
 
-  test('searches directories for Markdown and .sketch files, skipping hidden folders and node_modules', async () => {
+  test('searches directories for Markdown and .skeudo files, skipping .sketch files, hidden folders and node_modules', async () => {
     await files({
-      'tree/b.md': '```sketch\nf(x):\n    ::fail\n```\n',
-      'tree/a/z.sketch': CLEAN,
+      'tree/b.md': '```skeudo\nf(x):\n    ::fail\n```\n',
+      'tree/a/z.skeudo': CLEAN,
+      'tree/a/design.sketch': 'f(x):\n    ::fail\n',
       'tree/a/notes.txt': 'f(x):\n    ::fail\n',
-      'tree/node_modules/pkg/README.md': '```sketch\nf(x):\n    ::fail\n```\n',
-      'tree/.git/x.md': '```sketch\nf(x):\n    ::fail\n```\n',
+      'tree/node_modules/pkg/README.md': '```skeudo\nf(x):\n    ::fail\n```\n',
+      'tree/.git/x.md': '```skeudo\nf(x):\n    ::fail\n```\n',
     });
     expect(skeudo(['check', 'tree'])).toMatchObject({
       code: 1,
@@ -149,11 +164,11 @@ describe('render', () => {
 
   test('titles the page by front matter, then the first heading, the signature and the file name', async () => {
     const title = (args: string[], input = '') => /<title>(.*)<\/title>/.exec(skeudo(args, input).stdout)?.[1];
-    await files({ 'cancel.md': DOC.replace('title: Refunds\n', ''), 'flow.sketch': 'Every night:\n    purge old rows    ::write:postgres\n' });
+    await files({ 'cancel.md': DOC.replace('title: Refunds\n', ''), 'flow.skeudo': 'Every night:\n    purge old rows    ::write:postgres\n' });
     expect(title(['render', 'cancel.md'])).toBe('Cancel an order');
-    expect(title(['render'], '# Use `get_user` & <more>\n\n```sketch\nf(x):\n```\n')).toBe('Use get_user &amp; &lt;more&gt;');
+    expect(title(['render'], '# Use `get_user` & <more>\n\n```skeudo\nf(x):\n```\n')).toBe('Use get_user &amp; &lt;more&gt;');
     expect(title(['render'], CLEAN)).toBe('get_user');
-    expect(title(['render', 'flow.sketch'])).toBe('flow');
+    expect(title(['render', 'flow.skeudo'])).toBe('flow');
     expect(title(['render'], 'Every night:\n    purge    ::write:postgres\n')).toBe('Sketch');
   });
 
@@ -164,9 +179,9 @@ describe('render', () => {
   });
 
   test('writes to a file with -o', async () => {
-    await files({ 'clean.sketch': CLEAN });
-    expect(skeudo(['render', 'clean.sketch', '-o', 'out.html'])).toEqual({ code: 0, stdout: '', stderr: '' });
-    expect(await readFile(join(dir, 'out.html'), 'utf8')).toBe(skeudo(['render', 'clean.sketch']).stdout);
+    await files({ 'clean.skeudo': CLEAN });
+    expect(skeudo(['render', 'clean.skeudo', '-o', 'out.html'])).toEqual({ code: 0, stdout: '', stderr: '' });
+    expect(await readFile(join(dir, 'out.html'), 'utf8')).toBe(skeudo(['render', 'clean.skeudo']).stdout);
   });
 });
 

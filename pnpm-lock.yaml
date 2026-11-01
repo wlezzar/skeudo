@@ -23,10 +23,10 @@ importers:
 
   apps/cli:
     devDependencies:
-      '@sketch/core':
+      '@skeudo/core':
         specifier: workspace:*
         version: link:../../packages/core
-      '@sketch/html':
+      '@skeudo/html':
         specifier: workspace:*
         version: link:../../packages/html
       esbuild:
@@ -35,22 +35,22 @@ importers:
       markdown-it:
         specifier: ^15.0.3
         version: 15.0.3
-      markdown-it-sketch:
+      markdown-it-skeudo:
         specifier: workspace:*
         version: link:../../packages/markdown-it
 
   apps/playground:
     dependencies:
-      '@sketch/core':
+      '@skeudo/core':
         specifier: workspace:*
         version: link:../../packages/core
-      '@sketch/html':
+      '@skeudo/html':
         specifier: workspace:*
         version: link:../../packages/html
       markdown-it:
         specifier: ^15.0.3
         version: 15.0.3
-      markdown-it-sketch:
+      markdown-it-skeudo:
         specifier: workspace:*
         version: link:../../packages/markdown-it
     devDependencies:
@@ -60,10 +60,10 @@ importers:
 
   apps/vscode:
     devDependencies:
-      '@sketch/core':
+      '@skeudo/core':
         specifier: workspace:*
         version: link:../../packages/core
-      '@sketch/html':
+      '@skeudo/html':
         specifier: workspace:*
         version: link:../../packages/html
       '@types/vscode':
@@ -78,7 +78,7 @@ importers:
       markdown-it:
         specifier: ^15.0.3
         version: 15.0.3
-      markdown-it-sketch:
+      markdown-it-skeudo:
         specifier: workspace:*
         version: link:../../packages/markdown-it
       vscode-oniguruma:
@@ -92,16 +92,16 @@ importers:
 
   packages/html:
     dependencies:
-      '@sketch/core':
+      '@skeudo/core':
         specifier: workspace:*
         version: link:../core
 
   packages/markdown-it:
     dependencies:
-      '@sketch/core':
+      '@skeudo/core':
         specifier: workspace:*
         version: link:../core
-      '@sketch/html':
+      '@skeudo/html':
         specifier: workspace:*
         version: link:../html
     devDependencies:

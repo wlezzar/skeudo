@@ -1,5 +1,5 @@
 {
-  "name": "@sketch/html",
+  "name": "@skeudo/html",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -7,5 +7,5 @@
     ".": "./src/index.ts",
     "./sketch.css": "./src/sketch.css"
   },
-  "dependencies": { "@sketch/core": "workspace:*" }
+  "dependencies": { "@skeudo/core": "workspace:*" }
 }

@@ -1,4 +1,4 @@
-# Sketch
+# Skeudo
 
 Readable pseudocode for code review: loose about logic, strict about effects.
 The format spec lives in [spec/spec.md](spec/spec.md).
@@ -8,13 +8,13 @@ The format spec lives in [spec/spec.md](spec/spec.md).
 ```
 spec/
   spec.md        # the format: syntax, variables and labels, rendering
-  fixtures/      # .sketch inputs and the .json the parser must produce
+  fixtures/      # .skeudo inputs and the .json the parser must produce
 skills/
-  sketch/        # agent skill that writes sketches of code, commits and PRs
+  skeudo/        # agent skill that writes sketches of code, commits and PRs
 packages/
   core/          # parser (parse), analysis (analyze), AST types
   html/          # toHtml(), tagHtml(), enhance() + sketch.css
-  markdown-it/   # markdown-it-sketch: renders ```sketch fences and inline tag code
+  markdown-it/   # markdown-it-skeudo: renders ```skeudo fences and inline tag code
 apps/
   cli/           # skeudo: checks sketches and renders them as standalone HTML pages
   playground/    # live editor: preview, review panel, AST
@@ -31,7 +31,7 @@ pnpm dev         # http://localhost:5173
 pnpm test        # parser fixtures, see spec/fixtures/README.md
 pnpm typecheck
 pnpm build       # static playground in apps/playground/dist
-pnpm package:vscode  # VS Code extension in apps/vscode/sketch-0.0.1.vsix, see apps/vscode/README.md
+pnpm package:vscode  # VS Code extension in apps/vscode/skeudo-vscode-0.0.1.vsix, see apps/vscode/README.md
 pnpm build:cli       # CLI in apps/cli/dist/skeudo.js, see apps/cli/README.md
 pnpm package:cli     # CLI as apps/cli/skeudo-0.0.1.tgz, for npm install -g
 ```
