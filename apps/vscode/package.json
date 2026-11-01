@@ -1,7 +1,7 @@
 {
   "name": "sketch",
   "displayName": "Sketch",
-  "description": "Renders sketch fences in the Markdown preview: pseudocode for code review, with every outside effect tagged.",
+  "description": "Highlights sketches in .sketch files and Markdown fences, and renders them in the Markdown preview: pseudocode for code review, with every outside effect tagged.",
   "version": "0.0.1",
   "private": true,
   "publisher": "skeudo",
@@ -14,6 +14,7 @@
     "vscode": "^1.95.0"
   },
   "categories": [
+    "Programming Languages",
     "Visualization",
     "Other"
   ],
@@ -28,6 +29,9 @@
     "dist/extension.js",
     "dist/preview.js",
     "dist/sketch.css",
+    "dist/sketch.tmLanguage.json",
+    "dist/markdown-sketch.tmLanguage.json",
+    "language-configuration.json",
     "README.md"
   ],
   "contributes": {
@@ -37,6 +41,35 @@
     ],
     "markdown.previewScripts": [
       "./dist/preview.js"
+    ],
+    "languages": [
+      {
+        "id": "sketch",
+        "aliases": [
+          "Sketch"
+        ],
+        "extensions": [
+          ".sketch"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "sketch",
+        "scopeName": "source.sketch",
+        "path": "./dist/sketch.tmLanguage.json"
+      },
+      {
+        "scopeName": "markdown.sketch.codeblock",
+        "path": "./dist/markdown-sketch.tmLanguage.json",
+        "injectTo": [
+          "text.html.markdown"
+        ],
+        "embeddedLanguages": {
+          "meta.embedded.block.sketch": "sketch"
+        }
+      }
     ],
     "configuration": {
       "title": "Sketch",
@@ -74,6 +107,8 @@
     "@vscode/vsce": "4.0.0",
     "esbuild": "0.28.2",
     "markdown-it": "^15.0.3",
-    "markdown-it-sketch": "workspace:*"
+    "markdown-it-sketch": "workspace:*",
+    "vscode-oniguruma": "2.0.1",
+    "vscode-textmate": "9.3.2"
   }
 }

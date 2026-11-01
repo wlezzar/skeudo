@@ -17,7 +17,7 @@ packages/
   markdown-it/   # markdown-it-sketch: renders ```sketch fences and inline tag code
 apps/
   playground/    # live editor: preview, review panel, AST
-  vscode/        # VS Code extension: renders sketches in the Markdown preview
+  vscode/        # VS Code extension: highlights sketches and renders them in the Markdown preview
 ```
 
 Packages export their TypeScript sources directly; there is no build step until we publish. The VS Code extension bundles them.

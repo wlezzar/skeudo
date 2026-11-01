@@ -1,0 +1,26 @@
+{
+  "brackets": [
+    ["(", ")"],
+    ["[", "]"],
+    ["{", "}"]
+  ],
+  "autoClosingPairs": [
+    { "open": "(", "close": ")" },
+    { "open": "[", "close": "]" },
+    { "open": "{", "close": "}" }
+  ],
+  "surroundingPairs": [
+    ["(", ")"],
+    ["[", "]"],
+    ["{", "}"],
+    ["\"", "\""],
+    ["`", "`"]
+  ],
+  "onEnterRules": [
+    {
+      "beforeText": "^\\s*\\S.*:(?:\\s+::[^\\s\\[]+(?:\\[[^\\]]*\\])?)*\\s*$",
+      "action": { "indent": "indent" }
+    }
+  ],
+  "folding": { "offSide": true }
+}

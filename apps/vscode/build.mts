@@ -3,6 +3,7 @@
 import { build as bundle } from 'esbuild';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
+import { markdownInjection, sketchGrammar } from './src/grammar.ts';
 
 const LIGHT_THEMES = 'body.vscode-light, body.vscode-high-contrast-light';
 const DARK_THEMES = 'body.vscode-dark, body.vscode-high-contrast:not(.vscode-high-contrast-light)';
@@ -33,7 +34,7 @@ function replaceOnce(text: string, search: string, replacement: string): string 
   return text.replace(search, replacement);
 }
 
-/** Writes extension.js, preview.js and sketch.css to `outdir`. */
+/** Writes extension.js, preview.js, sketch.css and the grammars to `outdir`. */
 export async function build(outdir: string): Promise<void> {
   await mkdir(outdir, { recursive: true });
   const src = (file: string) => fileURLToPath(new URL(`src/${file}`, import.meta.url));
@@ -44,6 +45,8 @@ export async function build(outdir: string): Promise<void> {
     bundle({ ...common, entryPoints: [src('extension.ts')], outfile: `${outdir}/extension.js`, platform: 'node', format: 'cjs', external: ['vscode'] }),
     bundle({ ...common, entryPoints: [src('preview.ts')], outfile: `${outdir}/preview.js`, platform: 'browser', format: 'iife' }),
     writeFile(`${outdir}/sketch.css`, previewCss(css)),
+    writeFile(`${outdir}/sketch.tmLanguage.json`, JSON.stringify(sketchGrammar, null, 2) + '\n'),
+    writeFile(`${outdir}/markdown-sketch.tmLanguage.json`, JSON.stringify(markdownInjection, null, 2) + '\n'),
   ]);
 }
 

@@ -1,4 +1,5 @@
 /// <reference types="node" />
+import { readFileSync } from 'node:fs';
 import { mkdtemp, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -6,6 +7,7 @@ import markdownit from 'markdown-it';
 import { afterAll, beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
 import { build, previewCss } from '../build.mjs';
 import { activate } from '../src/extension';
+import { markdownInjection, sketchGrammar } from '../src/grammar';
 import { srcHref } from '../src/links';
 import manifest from '../package.json';
 
@@ -126,6 +128,23 @@ describe('source links', () => {
   });
 });
 
+describe('language configuration', () => {
+  const config = JSON.parse(readFileSync(new URL('../language-configuration.json', import.meta.url), 'utf8'));
+  const indents = (line: string) => new RegExp(config.onEnterRules[0].beforeText).test(line);
+
+  test('indents after a block header, even one with trailing tags', () => {
+    expect(indents('get_profile(user_id):')).toBe(true);
+    expect(indents('    if that fails:                    ::new ::changed[was a retry]')).toBe(true);
+    expect(indents('    else:   ::src[16-23]')).toBe(true);
+  });
+
+  test('does not indent after other lines, even ones whose tags hold colons', () => {
+    expect(indents('    cache.set(key)    ::write:redis[5 min ttl]')).toBe(false);
+    expect(indents('    ::src:load_user[app/users.py:88]')).toBe(false);
+    expect(indents('    if a: do b')).toBe(false);
+  });
+});
+
 describe('build', () => {
   let out: string;
   beforeAll(async () => {
@@ -139,11 +158,27 @@ describe('build', () => {
       manifest.main,
       ...manifest.contributes['markdown.previewStyles'],
       ...manifest.contributes['markdown.previewScripts'],
+      ...manifest.contributes.grammars.map((g) => g.path),
     ];
     for (const path of contributed) {
       expect(manifest.files).toContain(path.replace(/^\.\//, ''));
       await expect(readFile(join(out, path.replace(/^\.\/dist\//, '')), 'utf8')).resolves.not.toBe('');
     }
+    for (const { configuration } of manifest.contributes.languages) {
+      expect(manifest.files).toContain(configuration.replace(/^\.\//, ''));
+      JSON.parse(await readFile(new URL(`../${configuration}`, import.meta.url), 'utf8'));
+    }
+  });
+
+  test('writes grammars under the scope names the manifest gives them', async () => {
+    for (const { path, scopeName } of manifest.contributes.grammars) {
+      expect(JSON.parse(await readFile(join(out, path.replace(/^\.\/dist\//, '')), 'utf8')).scopeName).toBe(scopeName);
+    }
+    // Fences embed the language's grammar, in the scope the manifest maps to the language.
+    const fence = manifest.contributes.grammars.find((g) => 'injectTo' in g)!;
+    const embedded = JSON.stringify(markdownInjection);
+    expect(embedded).toContain(`"include":"${sketchGrammar.scopeName}"`);
+    expect(Object.keys(fence.embeddedLanguages!).map((scope) => embedded.includes(`"contentName":"${scope}"`))).toEqual([true]);
   });
 
   test('bundles everything but the vscode module', async () => {
