@@ -176,7 +176,7 @@ export const sketchGrammar = {
 /**
  * Embeds `source.skeudo` in Markdown's ```skeudo and ```sketch fences. It copies the shape of the fence rules in VS Code's
  * Markdown grammar: the `while` rule ends the sketch at the closing fence, even though the sketch's own
- * rules never end. Its fence languages must match FENCE_LANGS in markdown-it-skeudo, which a test checks.
+ * rules never end. Its fence languages must match FENCE_LANGS in @skeudo/core, which a test checks.
  */
 export const markdownInjection = {
   scopeName: 'markdown.skeudo.codeblock',

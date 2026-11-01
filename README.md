@@ -13,8 +13,9 @@ skills/
   skeudo/        # agent skill that writes sketches of code, commits and PRs
 packages/
   core/          # parser (parse), analysis (analyze), AST types
-  html/          # toHtml(), tagHtml(), enhance() + sketch.css
+  html/          # toHtml(), toHast(), tagHtml(), enhance() + sketch.css
   markdown-it/   # markdown-it-skeudo: renders ```skeudo fences and inline tag code
+  remark/        # remark-skeudo: the same for remark and MDX, as a hast tree
 apps/
   cli/           # skeudo: checks sketches and renders them as standalone HTML pages
   playground/    # live editor: preview, review panel, AST

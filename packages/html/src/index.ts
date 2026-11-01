@@ -9,6 +9,7 @@ import {
   type SketchLine,
   type Tag,
 } from '@skeudo/core';
+import type { Element as HastElement, ElementContent, Properties, Text } from 'hast';
 
 export interface HtmlOptions extends ParseOptions {
   /** Builds a link for a source location. Return undefined to show the location as a tooltip only. */
@@ -23,22 +24,58 @@ const DEFAULT_LABEL_KINDS = ['untrusted', 'secret'];
 const ESC: Record<string, string> = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
 export const escapeHtml = (s: string) => s.replace(/[&<>"']/g, (c) => ESC[c]);
 
+/*
+ * The renderer builds a hast tree (https://github.com/syntax-tree/hast), the HTML syntax tree that
+ * remark and rehype plugins pass around, so a plugin can hand it on without parsing HTML. toHtml
+ * serializes the same tree. Properties follow hast's naming: `className` for `class`, and camel case
+ * for data attributes (`dataLine` for `data-line`).
+ */
+
+function h(tagName: string, properties: Properties, children: ElementContent[] = []): HastElement {
+  return { type: 'element', tagName, properties, children };
+}
+
+/** A text node, or none for an empty string. */
+const text = (value: string): Text[] => (value ? [{ type: 'text', value }] : []);
+
+const VOID_ELEMENTS = new Set(['wbr']);
+
+function attributeName(property: string): string {
+  if (property === 'className') return 'class';
+  if (/^data[A-Z]/.test(property)) return `data${property.slice(4).replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`)}`;
+  return property;
+}
+
+/** Serializes the elements and text the renderer builds. Invisible spaces are written as entities. */
+function serialize(node: ElementContent): string {
+  if (node.type === 'text') return escapeHtml(node.value).replaceAll('​', '&#8203;');
+  if (node.type !== 'element') return '';
+  let attributes = '';
+  for (const [property, value] of Object.entries(node.properties)) {
+    if (value === undefined || value === null || value === false) continue;
+    const name = attributeName(property);
+    attributes += value === true ? ` ${name}` : ` ${name}="${escapeHtml(Array.isArray(value) ? value.join(' ') : String(value))}"`;
+  }
+  const open = `<${node.tagName}${attributes}>`;
+  return VOID_ELEMENTS.has(node.tagName) ? open : `${open}${node.children.map(serialize).join('')}</${node.tagName}>`;
+}
+
 /** Text that is copied with the sketch but not shown, such as the `::` of a tag. */
-const hiddenText = (s: string) => `<span class="sk-x">${escapeHtml(s)}</span>`;
+const hiddenText = (s: string) => h('span', { className: ['sk-x'] }, text(s));
 const classSafe = (s: string) => s.replace(/[^\p{L}\p{N}_-]/gu, '_');
 
-function link(cls: string, href: string | undefined, title: string, inner: string): string {
-  const t = title ? ` title="${escapeHtml(title)}"` : '';
+function link(cls: string[], href: string | undefined, title: string, children: ElementContent[]): HastElement {
+  const t = title ? { title } : {};
   return href
-    ? `<a class="${cls}" href="${escapeHtml(href)}" target="_blank" rel="noopener"${t}>${inner}</a>`
-    : `<span class="${cls}"${t}>${inner}</span>`;
+    ? h('a', { className: cls, href, target: '_blank', rel: ['noopener'], ...t }, children)
+    : h('span', { className: cls, ...t }, children);
 }
 
 /** The `?` and `~` modifiers as written. */
 const tagMods = (tag: Tag) => /^::[^?~:[]*([?~]*)/u.exec(tag.raw)?.[1] ?? '';
 
-/** Renders one tag as a pill, followed by its note. */
-export function tagHtml(tag: Tag, opts: HtmlOptions = {}): string {
+/** Builds one tag as a pill followed by its note, as a hast element. */
+export function tagHast(tag: Tag, opts: HtmlOptions = {}): HastElement {
   const labelKinds = opts.labelKinds ?? DEFAULT_LABEL_KINDS;
   const cls = ['sk-tag', `sk-k-${classSafe(tag.kind)}`];
   if (!KNOWN_KINDS.has(tag.kind)) cls.push('sk-other');
@@ -46,63 +83,69 @@ export function tagHtml(tag: Tag, opts: HtmlOptions = {}): string {
   if (tag.unverified) cls.push('sk-unv');
   if (tag.value === '*') cls.push('sk-rt');
   const color = opts.kindColors?.[tag.kind];
-  const style = color ? ` style="--sk-c:${escapeHtml(color)}"` : '';
   const mods = tagMods(tag);
 
-  let inner = hiddenText('::') + `<span class="sk-kind">${escapeHtml(tag.kind)}</span>`;
-  if (mods) inner += `<span class="sk-mod">${escapeHtml(mods)}</span>`;
+  const pill: ElementContent[] = [hiddenText('::'), h('span', { className: ['sk-kind'] }, text(tag.kind))];
+  if (mods) pill.push(h('span', { className: ['sk-mod'] }, text(mods)));
   if (tag.value) {
     const isLabel = labelKinds.includes(tag.kind);
-    const varAttr = isLabel ? ` data-var="${escapeHtml(tag.value)}"` : '';
-    inner += hiddenText(':') + `<span class="sk-val"${varAttr}>${escapeHtml(tag.value)}</span>`;
+    pill.push(hiddenText(':'), h('span', { className: ['sk-val'], ...(isLabel ? { dataVar: tag.value } : {}) }, text(tag.value)));
   }
-  let html = `<span class="${cls.join(' ')}"${style}>${inner}</span>`;
+  const children = [h('span', { className: cls, ...(color ? { style: `--sk-c:${color}` } : {}) }, pill)];
   if (tag.note) {
-    const { text, danger } = tag.note;
-    html +=
-      `<span class="sk-note${danger ? ' sk-note-danger' : ''}">` +
-      hiddenText('[') +
-      (danger ? `<span class="sk-bang">!</span>` : '') +
-      escapeHtml(text) +
-      hiddenText(']') +
-      `</span>`;
+    const { text: note, danger } = tag.note;
+    children.push(
+      h('span', { className: danger ? ['sk-note', 'sk-note-danger'] : ['sk-note'] }, [
+        hiddenText('['),
+        ...(danger ? [h('span', { className: ['sk-bang'] }, text('!'))] : []),
+        ...text(note),
+        hiddenText(']'),
+      ]),
+    );
   }
-  return `<span class="sk-tagw" title="${escapeHtml(tag.raw)}">${html}</span>`;
+  return h('span', { className: ['sk-tagw'], title: tag.raw }, children);
 }
 
-function varHtml(sketch: Sketch, name: string, text: string, definition: boolean): string {
+/** Renders one tag as a pill, followed by its note. */
+export function tagHtml(tag: Tag, opts: HtmlOptions = {}): string {
+  return serialize(tagHast(tag, opts));
+}
+
+function varHast(sketch: Sketch, name: string, value: string, definition: boolean): HastElement {
   const labels = sketch.variables[name]?.labels ?? [];
   const cls = ['sk-var'];
   if (definition) cls.push('sk-def');
   for (const l of labels) cls.push('sk-lbl', `sk-lbl-${classSafe(l)}`);
-  const title = labels.length ? ` title="${escapeHtml(labels.join(', '))}"` : '';
-  return `<span class="${cls.join(' ')}" data-var="${escapeHtml(name)}"${title}>${escapeHtml(text)}</span>`;
+  const title = labels.length ? { title: labels.join(', ') } : {};
+  return h('span', { className: cls, dataVar: name, ...title }, text(value));
 }
 
-function segmentHtml(seg: Segment, sketch: Sketch, opts: HtmlOptions): string {
+function segmentHast(seg: Segment, sketch: Sketch, opts: HtmlOptions): ElementContent[] {
   switch (seg.type) {
     case 'text':
-      return escapeHtml(seg.text);
+      return text(seg.text);
     case 'word':
-      return `<span class="sk-word">${escapeHtml(seg.text)}</span>`;
+      return [h('span', { className: ['sk-word'] }, text(seg.text))];
     case 'fn':
-      return `<span class="sk-fn">${escapeHtml(seg.text)}</span>`;
+      return [h('span', { className: ['sk-fn'] }, text(seg.text))];
     case 'var':
-      return varHtml(sketch, seg.name, seg.text, seg.definition);
+      return [varHast(sketch, seg.name, seg.text, seg.definition)];
     case 'call': {
       const loc = sketch.callSources[seg.name];
-      const inner = seg.head
-        ? varHtml(sketch, seg.head, seg.head, false) + escapeHtml(seg.text.slice(seg.head.length))
-        : escapeHtml(seg.text);
-      return link(
-        loc ? 'sk-call sk-linked' : 'sk-call',
-        loc && opts.srcHref?.(loc),
-        loc ? `Defined at ${formatLocation(loc)}` : '',
-        inner,
-      );
+      const children = seg.head
+        ? [varHast(sketch, seg.head, seg.head, false), ...text(seg.text.slice(seg.head.length))]
+        : text(seg.text);
+      return [
+        link(
+          loc ? ['sk-call', 'sk-linked'] : ['sk-call'],
+          loc && opts.srcHref?.(loc),
+          loc ? `Defined at ${formatLocation(loc)}` : '',
+          children,
+        ),
+      ];
     }
     case 'tag':
-      return seg.tag.kind === 'src' ? '' : tagHtml(seg.tag, opts);
+      return seg.tag.kind === 'src' ? [] : [tagHast(seg.tag, opts)];
   }
 }
 
@@ -121,14 +164,14 @@ export function srcBaseHref(base: string): (loc: ResolvedSrc) => string | undefi
   };
 }
 
-function gutterHtml(src: ResolvedSrc | undefined, opts: HtmlOptions): string {
-  if (!src) return '';
+function gutterHast(src: ResolvedSrc | undefined, opts: HtmlOptions): HastElement[] {
+  if (!src) return [];
   const where = formatLocation(src);
   if (src.inherited) {
-    return link('sk-src sk-src-inherited', opts.srcHref?.(src), `${where} (from the enclosing block)`, '·');
+    return [link(['sk-src', 'sk-src-inherited'], opts.srcHref?.(src), `${where} (from the enclosing block)`, text('·'))];
   }
   const label = src.start !== undefined ? String(src.start) : '↗';
-  return link('sk-src', opts.srcHref?.(src), where, label);
+  return [link(['sk-src'], opts.srcHref?.(src), where, text(label))];
 }
 
 /*
@@ -151,7 +194,7 @@ const TAG_COLUMN_PADDING = 5;
 /** The tag column never gets narrower than this (`minmax(22ch, 1fr)`). */
 const TAG_COLUMN_MIN = 22;
 
-const WIDE_RE = /[ᄀ-ᅟ⺀-꓏가-힣豈-﫿︰-﹏＀-｠￠-￦\u{1f300}-\u{1faff}\u{20000}-\u{3fffd}]/u;
+const WIDE_RE = /[ᄀ-ᅟ⺀-꓏가-힣豈-﫿︰-﹏＀-｠￠-￦\u{1f300}-\u{1faff}\u{20000}-\u{3fffd}]/u;
 
 function textWidth(s: string): number {
   let w = 0;
@@ -193,7 +236,13 @@ function fitClass(widths: number[], before: number): string | undefined {
   return need > FIT_MAX ? 'sk-under' : `sk-fit-${need}`;
 }
 
-function lineHtml(line: SketchLine, sketch: Sketch, opts: HtmlOptions, gutter: boolean, before: number): string {
+/** A file path that can break after each slash. */
+function breakablePath(path: string): ElementContent[] {
+  const parts = path.split('/');
+  return parts.flatMap((part, i) => (i < parts.length - 1 ? [...text(`${part}/`), h('wbr', {})] : text(part)));
+}
+
+function lineHast(line: SketchLine, sketch: Sketch, opts: HtmlOptions, gutter: boolean, before: number): HastElement {
   const indent = ' '.repeat(line.depth * (sketch.indentUnit ?? 4));
   const cls = ['sk-row'];
   if (line.blank) cls.push('sk-blank');
@@ -202,34 +251,34 @@ function lineHtml(line: SketchLine, sketch: Sketch, opts: HtmlOptions, gutter: b
   if (line.change) cls.push('sk-ch', `sk-ch-${line.change.kind}`);
   const diags = sketch.diagnostics.filter((d) => d.line === line.number);
   if (diags.length) cls.push('sk-has-diag');
-  const title = diags.length ? ` title="${escapeHtml(diags.map((d) => d.message).join('\n'))}"` : '';
 
-  let code = line.segments.map((s) => segmentHtml(s, sketch, opts)).join('');
+  let code = line.segments.flatMap((s) => segmentHast(s, sketch, opts));
   // Wrapped so the strike-through of a removed line skips its indentation.
-  if (code && line.change?.kind === 'removed') code = `<span class="sk-struck">${code}</span>`;
+  if (code.length && line.change?.kind === 'removed') code = [h('span', { className: ['sk-struck'] }, code)];
   const trailing = line.tags.filter((t) => t.trailing && t.kind !== 'src');
-  const tags = trailing.map((t) => tagHtml(t, opts));
+  const tags = trailing.map((t) => tagHast(t, opts));
   const widths = trailing.map(tagWidth);
   if (line.signature && line.src && sketch.file) {
     // Set at 0.78em. It can also break after a slash, when even the line under the code is too narrow.
-    const file = escapeHtml(sketch.file).replaceAll('/', '/<wbr>');
-    tags.push(link('sk-file', opts.srcHref?.(line.src), formatLocation(line.src), file));
+    tags.push(link(['sk-file'], opts.srcHref?.(line.src), formatLocation(line.src), breakablePath(sketch.file)));
     widths.push(textWidth(sketch.file) * 0.78);
   }
   const fit = fitClass(widths, before);
   if (fit) cls.push(fit);
 
-  return (
-    `<div class="${cls.join(' ')}" style="--d:${line.depth}" data-line="${line.number}"${title}>` +
-    `<span class="sk-gut">${gutter ? gutterHtml(line.src, opts) : ''}</span>` +
-    `<span class="sk-code">${indent}${code || '&#8203;'}</span>` +
-    `<span class="sk-tags">${tags.join('')}</span>` +
-    `</div>`
-  );
+  const title = diags.length ? { title: diags.map((d) => d.message).join('\n') } : {};
+  return h('div', { className: cls, style: `--d:${line.depth}`, dataLine: line.number, ...title }, [
+    h('span', { className: ['sk-gut'] }, gutter ? gutterHast(line.src, opts) : []),
+    h('span', { className: ['sk-code'] }, [...text(indent), ...(code.length ? code : text('​'))]),
+    h('span', { className: ['sk-tags'] }, tags),
+  ]);
 }
 
-/** Renders a sketch (source text or an already parsed sketch) to an HTML string. */
-export function toHtml(input: string | Sketch, opts: HtmlOptions = {}): string {
+/**
+ * Builds a sketch (source text or an already parsed sketch) as a hast tree: one `div.sketch`
+ * element, the same markup toHtml returns.
+ */
+export function toHast(input: string | Sketch, opts: HtmlOptions = {}): HastElement {
   const sketch = typeof input === 'string' ? parse(input, opts) : input;
   const firstContent = sketch.lines.findIndex((l) => !l.blank);
   const lines = firstContent === -1 ? [] : sketch.lines.slice(firstContent).filter((l) => !l.hidden);
@@ -237,12 +286,15 @@ export function toHtml(input: string | Sketch, opts: HtmlOptions = {}): string {
   // Everything left of the tag column: the gutter and the widest line of code.
   const unit = sketch.indentUnit ?? 4;
   const before = gutterWidth(lines, gutter) + Math.max(0, ...lines.map((l) => codeWidth(l, unit)));
-  const rows = lines.map((l) => lineHtml(l, sketch, opts, gutter, before)).join('');
-  const style = `--sk-indent:${sketch.indentUnit ?? 4}ch`;
-  return (
-    `<div class="sketch${gutter ? ' sk-gutter' : ''}" style="${style}" data-sketch>` +
-    `<div class="sk-lines">${rows}</div></div>`
-  );
+  const rows = lines.map((l) => lineHast(l, sketch, opts, gutter, before));
+  return h('div', { className: gutter ? ['sketch', 'sk-gutter'] : ['sketch'], style: `--sk-indent:${unit}ch`, dataSketch: true }, [
+    h('div', { className: ['sk-lines'] }, rows),
+  ]);
+}
+
+/** Renders a sketch (source text or an already parsed sketch) to an HTML string. */
+export function toHtml(input: string | Sketch, opts: HtmlOptions = {}): string {
+  return serialize(toHast(input, opts));
 }
 
 /**

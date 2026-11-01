@@ -7,5 +7,8 @@
     ".": "./src/index.ts",
     "./sketch.css": "./src/sketch.css"
   },
-  "dependencies": { "@skeudo/core": "workspace:*" }
+  "dependencies": {
+    "@skeudo/core": "workspace:*",
+    "@types/hast": "^3.0.5"
+  }
 }

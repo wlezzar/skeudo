@@ -28,6 +28,8 @@ const BINDING_RE = /^([\p{L}_][\p{L}\p{N}_]*)\s*=(?![=>])/u;
 const WORD_RE = /^[\p{L}][\p{L}\p{N}_'’-]*/u;
 
 const DEFAULT_LABEL_KINDS = ['untrusted', 'secret'];
+/** Fence languages that hold a sketch: skeudo, and sketch, the format's working name, which older documents use. */
+export const FENCE_LANGS: readonly string[] = ['skeudo', 'sketch'];
 /** Tag kinds that mark what a commit or pull request did to a line. */
 export const CHANGE_KINDS: ReadonlySet<string> = new Set<ChangeKind>(['new', 'changed', 'removed']);
 

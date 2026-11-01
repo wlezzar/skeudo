@@ -1,9 +1,8 @@
 import type { MarkdownIt } from 'markdown-it';
-import { parseTagsOnly } from '@skeudo/core';
+import { FENCE_LANGS, parseTagsOnly } from '@skeudo/core';
 import { tagHtml, toHtml, type HtmlOptions } from '@skeudo/html';
 
-/** Fence languages that hold a sketch: skeudo, and sketch, the format's working name, which older documents use. */
-export const FENCE_LANGS = ['skeudo', 'sketch'];
+export { FENCE_LANGS };
 
 export interface SkeudoPluginOptions extends HtmlOptions {
   /** Fence languages rendered as sketches. Defaults to FENCE_LANGS. */
