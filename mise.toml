@@ -1,0 +1,11 @@
+[tasks."install:cli"]
+description = "Build the skeudo CLI, pack it and install it globally, so `skeudo` is on your PATH"
+run = [
+  "pnpm install",
+  "pnpm package:cli",
+  "npm install -g apps/cli/skeudo-0.0.1.tgz",
+]
+
+[tasks."install:skills"]
+description = "Install the skeudo agent skill globally: a copy in ~/.agents/skills, linked into Claude Code. Re-run after editing the skill"
+run = "npx skills add /home/wlezzar/projects/skeudo -g --symlink --yes"
