@@ -33,6 +33,7 @@ Sketches go in fenced code blocks tagged `skeudo`. Lines nest by indentation, 4 
 | `::danger[note]` | Something on the line a reviewer should stop at. |
 | `::unsure[note]` | You aren't sure the line is accurate. |
 | `::src[location]`, `::src:call[location]` | Links a line to its source, or a call to its definition. |
+| `::repo[url]` | Names the repository and commit that `::src` paths and lines refer to. See step 5. |
 | `::new`, `::changed[was …]`, `::removed` | What a commit or pull request did to the line. See step 6. |
 | `::anything[note]` | Any other kind is valid and renders as a neutral pill. |
 
@@ -61,9 +62,10 @@ Sketches go in fenced code blocks tagged `skeudo`. Lines nest by indentation, 4 
    - Put `::src[path:start-end]` on the signature, with the path relative to the repo root.
    - Put `::src[start-end]` on blocks and key lines. A location without a path uses the signature's file.
    - Put `::src:name[path:line]` at the end of the sketch for calls a reviewer may open.
-   - Line numbers refer to the revision you sketched; state it in the document. Get them with `grep -n` or `git show <rev>:<path> | grep -n …`.
+   - End the sketch with `::repo[git+<remote>@<commit>]`, so its links work wherever the sketch is saved or read. Write the remote as `https://<host>/<owner>/<repo>`, whatever form `git remote get-url origin` prints: `git@github.com:org/shop.git` becomes `https://github.com/org/shop`. The commit is the one you sketched, from `git rev-parse --short HEAD` or the PR's head commit. With no remote, write `git+file://<absolute path of the repo>@<commit>`. Leave out `@<commit>` when sketching uncommitted work.
+   - Line numbers refer to that commit. Get them with `grep -n` or `git show <rev>:<path> | grep -n …`.
 6. **Mark changes (commits and PRs only).**
-   - Sketch the code as it is after the change. `::src` locations refer to that revision.
+   - Sketch the code as it is after the change. `::src` locations refer to that revision, so `::repo` names the commit after the change.
    - Tag what changed: `::new` on a line the change adds, `::changed[was …]` on a line whose behavior changed, and `::removed` on a line describing behavior that is gone, kept where it used to run.
    - `::new` or `::removed` on a block header covers the whole block, so don't repeat it on the lines inside. A line inside can still carry its own tag, such as `::changed[…]` on a line moved into a new block.
    - `::changed` always gets a note saying how. `::changed` on a block header covers only that line.
@@ -105,6 +107,7 @@ Each item in the last section should be something the sketches make visible: an 
 - In a sketch of a change, every added, altered or removed behavior carries a change tag, and every `::changed` has a note.
 - Indentation is 4 spaces per level; calls close on the same line; notes contain no `]`.
 - Calls are real names a reviewer can open; everything else is prose.
+- Each sketch with `::src` links ends with `::repo`, naming the repository and the commit sketched.
 
 ## Example
 
@@ -121,4 +124,5 @@ get_profile(user_id):                    ::src[app/profile.py:12-24]
         cache.set(user_id, row)          ::write:redis[5 min ttl]
         return row
     ::src:load_user[app/users.py:88]
+    ::repo[git+https://github.com/org/shop@a1b2c3d]
 ```

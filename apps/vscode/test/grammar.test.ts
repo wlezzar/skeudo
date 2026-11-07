@@ -76,7 +76,8 @@ interface Marks {
 }
 
 const FAMILIES = ['read', 'write', 'fail', 'danger', 'new', 'changed', 'removed', 'src'];
-const family = (kind: string) => (kind === 'untrusted' || kind === 'secret' ? 'label' : FAMILIES.includes(kind) ? kind : 'other');
+const family = (kind: string) =>
+  kind === 'untrusted' || kind === 'secret' ? 'label' : kind === 'repo' ? 'src' : FAMILIES.includes(kind) ? kind : 'other';
 
 function parserMarks(line: SketchLine, raw: string): Marks {
   const lead = raw.length - raw.trimStart().length;
@@ -219,6 +220,12 @@ describe('scopes', () => {
 
   test('::src locations are underlined like links', () => {
     expect(sketchScopes('x  ::src:load[app/users.py:88]', 'app/')).toEqual(expect.arrayContaining(['comment.src.skeudo', 'markup.underline.link.skeudo']));
+  });
+
+  test('::repo is muted like ::src, with its URL underlined', () => {
+    const source = '    ::repo[git+https://github.com/org/shop@a1b2c3d]';
+    expect(sketchScopes(source, '::repo')).toEqual(expect.arrayContaining(['meta.tag.src.skeudo', 'comment.src.skeudo']));
+    expect(sketchScopes(source, 'git+')).toEqual(expect.arrayContaining(['comment.src.skeudo', 'markup.underline.link.skeudo']));
   });
 
   test('modifiers and the runtime system', () => {

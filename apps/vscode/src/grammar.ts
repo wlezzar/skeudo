@@ -57,8 +57,8 @@ const FAMILIES: Record<string, Family> = {
   changed: { kinds: ['changed'], head: 'markup.changed.skeudo' },
   // Themes often color deletions like strings, as they do writes, so it's also struck through.
   removed: { kinds: ['removed'], head: 'markup.deleted.removed.skeudo markup.strikethrough.removed.skeudo' },
-  // Renderers hide ::src tags, so they're muted, with the location underlined like a link.
-  src: { kinds: ['src'], tag: 'comment.src.skeudo', note: 'location' },
+  // Renderers hide ::src and ::repo tags, so they're muted, with the location or URL underlined like a link.
+  src: { kinds: ['src', 'repo'], tag: 'comment.src.skeudo', note: 'location' },
   other: { head: 'entity.name.label.$kind.skeudo' },
 };
 

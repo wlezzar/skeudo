@@ -1,6 +1,6 @@
 import markdownit, { type MarkdownIt } from 'markdown-it';
 import { analyze, formatLocation, parse, parseTagsOnly, type Review, type Sketch } from '@skeudo/core';
-import { enhance, escapeHtml as esc, srcBaseHref, tagHtml, toHtml, type HtmlOptions } from '@skeudo/html';
+import { enhance, escapeHtml as esc, repoHref, srcBaseHref, tagHtml, toHtml, type HtmlOptions } from '@skeudo/html';
 import markdownItSkeudo, { FENCE_LANGS, sketchFences } from 'markdown-it-skeudo';
 import '@skeudo/html/sketch.css';
 import './style.css';
@@ -51,9 +51,11 @@ $('#theme').addEventListener('click', () => {
 });
 
 // ---------- Rendering options ----------
+// The base comes from an example's front matter, so as in the CLI, it serves sketches that don't name their repository with ::repo.
 function htmlOptions(): HtmlOptions {
   const base = srcBaseInput.value.trim();
-  return { srcHref: base ? srcBaseHref(base) : undefined };
+  const underBase = base ? srcBaseHref(base) : undefined;
+  return { srcHref: (loc, sketch) => (sketch.repo && repoHref(sketch.repo, loc)) || underBase?.(loc) };
 }
 
 function makeMarkdown(opts: HtmlOptions): MarkdownIt {

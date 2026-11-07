@@ -162,6 +162,20 @@ describe('render', () => {
     ]);
   });
 
+  test('links a sketch that names its repository there, unless --src-base is given', async () => {
+    const withRepo = DOC.replace('    ::fail\n', '    ::fail:RefundFailed\n    ::repo[git+https://gitlab.com/team/shop@f00ba47]\n');
+    await files({ 'repo.md': withRepo });
+    const hrefs = (out: string) => [...new Set(out.match(/href="[^"]*"/g))];
+    expect(hrefs(skeudo(['render', 'repo.md']).stdout)).toEqual([
+      'href="https://gitlab.com/team/shop/-/blob/f00ba47/shop/orders.py#L40-60"',
+      'href="https://gitlab.com/team/shop/-/blob/f00ba47/shop/orders.py#L42"',
+    ]);
+    expect(hrefs(skeudo(['render', 'repo.md', '--src-base', 'https://example.com/src']).stdout)).toEqual([
+      'href="https://example.com/src/shop/orders.py#L40-L60"',
+      'href="https://example.com/src/shop/orders.py#L42"',
+    ]);
+  });
+
   test('titles the page by front matter, then the first heading, the signature and the file name', async () => {
     const title = (args: string[], input = '') => /<title>(.*)<\/title>/.exec(skeudo(args, input).stdout)?.[1];
     await files({ 'cancel.md': DOC.replace('title: Refunds\n', ''), 'flow.skeudo': 'Every night:\n    purge old rows    ::write:postgres\n' });

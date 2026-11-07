@@ -2,6 +2,7 @@ import type {
   ChangeKind,
   Diagnostic,
   ParseOptions,
+  Repo,
   ResolvedSrc,
   Segment,
   Signature,
@@ -95,6 +96,67 @@ export function formatLocation(loc: SrcLocation): string {
   if (loc.path && range) return `${loc.path}:${range}`;
   return loc.path ?? range;
 }
+
+/** `scheme://authority/path`, with the path optional. */
+const URL_RE = /^([a-z][a-z0-9+.-]*):\/\/([^/\s]*)(\/\S*)?$/i;
+
+/**
+ * A remote's host and repository path, ignoring the protocol, the user, the port and a trailing `.git`,
+ * so every way of cloning a repository gives the same answer.
+ */
+function hostAndPath(authority: string, path: string): { host: string; path: string } | undefined {
+  const host = authority.replace(/^[^@]*@/, '').replace(/:\d*$/, '').toLowerCase();
+  const repoPath = path.replace(/^\/+|\/+$/g, '').replace(/\.git$/i, '');
+  return host && repoPath ? { host, path: repoPath } : undefined;
+}
+
+/**
+ * Parses the URL in a `::repo` note: `git+<remote>@<revision>`, `git+file://<path>@<revision>`, or any
+ * other URL, used as a base. Returns undefined when the note isn't a URL.
+ */
+export function parseRepo(text: string): Repo | undefined {
+  const url = text.trim();
+  if (/^git\+/i.test(url)) {
+    const m = URL_RE.exec(url.slice(4));
+    if (!m) return undefined;
+    const [, scheme, authority, fullPath = ''] = m;
+    // The revision follows the last `@` of the path, so the user in `git+ssh://git@host/…` stays in the remote.
+    const at = fullPath.lastIndexOf('@');
+    const path = at === -1 ? fullPath : fullPath.slice(0, at);
+    const rev = at === -1 ? undefined : fullPath.slice(at + 1).replace(/\/+$/, '') || undefined;
+    if (scheme.toLowerCase() === 'file') {
+      let folder: string;
+      try {
+        folder = decodeURIComponent(path);
+      } catch {
+        return undefined;
+      }
+      // `file:///C:/code/shop` is `C:/code/shop` on Windows.
+      if (/^\/[a-z]:/i.test(folder)) folder = folder.slice(1);
+      folder = folder.length > 1 ? folder.replace(/\/+$/, '') : folder;
+      return folder ? { type: 'local', url, path: folder, ...(rev ? { rev } : {}) } : undefined;
+    }
+    const where = hostAndPath(authority, path);
+    return where && { type: 'remote', url, remote: `${scheme}://${authority}${path}`, ...where, ...(rev ? { rev } : {}) };
+  }
+  return URL_RE.test(url) ? { type: 'base', url } : undefined;
+}
+
+/**
+ * Names a repository by its host and path, as in `github.com/org/shop`, from a remote URL or the
+ * `git@host:path` form `git remote` prints. Two remotes with the same name are the same repository.
+ * Returns undefined for a local path or `file://` URL.
+ */
+export function repoId(remote: string): string | undefined {
+  const s = remote.trim().replace(/^git\+/i, '');
+  const url = URL_RE.exec(s);
+  if (url) return url[1].toLowerCase() === 'file' ? undefined : idOf(hostAndPath(url[2], url[3] ?? ''));
+  // `git@github.com:org/shop.git`. A single letter before the colon is a Windows drive.
+  const scp = /^([^/:\s]{2,}):(?!\/\/)(\S+)$/.exec(s);
+  return scp ? idOf(hostAndPath(scp[1], scp[2])) : undefined;
+}
+
+const idOf = (where: { host: string; path: string } | undefined) => where && `${where.host}/${where.path}`.toLowerCase();
 
 /** Index of the `)` matching the `(` at `open`, or -1. */
 function findClose(text: string, open: number): number {
@@ -254,10 +316,10 @@ export function parse(source: string, options: ParseOptions = {}): Sketch {
       if (m) line.binding = m[1];
     }
 
-    const srcTags = tags.filter((t) => t.kind === 'src');
-    if (srcTags.length && !line.header) {
+    const linkTags = tags.filter((t) => t.kind === 'src' || t.kind === 'repo');
+    if (linkTags.length && !line.header) {
       let rest = text;
-      for (const t of [...srcTags].reverse()) rest = rest.slice(0, t.start) + rest.slice(t.end);
+      for (const t of [...linkTags].reverse()) rest = rest.slice(0, t.start) + rest.slice(t.end);
       line.hidden = rest.trim() === '';
     }
 
@@ -270,6 +332,8 @@ export function parse(source: string, options: ParseOptions = {}): Sketch {
         warn(line.number, `::${t.kind} needs the variable it labels, as in ::${t.kind}:name.`);
       } else if (t.kind === 'src' && !t.note?.text) {
         warn(line.number, `::src needs a location in its note, as in ::src[app/file.py:12-24].`);
+      } else if (t.kind === 'repo' && !(t.note && parseRepo(t.note.text))) {
+        warn(line.number, `::repo needs a URL in its note, as in ::repo[git+https://github.com/org/repo@a1b2c3d].`);
       } else if (t.kind === 'changed' && !t.note?.text) {
         warn(line.number, `::changed needs a note saying how, as in ::changed[was …].`);
       }
@@ -310,6 +374,20 @@ export function parse(source: string, options: ParseOptions = {}): Sketch {
       else line.src = resolved;
     }
   }
+  let repo: Repo | undefined;
+  let repoLine = 0;
+  for (const line of body) {
+    for (const t of line.tags) {
+      const named = t.kind === 'repo' && t.note ? parseRepo(t.note.text) : undefined;
+      if (!named) continue;
+      if (repo) {
+        warn(line.number, `This sketch already names its repository on line ${repoLine}; only the first ::repo applies.`);
+      } else {
+        repo = named;
+        repoLine = line.number;
+      }
+    }
+  }
   const byNumber = new Map(lines.map((l) => [l.number, l]));
   for (const line of body) {
     if (line.src || line.parent === undefined) continue;
@@ -336,7 +414,7 @@ export function parse(source: string, options: ParseOptions = {}): Sketch {
   const varNames = new Set(Object.keys(variables));
   for (const line of body) line.segments = tokenize(line, varNames);
 
-  return { source, signature, file, indentUnit, lines, variables, callSources, diagnostics };
+  return { source, signature, file, repo, indentUnit, lines, variables, callSources, diagnostics };
 }
 
 /** Splits the content part of a line (everything before the tag column) into segments. */

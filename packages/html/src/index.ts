@@ -3,6 +3,7 @@ import {
   formatLocation,
   parse,
   type ParseOptions,
+  type Repo,
   type ResolvedSrc,
   type Segment,
   type Sketch,
@@ -11,14 +12,30 @@ import {
 } from '@skeudo/core';
 import type { Element as HastElement, ElementContent, Properties, Text } from 'hast';
 
+/** A link for a source location, with a note for its tooltip, such as a warning that the lines may have moved. */
+export interface SrcLink {
+  href: string;
+  note?: string;
+}
+
+/** The kinds of code hosts repoHref can link to. */
+export type GitHost = 'github' | 'gitlab' | 'bitbucket';
+
 export interface HtmlOptions extends ParseOptions {
-  /** Builds a link for a source location. Return undefined to show the location as a tooltip only. */
-  srcHref?: (loc: ResolvedSrc) => string | undefined;
+  /**
+   * Builds a link for a source location in a sketch. Return undefined to show the location as a tooltip
+   * only. Defaults to repoHref, which links to the repository the sketch names with `::repo`.
+   */
+  srcHref?: (loc: ResolvedSrc, sketch: Sketch) => string | SrcLink | undefined;
+  /** Hosts of other GitHub, GitLab or Bitbucket servers, such as `{ 'git.example.com': 'gitlab' }`, for repoHref. */
+  gitHosts?: Record<string, GitHost>;
   /** CSS colors for tag kinds, such as `{ todo: '#8b5cf6' }`. Overrides the defaults. */
   kindColors?: Record<string, string>;
 }
 
-const KNOWN_KINDS = new Set(['read', 'write', 'fail', 'src', 'danger', 'unsure', 'untrusted', 'secret', ...CHANGE_KINDS]);
+const KNOWN_KINDS = new Set(['read', 'write', 'fail', 'src', 'repo', 'danger', 'unsure', 'untrusted', 'secret', ...CHANGE_KINDS]);
+/** Tags a renderer hides, turning them into links. */
+const isLinkTag = (tag: Tag) => tag.kind === 'src' || tag.kind === 'repo';
 const DEFAULT_LABEL_KINDS = ['untrusted', 'secret'];
 
 const ESC: Record<string, string> = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
@@ -69,6 +86,13 @@ function link(cls: string[], href: string | undefined, title: string, children: 
   return href
     ? h('a', { className: cls, href, target: '_blank', rel: ['noopener'], ...t }, children)
     : h('span', { className: cls, ...t }, children);
+}
+
+/** A link to a source location, through `srcHref`, with its note added to the tooltip. */
+function srcLink(cls: string[], loc: ResolvedSrc, sketch: Sketch, opts: HtmlOptions, title: string, children: ElementContent[]): HastElement {
+  const found = (opts.srcHref ?? ((l, s) => (s.repo ? repoHref(s.repo, l, opts.gitHosts) : undefined)))(loc, sketch);
+  const { href, note } = typeof found === 'string' ? { href: found, note: undefined } : (found ?? {});
+  return link(note ? [...cls, 'sk-src-note'] : cls, href, note ? `${title}\n${note}` : title, children);
 }
 
 /** The `?` and `~` modifiers as written. */
@@ -135,18 +159,25 @@ function segmentHast(seg: Segment, sketch: Sketch, opts: HtmlOptions): ElementCo
       const children = seg.head
         ? [varHast(sketch, seg.head, seg.head, false), ...text(seg.text.slice(seg.head.length))]
         : text(seg.text);
-      return [
-        link(
-          loc ? ['sk-call', 'sk-linked'] : ['sk-call'],
-          loc && opts.srcHref?.(loc),
-          loc ? `Defined at ${formatLocation(loc)}` : '',
-          children,
-        ),
-      ];
+      if (!loc) return [link(['sk-call'], undefined, '', children)];
+      return [srcLink(['sk-call', 'sk-linked'], loc, sketch, opts, `Defined at ${formatLocation(loc)}`, children)];
     }
     case 'tag':
-      return seg.tag.kind === 'src' ? [] : [tagHast(seg.tag, opts)];
+      return isLinkTag(seg.tag) ? [] : [tagHast(seg.tag, opts)];
   }
+}
+
+/** A path in a URL, each part escaped. */
+const encodePath = (path: string) => path.split('/').map(encodeURIComponent).join('/');
+/** A location's path, without a leading `./`. */
+const relativePath = (loc: ResolvedSrc) => loc.path!.replace(/^(\.?\/)+/, '');
+
+/** The lines of a location as a URL fragment, in the form each host reads: `#L88-L94`, `#L88-94` or `#lines-88:94`. */
+function linesFragment(loc: ResolvedSrc, host: GitHost = 'github'): string {
+  if (loc.start === undefined) return '';
+  const end = loc.end !== undefined && loc.end !== loc.start ? loc.end : undefined;
+  if (host === 'bitbucket') return `#lines-${loc.start}${end === undefined ? '' : `:${end}`}`;
+  return `#L${loc.start}${end === undefined ? '' : host === 'gitlab' ? `-${end}` : `-L${end}`}`;
 }
 
 /**
@@ -155,23 +186,40 @@ function segmentHast(seg: Segment, sketch: Sketch, opts: HtmlOptions): ElementCo
  */
 export function srcBaseHref(base: string): (loc: ResolvedSrc) => string | undefined {
   const root = base.endsWith('/') ? base : `${base}/`;
-  return (loc) => {
-    if (!loc.path) return undefined;
-    let url = root + loc.path.replace(/^(\.?\/)+/, '').split('/').map(encodeURIComponent).join('/');
-    if (loc.start !== undefined) url += `#L${loc.start}`;
-    if (loc.start !== undefined && loc.end !== undefined && loc.end !== loc.start) url += `-L${loc.end}`;
-    return url;
-  };
+  return (loc) => (loc.path ? root + encodePath(relativePath(loc)) + linesFragment(loc) : undefined);
 }
 
-function gutterHast(src: ResolvedSrc | undefined, opts: HtmlOptions): HastElement[] {
+const KNOWN_HOSTS: Record<string, GitHost> = { 'github.com': 'github', 'gitlab.com': 'gitlab', 'bitbucket.org': 'bitbucket' };
+
+/**
+ * Links a source location to the repository a sketch names with `::repo`. A remote on GitHub, GitLab or
+ * Bitbucket links to the file on that host at the revision, or at the default branch without one; give
+ * other servers of those kinds in `hosts`. A `git+file://` folder links with a `file://` URL, and any
+ * other URL is a base that the path is added to. Returns undefined for a host it doesn't know.
+ */
+export function repoHref(repo: Repo, loc: ResolvedSrc, hosts: Record<string, GitHost> = {}): string | undefined {
+  if (!loc.path) return undefined;
+  if (repo.type === 'base') return srcBaseHref(repo.url)(loc);
+  if (repo.type === 'local') {
+    // Keep a Windows drive, as in `file:///C:/code`, unescaped.
+    const folder = repo.path.split('/').map((part, i) => (i === 0 && /^[a-z]:$/i.test(part) ? part : encodeURIComponent(part)));
+    return srcBaseHref(`file://${repo.path.startsWith('/') ? '' : '/'}${folder.join('/')}`)(loc);
+  }
+  const host = hosts[repo.host] ?? KNOWN_HOSTS[repo.host];
+  if (!host) return undefined;
+  const rev = encodePath(repo.rev ?? 'HEAD');
+  const view = host === 'github' ? 'blob' : host === 'gitlab' ? '-/blob' : 'src';
+  return `https://${repo.host}/${encodePath(repo.path)}/${view}/${rev}/${encodePath(relativePath(loc))}${linesFragment(loc, host)}`;
+}
+
+function gutterHast(src: ResolvedSrc | undefined, sketch: Sketch, opts: HtmlOptions): HastElement[] {
   if (!src) return [];
   const where = formatLocation(src);
   if (src.inherited) {
-    return [link(['sk-src', 'sk-src-inherited'], opts.srcHref?.(src), `${where} (from the enclosing block)`, text('·'))];
+    return [srcLink(['sk-src', 'sk-src-inherited'], src, sketch, opts, `${where} (from the enclosing block)`, text('·'))];
   }
   const label = src.start !== undefined ? String(src.start) : '↗';
-  return [link(['sk-src'], opts.srcHref?.(src), where, text(label))];
+  return [srcLink(['sk-src'], src, sketch, opts, where, text(label))];
 }
 
 /*
@@ -214,7 +262,7 @@ function codeWidth(line: SketchLine, unit: number): number {
   let w = line.depth * unit;
   for (const seg of line.segments) {
     if (seg.type !== 'tag') w += textWidth(seg.text);
-    else if (seg.tag.kind !== 'src') w += tagWidth(seg.tag);
+    else if (!isLinkTag(seg.tag)) w += tagWidth(seg.tag);
   }
   return w;
 }
@@ -255,12 +303,12 @@ function lineHast(line: SketchLine, sketch: Sketch, opts: HtmlOptions, gutter: b
   let code = line.segments.flatMap((s) => segmentHast(s, sketch, opts));
   // Wrapped so the strike-through of a removed line skips its indentation.
   if (code.length && line.change?.kind === 'removed') code = [h('span', { className: ['sk-struck'] }, code)];
-  const trailing = line.tags.filter((t) => t.trailing && t.kind !== 'src');
+  const trailing = line.tags.filter((t) => t.trailing && !isLinkTag(t));
   const tags = trailing.map((t) => tagHast(t, opts));
   const widths = trailing.map(tagWidth);
   if (line.signature && line.src && sketch.file) {
     // Set at 0.78em. It can also break after a slash, when even the line under the code is too narrow.
-    tags.push(link(['sk-file'], opts.srcHref?.(line.src), formatLocation(line.src), breakablePath(sketch.file)));
+    tags.push(srcLink(['sk-file'], line.src, sketch, opts, formatLocation(line.src), breakablePath(sketch.file)));
     widths.push(textWidth(sketch.file) * 0.78);
   }
   const fit = fitClass(widths, before);
@@ -268,7 +316,7 @@ function lineHast(line: SketchLine, sketch: Sketch, opts: HtmlOptions, gutter: b
 
   const title = diags.length ? { title: diags.map((d) => d.message).join('\n') } : {};
   return h('div', { className: cls, style: `--d:${line.depth}`, dataLine: line.number, ...title }, [
-    h('span', { className: ['sk-gut'] }, gutter ? gutterHast(line.src, opts) : []),
+    h('span', { className: ['sk-gut'] }, gutter ? gutterHast(line.src, sketch, opts) : []),
     h('span', { className: ['sk-code'] }, [...text(indent), ...(code.length ? code : text('​'))]),
     h('span', { className: ['sk-tags'] }, tags),
   ]);

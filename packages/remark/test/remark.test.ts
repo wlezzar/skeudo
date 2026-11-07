@@ -80,6 +80,11 @@ describe('sketch fences', () => {
     expect(out).toContain('style="--sk-c:#8b5cf6"');
   });
 
+  test('links a sketch that names its repository there, with no options', () => {
+    const source = 'get_user(id):                 ::src[api/users.ts:12]\n    ::repo[git+https://github.com/org/repo@a1b2c3d]\n';
+    expect(html(fenced('skeudo', source))).toContain('href="https://github.com/org/repo/blob/a1b2c3d/api/users.ts#L12"');
+  });
+
   test("reports the parser's warnings on the file, at their line in the document", () => {
     const doc = `# Doc\n\n${fenced('skeudo', 'f():\n    a     ::changed\n')}`;
     const file = unified().use(remarkParse).use(remarkSkeudo).use(remarkRehype).use(rehypeStringify).processSync(doc);

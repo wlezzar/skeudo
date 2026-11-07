@@ -1,6 +1,6 @@
 import markdownit from 'markdown-it';
 import { parse, type Diagnostic, type Sketch } from '@skeudo/core';
-import { escapeHtml, srcBaseHref, toHtml, type HtmlOptions } from '@skeudo/html';
+import { escapeHtml, repoHref, srcBaseHref, toHtml, type HtmlOptions } from '@skeudo/html';
 import markdownItSkeudo, { FENCE_LANGS, frontMatter, sketchFences } from 'markdown-it-skeudo';
 
 /** A Markdown document with sketch fences, or a sketch on its own. */
@@ -54,17 +54,26 @@ export function problems(doc: Doc): Problem[] {
 export const formatProblem = (doc: Doc, p: Problem) => `${doc.name}:${p.line}: ${p.severity}: ${p.message}`;
 
 export interface PageOptions {
-  /** Base URL for `::src` links. Defaults to `srcBase` in the front matter. */
+  /** Base URL for `::src` links, given for this rendering. It wins over `::repo` and the front matter. */
   srcBase?: string;
   /** Stylesheet and script inlined into the page. */
   css: string;
   script: string;
 }
 
+/**
+ * Links `::src` locations under the base given for this rendering. Without one, a sketch links to the
+ * repository it names with `::repo`, and a sketch that names none links under the front matter's `srcBase`.
+ */
+function srcLinks(given: string | undefined, fallback: string | undefined): HtmlOptions['srcHref'] {
+  if (given) return srcBaseHref(given);
+  const underFallback = fallback ? srcBaseHref(fallback) : undefined;
+  return (loc, sketch) => (sketch.repo && repoHref(sketch.repo, loc)) || underFallback?.(loc);
+}
+
 /** Renders a document as a standalone HTML page, with nothing loaded from elsewhere. */
 export function renderPage(doc: Doc, opts: PageOptions): string {
-  const base = opts.srcBase ?? doc.meta.srcBase;
-  const html: HtmlOptions = { srcHref: base ? srcBaseHref(base) : undefined };
+  const html: HtmlOptions = { srcHref: srcLinks(opts.srcBase, doc.meta.srcBase) };
   let body: string;
   let heading: string | undefined;
   if (doc.markdown) {

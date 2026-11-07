@@ -37,6 +37,28 @@ export interface ResolvedSrc extends SrcLocation {
   inherited?: boolean;
 }
 
+/**
+ * The repository a `::repo` tag names, which `::src` paths are relative to. `url` is the URL as written,
+ * and `rev` is the revision after the last `@` of its path, when there is one.
+ */
+export type Repo =
+  /** `git+https://github.com/org/shop@a1b2c3d`, or any other remote after `git+`. */
+  | {
+      type: 'remote';
+      url: string;
+      /** The remote after `git+`, without the revision: `https://github.com/org/shop`. */
+      remote: string;
+      /** Lowercase host, without a user or port: `github.com`. */
+      host: string;
+      /** Path of the repository on its host, without a trailing `.git`: `org/shop`. */
+      path: string;
+      rev?: string;
+    }
+  /** `git+file:///home/me/shop@a1b2c3d`: a folder on this machine. */
+  | { type: 'local'; url: string; /** Absolute path of the folder: `/home/me/shop`. */ path: string; rev?: string }
+  /** Any other URL, which paths are added to as given. */
+  | { type: 'base'; url: string };
+
 /** A change tag in a sketch of a commit or pull request. */
 export type ChangeKind = 'new' | 'changed' | 'removed';
 
@@ -85,7 +107,7 @@ export interface SketchLine {
   src?: ResolvedSrc;
   /** Own or inherited change, in a sketch of a commit or pull request. */
   change?: LineChange;
-  /** True when the line holds nothing but `::src` tags, so a renderer drops it. */
+  /** True when the line holds nothing but `::src` and `::repo` tags, so a renderer drops it. */
   hidden: boolean;
 }
 
@@ -115,6 +137,8 @@ export interface Sketch {
   signature?: Signature;
   /** File named by the `::src` tag on the signature. */
   file?: string;
+  /** Repository named by the sketch's first `::repo` tag. */
+  repo?: Repo;
   /** Spaces per indentation level, when it could be determined. */
   indentUnit?: number;
   lines: SketchLine[];

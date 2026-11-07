@@ -1,6 +1,6 @@
 # Skeudo: readable pseudocode for code review
 
-Oct 22, 2026 · updated Nov 1, 2026 · @Walid Lezzar
+Oct 22, 2026 · updated Nov 7, 2026 · @Walid Lezzar
 
 ## Purpose and core contract
 
@@ -57,6 +57,7 @@ Every marker is a tag: `::kind`, optionally followed by `:value` and an attached
 | `::danger[note]` | Flags something on the line a reviewer should stop at. |
 | `::unsure[note]` | The author isn't sure the line is accurate. |
 | `::src[location]` | Links the line to its source. With a call name as value, `::src:name[location]` links that call to its definition. |
+| `::repo[url]` | Names the repository that `::src` paths are relative to, and the revision they refer to. See Source links. |
 | `::new` | The change being sketched adds this line. See Changes. |
 | `::changed[how]` | The change being sketched alters what this line does. See Changes. |
 | `::removed[what]` | The change being sketched takes this behavior away. See Changes. |
@@ -71,7 +72,7 @@ The system is any name: `postgres`, `stripe`, `legacy-billing`. A dot narrows it
 
 A note attached to a tag, with no space, describes it in free words. Access patterns go here: `::read:postgres.orders[lookup by key]`, `::read:postgres.items[n x lookup by key]`, `::read:postgres.orders[!full scan]`. A note starting with `!` flags a danger the reviewer should stop at: `::write:stripe[!no idempotency key]`. A danger that belongs to the whole line rather than one effect is its own tag: `::danger[shared across tenants]`.
 
-Brackets that aren't attached to a tag are plain prose, so code such as `messages = [task]` needs no escaping. The one note that isn't free words is the note of `::src`, which holds a location; see Source links.
+Brackets that aren't attached to a tag are plain prose, so code such as `messages = [task]` needs no escaping. Two notes aren't free words: the note of `::src` holds a location, and the note of `::repo` holds a URL; see Source links.
 
 ### Direction
 
@@ -89,11 +90,13 @@ Tags that come after everything else on a line are its trailing tags, and render
 
 ### Source links
 
-`::src` links a sketch to the code it describes. Its note holds a location instead of free words: `path:start-end`, `path:line`, `path`, or a bare line or range.
+`::src` links a sketch to the code it describes. Its note holds a location instead of free words: `path:start-end`, `path:line`, `path`, or a bare line or range. Paths are relative to the root of the repository.
 
 Without a value, `::src` gives the source of the line it sits on, as in `::src[app/profile.py:12-24]`. A location without a path uses the file named on the signature, so other lines can write `::src[13]`. A line without `::src` uses its parent block's range, so a sketch can anchor every line, only its blocks or just its signature.
 
 With a call name as its value, `::src` gives that call's definition, as in `::src:load_user[app/users.py:88]`. It applies to every call of that name in the sketch, wherever the tag sits. By convention these tags go at the end of the sketch.
+
+`::repo` names the repository and the revision the locations refer to. Its note holds a URL. It applies to the whole sketch, wherever it sits; by convention it goes on the last line.
 
 ```skeudo
 get_profile(user_id):                    ::src[app/profile.py:12-24]
@@ -108,9 +111,24 @@ get_profile(user_id):                    ::src[app/profile.py:12-24]
         return row
     ::src:load_user[app/users.py:88]
     ::src:cache.set[lib/cache.py:31]
+    ::repo[git+https://github.com/org/shop@a1b2c3d]
 ```
 
-Renderers hide `::src` tags and turn them into links. In plain text they add clutter, so a tool posting a sketch where nothing renders can leave them out.
+Renderers hide `::src` and `::repo` tags and turn them into links. In plain text they add clutter, so a tool posting a sketch where nothing renders can leave them out.
+
+The URL of `::repo` takes one of three forms:
+
+| Form | Example | Links go to |
+| --- | --- | --- |
+| `git+` and a remote, then `@` and a revision | `git+https://github.com/org/shop@a1b2c3d` | A local copy of the repository when the renderer finds one, otherwise the repository's host at that revision |
+| `git+file://` and an absolute path, then `@` and a revision | `git+file:///home/me/shop@a1b2c3d` | That folder |
+| Any other URL | `https://code.example.com/shop/blob/a1b2c3d/` | That URL with the path added, as given |
+
+The revision follows the last `@` in the URL's path, so the user in `git+ssh://git@github.com/org/shop.git` belongs to the remote. It can be a commit, a tag or a branch. It is optional; without one, links go to the code as it is now. Prefer the commit the sketch was written from, so its line numbers still match after the code moves on.
+
+Two remotes name the same repository when their host and path match, ignoring the protocol, the user, the port, letter case and a trailing `.git`. So `git+ssh://git@github.com/org/shop.git` and `git+https://github.com/org/shop` are the same repository, and a renderer can find a local copy however it was cloned.
+
+A sketch without `::repo` leaves the root to the renderer, such as the editor's workspace folder. A base the user gives for one rendering, such as a command-line option, takes precedence over `::repo`.
 
 ## Variables and labels
 
@@ -152,7 +170,7 @@ A line without a change tag is unchanged; keep only the unchanged lines needed t
 
 A removed line stays where the behavior used to run, and keeps its effect tags. These are effects the code no longer has, so tools show them as removed rather than counting them among the code's effects or as places labeled data reaches.
 
-By convention, change tags follow a line's effect tags and come before its `::src` tags. In a sketch of a change, `::src` locations refer to the code after the change.
+By convention, change tags follow a line's effect tags and come before its `::src` tags. In a sketch of a change, `::src` locations refer to the code after the change, so `::repo` names that revision.
 
 ```skeudo
 cancel_order(order_id):
@@ -201,6 +219,7 @@ A sketch always renders. Problems are warnings attached to their line, never err
 - A note has no closing `]`. The `[` and what follows stay prose.
 - `::read` or `::write` has no system, `::fail` has no name, a label has no variable, or `::changed` has no note.
 - `::src` has no location, or its location has no file and the signature names none.
+- `::repo` has no URL, or a sketch has more than one `::repo`. The first one applies.
 
 ## Authoring rules
 
@@ -211,7 +230,7 @@ These rules apply to anyone writing a sketch, human or AI. The first two carry t
 | Mark every effect where it happens | Any line that reads or changes outside state carries a tag, whether it is prose or a call. Effects inside a called function are tagged on the call. |
 | Keep effects separate and in order | One tag per effect, in execution order. Never fold several effects into untagged words like "undo both". |
 | Name the failures the function raises or handles | Each one is `::fail:Name`, inside an `if …:` block for its condition. Failures from callees that simply propagate need no tag. A swallowed failure is noted on its effect, as in `::write:sendgrid[failure ignored]`. |
-| Anchor what a reviewer may open | Use real function names for calls worth jumping to. Write everything else as prose. When the source is known, link lines and calls with `::src`. |
+| Anchor what a reviewer may open | Use real function names for calls worth jumping to. Write everything else as prose. When the source is known, link lines and calls with `::src`, and name the repository and revision with `::repo`. |
 | Use prose for intent | Invariants, purposes and summaries go in plain words, such as "only one refresh at a time". |
 | Flag doubt instead of guessing | Add `~` or `::unsure[…]` when a claim isn't verified. When a detail like an access pattern is a guess, say "probably" in its note. |
 | Flag dangers | Start a note with `!` where a reviewer should stop, as in `::write:stripe[!no idempotency key]` or `::read:postgres.orders[!full scan]`. Use `::danger[…]` for a danger that belongs to the whole line. |
@@ -242,7 +261,8 @@ A highlighter works only from tags, the shape of calls and bindings, and positio
 | Binding or parameter | Bold; colored across all its uses on hover or click |
 | Labeled variable | Persistent underline in the label's color: wavy pink for untrusted, solid purple for secret |
 | Other kinds | Neutral pill, unless the renderer assigns a color |
-| `::src` tag | Hidden; the line links to its source, and calls link to their definitions. A line made only of `::src` tags is hidden entirely. The file named on the signature appears at the end of that line. |
+| `::src` tag | Hidden; the line links to its source, and calls link to their definitions. A line made only of `::src` and `::repo` tags is hidden entirely. The file named on the signature appears at the end of that line. |
+| `::repo` tag | Hidden. Links open a local copy of the repository when the renderer finds one, with a warning when the file has changed since the sketch's revision. Otherwise they go to the file on the repository's host at the sketch's revision, for hosts the renderer knows how to link to. |
 | Trailing tags | Aligned into a right-hand tag column, with their notes. When a line's tags don't fit on one line of the column, a renderer may move them under the line. A note too long for the space wraps rather than being cut off. |
 | `::new` tag | Green pill. A green bar in the gutter beside the line, and beside every line of the block it covers |
 | `::changed` tag | Blue pill with its note. A blue bar in the gutter beside the line |
@@ -372,10 +392,11 @@ These changes make the format consistent with what was sketched in discussion, a
 | Problems in a sketch | Not specified | Warnings on the line; a sketch always renders | A half-written sketch is still worth reading |
 | Changes | Not designed; sketches of commits used provisional `::new`, `::changed` and `::removed` tags | The three tags are defined. New and removed cover their block, and removed effects stay visible but don't count | Commits and pull requests are what gets sketched most, and tags need no grammar change |
 | Format name | "Sketch" was a working name, with `` ```sketch `` fences and `.sketch` files | Skeudo, with `` ```skeudo `` fences (`` ```sketch `` still accepted) and `.skeudo` files | `.sketch` belongs to the Sketch design app, and "sketch" alone is a common word other tools also use |
+| Source repository | `::src` paths had no stated root, so links resolved against wherever the sketch was opened, and the revision was left to the tool that generated the sketch | `::repo[git+<remote>@<revision>]` names the repository and revision; `::src` paths are relative to its root | A sketch saved or read outside its repository, or read after the code moved on, still links to the right lines. The URL form is the one pip uses for git dependencies |
 
 | Open question | Current default |
 | --- | --- |
-| Which revision of the code `::src` line numbers refer to | Left to the tool that generates the sketch |
+| Whether editors open a file at the sketch's revision, rather than the local copy as it is now | The local copy as it is now, with a warning when the file has changed since the revision |
 | Zoom levels: one line, block level, near source | Block level only |
 | Whether model calls need their own kind, for cost and nondeterminism | Treated as reads |
 | Whether shorthands such as `->sys` come back as sugar for tags | Tags only |

@@ -1,0 +1,6 @@
+get_profile(user_id):                    ::src[app/profile.py:12-24]
+    row = load_user(user_id)             ::read:postgres.users
+    ::repo
+    ::repo[github.com/org/shop]
+    ::repo[git+file:///home/me/shop@a1b2c3d]
+    ::repo[git+https://github.com/org/shop@a1b2c3d]

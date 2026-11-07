@@ -1,6 +1,14 @@
 {
   "signature": { "name": "get_profile", "params": ["user_id"], "line": 1 },
   "file": "app/profile.py",
+  "repo": {
+    "type": "remote",
+    "url": "git+https://github.com/org/shop@a1b2c3d",
+    "remote": "https://github.com/org/shop",
+    "host": "github.com",
+    "path": "org/shop",
+    "rev": "a1b2c3d"
+  },
   "indentUnit": 4,
   "callSources": {
     "load_user": { "path": "app/users.py", "start": 88, "end": 88 },
@@ -215,6 +223,22 @@
         }
       ],
       "segments": [{ "type": "tag", "raw": "::src:cache.set[lib/cache.py:31]" }]
+    },
+    {
+      "number": 13,
+      "depth": 1,
+      "text": "::repo[git+https://github.com/org/shop@a1b2c3d]",
+      "hidden": true,
+      "parent": 1,
+      "src": { "path": "app/profile.py", "start": 12, "end": 24, "inherited": true },
+      "tags": [
+        {
+          "raw": "::repo[git+https://github.com/org/shop@a1b2c3d]",
+          "kind": "repo",
+          "note": { "text": "git+https://github.com/org/shop@a1b2c3d" }
+        }
+      ],
+      "segments": [{ "type": "tag", "raw": "::repo[git+https://github.com/org/shop@a1b2c3d]" }]
     }
   ]
 }

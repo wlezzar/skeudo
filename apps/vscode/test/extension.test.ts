@@ -1,20 +1,25 @@
 /// <reference types="node" />
+import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
-import { mkdtemp, readFile, rm } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, realpath, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { pathToFileURL } from 'node:url';
 import markdownit from 'markdown-it';
 import { afterAll, beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
+import { parse } from '@skeudo/core';
 import { build, previewCss } from '../build.mjs';
 import { activate } from '../src/extension';
+import { Git } from '../src/git';
 import { markdownInjection, sketchGrammar } from '../src/grammar';
-import { srcHref } from '../src/links';
+import { createSrcHref, workspaceHref, type LinkContext } from '../src/links';
 import manifest from '../package.json';
 
 /** A stand-in for the parts of the `vscode` API the extension uses. */
 const vscode = vi.hoisted(() => {
   type Listener = (e: { affectsConfiguration(section: string): boolean }) => void;
-  const state = { settings: {} as Record<string, unknown>, listeners: [] as Listener[] };
+  const state = { settings: {} as Record<string, unknown>, listeners: [] as Listener[], folders: [] as string[], trusted: true };
+  const noop = () => ({ dispose() {} });
   return {
     state,
     changeSetting(key: string, value: unknown) {
@@ -28,11 +33,25 @@ const vscode = vi.hoisted(() => {
         state.listeners.push(listener);
         return { dispose() {} };
       },
+      onDidChangeWorkspaceFolders: noop,
+      onDidGrantWorkspaceTrust: noop,
+      get workspaceFolders() {
+        return state.folders.map((fsPath) => ({ uri: { scheme: 'file', fsPath } }));
+      },
+      get isTrusted() {
+        return state.trusted;
+      },
     },
     commands: { executeCommand: vi.fn(async () => undefined) },
   };
 });
 vi.mock('vscode', () => ({ workspace: vscode.workspace, commands: vscode.commands }));
+
+/** A stand-in for the extension's global state. */
+function memento(initial: Record<string, unknown> = {}) {
+  const data = { ...initial };
+  return { get: (key: string) => data[key], update: vi.fn(async (key: string, value: unknown) => void (data[key] = value)) };
+}
 
 const DOC = [
   '# Profile',
@@ -53,8 +72,8 @@ const DOC = [
 ].join('\n');
 
 /** Activates the extension and returns a markdown-it instance it extended, as VS Code's preview would. */
-function preview() {
-  const { extendMarkdownIt } = activate({ subscriptions: [] } as never);
+function preview(globalState = memento()) {
+  const { extendMarkdownIt } = activate({ subscriptions: [], globalState } as never);
   // VS Code's preview tags every block with its source line, for scroll sync.
   const md = markdownit({ html: true, linkify: true });
   md.core.ruler.push('source_map_data_attribute', (state) => {
@@ -71,6 +90,8 @@ function preview() {
 beforeEach(() => {
   vscode.state.settings = {};
   vscode.state.listeners = [];
+  vscode.state.folders = [];
+  vscode.state.trusted = true;
   vscode.commands.executeCommand.mockClear();
 });
 
@@ -116,19 +137,129 @@ describe('Markdown preview', () => {
   });
 });
 
-describe('source links', () => {
+describe('source links without ::repo', () => {
   test('use the path from the workspace folder, and the line or range', () => {
-    expect(srcHref({ path: 'app/users.py', start: 88 })).toBe('/app/users.py#L88');
-    expect(srcHref({ path: './app/users.py', start: 88, end: 88 })).toBe('/app/users.py#L88');
-    expect(srcHref({ path: 'app/users.py' })).toBe('/app/users.py');
+    expect(workspaceHref({ path: 'app/users.py', start: 88 })).toBe('/app/users.py#L88');
+    expect(workspaceHref({ path: './app/users.py', start: 88, end: 88 })).toBe('/app/users.py#L88');
+    expect(workspaceHref({ path: 'app/users.py' })).toBe('/app/users.py');
   });
 
   test('escape characters that mean something in a URL', () => {
-    expect(srcHref({ path: 'docs/a b#1.md', start: 3 })).toBe('/docs/a%20b%231.md#L3');
+    expect(workspaceHref({ path: 'docs/a b#1.md', start: 3 })).toBe('/docs/a%20b%231.md#L3');
   });
 
   test('are omitted for a location without a file', () => {
-    expect(srcHref({ start: 13 })).toBeUndefined();
+    expect(workspaceHref({ start: 13 })).toBeUndefined();
+  });
+});
+
+describe('source links with ::repo', () => {
+  // A repository cloned from GitHub, and a folder of notes outside it, where a sketch of it is saved.
+  let root: string;
+  let shop: string;
+  let notes: string;
+  let sha: string;
+  const ID = 'github.com/org/shop';
+  const git = (cwd: string, ...args: string[]) =>
+    execFileSync('git', ['-c', 'user.name=Test', '-c', 'user.email=test@example.com', ...args], { cwd, encoding: 'utf8' }).trim();
+
+  beforeAll(async () => {
+    // Git reports real paths, which differ from the temp folder's on macOS.
+    root = await realpath(await mkdtemp(join(tmpdir(), 'skeudo-links-')));
+    shop = join(root, 'shop');
+    notes = join(root, 'notes');
+    await mkdir(join(shop, 'app'), { recursive: true });
+    await mkdir(join(shop, 'docs'));
+    await mkdir(notes);
+    await writeFile(join(shop, 'app', 'profile.py'), 'def get_profile(user_id):\n    return None\n');
+    git(shop, 'init', '-q');
+    git(shop, 'remote', 'add', 'origin', 'git@github.com:org/shop.git');
+    git(shop, 'add', '.');
+    git(shop, 'commit', '-qm', 'Add profiles');
+    sha = git(shop, 'rev-parse', '--short', 'HEAD');
+  });
+  afterAll(() => rm(root, { recursive: true, force: true }));
+
+  const LOC = { path: 'app/profile.py', start: 1, end: 2 };
+  const context = (over: Partial<LinkContext> = {}): LinkContext => ({
+    git: () => new Git(0),
+    repositories: () => ({}),
+    gitHosts: () => ({}),
+    workspaceFolders: () => [],
+    remembered: () => ({}),
+    ...over,
+  });
+  const inDocument = (path = join(notes, 'review.md')) => ({ currentDocument: { scheme: 'file', fsPath: path } });
+  const href = (ctx: LinkContext, repo: string, env: Record<string, unknown> = inDocument()) =>
+    createSrcHref(ctx)(LOC, parse(`get_profile(user_id):    ::src[app/profile.py:1-2]\n    ::repo[${repo}]\n`), env);
+  const remembered = () => ({ [ID]: shop });
+
+  test('open the local copy, with a path relative to the document', () => {
+    expect(href(context({ remembered }), 'git+https://github.com/org/shop')).toBe('../shop/app/profile.py#L1-L2');
+  });
+
+  test('find the copy from the setting, the repository holding the document, or the open folders', () => {
+    expect(href(context({ repositories: () => ({ 'https://github.com/org/shop.git': shop }) }), 'git+https://github.com/org/shop')).toBe('../shop/app/profile.py#L1-L2');
+    expect(href(context({ repositories: () => ({ 'github.com/Org/Shop': shop }) }), 'git+https://github.com/org/shop')).toBe('../shop/app/profile.py#L1-L2');
+    expect(href(context(), 'git+https://github.com/org/shop', inDocument(join(shop, 'docs', 'review.md')))).toBe('../app/profile.py#L1-L2');
+    expect(href(context({ workspaceFolders: () => [notes, shop] }), 'git+https://github.com/org/shop')).toBe('../shop/app/profile.py#L1-L2');
+  });
+
+  test('warn when the file has changed since the revision, or the copy lacks the revision', async () => {
+    const ctx = context({ remembered });
+    expect(href(ctx, `git+https://github.com/org/shop@${sha}`)).toBe('../shop/app/profile.py#L1-L2');
+    await writeFile(join(shop, 'app', 'profile.py'), '# Profiles\ndef get_profile(user_id):\n    return None\n');
+    try {
+      expect(href(ctx, `git+https://github.com/org/shop@${sha}`)).toEqual({
+        href: '../shop/app/profile.py#L1-L2',
+        note: `app/profile.py has changed since ${sha}, so the lines may have moved.`,
+      });
+    } finally {
+      git(shop, 'checkout', '--', 'app/profile.py');
+    }
+    expect(href(ctx, 'git+https://github.com/org/shop@0000000')).toEqual({
+      href: '../shop/app/profile.py#L1-L2',
+      note: `${shop} doesn't have 0000000, so the lines may have moved.`,
+    });
+  });
+
+  test('never pass a revision to git that it would read as an option', () => {
+    expect(href(context({ remembered }), 'git+https://github.com/org/shop@--output=x')).toBe('../shop/app/profile.py#L1-L2');
+  });
+
+  test('link to the host when there is no local copy, or no document on disk', () => {
+    const web = `https://github.com/org/shop/blob/${sha}/app/profile.py#L1-L2`;
+    expect(href(context(), `git+https://github.com/org/shop@${sha}`)).toBe(web);
+    expect(href(context({ remembered }), `git+https://github.com/org/shop@${sha}`, {})).toBe(web);
+    expect(href(context(), 'git+https://git.example.com/org/shop')).toBeUndefined();
+    expect(href(context({ gitHosts: () => ({ 'git.example.com': 'gitlab' }) }), 'git+https://git.example.com/org/shop')).toBe(
+      'https://git.example.com/org/shop/-/blob/HEAD/app/profile.py#L1-2',
+    );
+  });
+
+  test('open a git+file folder or a file: base from the document, and leave a missing folder unlinked', () => {
+    const url = pathToFileURL(shop).href;
+    expect(href(context(), `git+${url}@${sha}`)).toBe('../shop/app/profile.py#L1-L2');
+    expect(href(context(), url)).toBe('../shop/app/profile.py#L1-L2');
+    expect(href(context(), 'git+file:///nowhere/shop')).toBeUndefined();
+    expect(href(context(), 'https://code.example.com/shop/blob/a1b2c3d')).toBe('https://code.example.com/shop/blob/a1b2c3d/app/profile.py#L1-L2');
+  });
+
+  test('run no git in an untrusted workspace', async () => {
+    const untrusted = context({ git: () => undefined, workspaceFolders: () => [shop] });
+    expect(href(untrusted, 'git+https://github.com/org/shop')).toBe('https://github.com/org/shop/blob/HEAD/app/profile.py#L1-L2');
+    expect(href({ ...untrusted, remembered }, 'git+https://github.com/org/shop@0000000')).toBe('../shop/app/profile.py#L1-L2');
+  });
+
+  test('work in the preview, which remembers the repositories open in the window', async () => {
+    vscode.state.folders = [shop];
+    const state = memento();
+    const md = preview(state);
+    await vi.waitFor(() => expect(state.update).toHaveBeenCalledWith('repositories', { [ID]: shop }));
+
+    vscode.state.folders = [notes];
+    const doc = '```skeudo\nget_profile(user_id):    ::src[app/profile.py:1-2]\n    ::repo[git+https://github.com/org/shop]\n```\n';
+    expect(md.render(doc, inDocument())).toContain('href="../shop/app/profile.py#L1-L2"');
   });
 });
 
@@ -185,9 +316,9 @@ describe('build', () => {
     expect(Object.keys(fence.embeddedLanguages!).map((scope) => embedded.includes(`"contentName":"${scope}"`))).toEqual([true]);
   });
 
-  test('bundles everything but the vscode module', async () => {
+  test("bundles everything but the vscode module and Node's own modules", async () => {
     const js = await readFile(join(out, 'extension.js'), 'utf8');
-    expect([...js.matchAll(/require\("([^"]+)"\)/g)].map((m) => m[1])).toEqual(['vscode']);
+    expect([...new Set([...js.matchAll(/require\("([^"]+)"\)/g)].map((m) => m[1]).filter((m) => !m.startsWith('node:')))]).toEqual(['vscode']);
     expect(js).toContain('extendMarkdownIt');
   });
 

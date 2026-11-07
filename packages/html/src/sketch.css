@@ -354,6 +354,11 @@ a.sk-call:hover { text-decoration-style: solid; }
 }
 a.sk-file:hover { color: var(--sk-blue); text-decoration: underline; }
 
+/* A source link whose tooltip carries a note, such as a warning that the lines may have moved. */
+.sk-src.sk-src-note,
+.sk-file.sk-src-note { color: var(--sk-amber); }
+.sk-call.sk-src-note { text-decoration-color: var(--sk-amber); }
+
 /* Inline code made only of tags, as rendered by markdown-it-skeudo.
    The doubled class outranks host rules such as `.markdown-body code`. */
 code.sk-inline.sk-inline {

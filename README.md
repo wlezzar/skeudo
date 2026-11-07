@@ -37,7 +37,7 @@ pnpm build:cli       # CLI in apps/cli/dist/skeudo.js, see apps/cli/README.md
 pnpm package:cli     # CLI as apps/cli/skeudo-0.0.1.tgz, for npm install -g
 ```
 
-Markdown files in `apps/playground/local-examples/` (gitignored) appear in the playground's Example menu, so you can try sketches of private code. Optional front matter sets the menu title and the base URL for source links:
+Markdown files in `apps/playground/local-examples/` (gitignored) appear in the playground's Example menu, so you can try sketches of private code. Optional front matter sets the menu title and the base URL for source links in sketches without `::repo`:
 
 ```markdown
 ---

@@ -47,7 +47,8 @@ The page needs the stylesheet, `@skeudo/html/sketch.css`. For variable highlight
 | --- | --- | --- |
 | `langs` | `['skeudo', 'sketch']` | Fence languages rendered as sketches. |
 | `inlineTags` | `true` | Render inline code made only of tags as pills. |
-| `srcHref` | none | Builds a link for a `::src` location, from `{ path, start, end }`. `srcBaseHref(base)` from `@skeudo/html` builds one for a base URL, such as `https://github.com/org/repo/blob/a1b2c3d/`. Without it, locations are tooltips. |
+| `srcHref` | links to `::repo` | Builds a link for a `::src` location, from `{ path, start, end }` and the parsed sketch. `srcBaseHref(base)` from `@skeudo/html` builds one for a base URL, such as `https://github.com/org/repo/blob/a1b2c3d/`. Without it, a sketch that names its repository with `::repo` links to the file there, on GitHub, GitLab or Bitbucket, and other locations are tooltips. |
+| `gitHosts` | `{}` | Other GitHub, GitLab or Bitbucket servers, such as `{ 'git.example.com': 'gitlab' }`, so `::repo` links reach them too. |
 | `kindColors` | `{}` | CSS colors for tag kinds, such as `{ todo: '#8b5cf6' }`. |
 | `labelKinds` | `['untrusted', 'secret']` | Tag kinds whose value labels a variable. Every later use of a labeled variable is marked. |
 

@@ -1,0 +1,93 @@
+{
+  "signature": { "name": "get_profile", "params": ["user_id"], "line": 1 },
+  "file": "app/profile.py",
+  "repo": {
+    "type": "remote",
+    "url": "git+ssh://git@github.com/org/shop.git@a1b2c3d",
+    "remote": "ssh://git@github.com/org/shop.git",
+    "host": "github.com",
+    "path": "org/shop",
+    "rev": "a1b2c3d"
+  },
+  "indentUnit": 4,
+  "callSources": { "load_user": { "path": "app/users.py", "start": 88, "end": 88 } },
+  "variables": {
+    "user_id": { "origin": "param", "line": 1 },
+    "row": { "origin": "binding", "line": 2 }
+  },
+  "lines": [
+    {
+      "number": 1,
+      "depth": 0,
+      "text": "get_profile(user_id):                    ::src[app/profile.py:12-24]",
+      "signature": true,
+      "header": true,
+      "src": { "path": "app/profile.py", "start": 12, "end": 24 },
+      "tags": [
+        {
+          "raw": "::src[app/profile.py:12-24]",
+          "kind": "src",
+          "note": { "text": "app/profile.py:12-24" },
+          "trailing": true
+        }
+      ],
+      "segments": [
+        { "type": "fn", "text": "get_profile" },
+        { "type": "text", "text": "(" },
+        { "type": "var", "text": "user_id", "name": "user_id", "definition": true },
+        { "type": "text", "text": "):" }
+      ]
+    },
+    {
+      "number": 2,
+      "depth": 1,
+      "text": "row = load_user(user_id)             ::read:postgres.users ::src[14]",
+      "parent": 1,
+      "binding": "row",
+      "src": { "start": 14, "end": 14, "path": "app/profile.py" },
+      "tags": [
+        {
+          "raw": "::read:postgres.users",
+          "kind": "read",
+          "value": "postgres.users",
+          "trailing": true
+        },
+        { "raw": "::src[14]", "kind": "src", "note": { "text": "14" }, "trailing": true }
+      ],
+      "segments": [
+        { "type": "var", "text": "row", "name": "row", "definition": true },
+        { "type": "text", "text": " = " },
+        { "type": "call", "text": "load_user", "name": "load_user" },
+        { "type": "text", "text": "(" },
+        { "type": "var", "text": "user_id", "name": "user_id" },
+        { "type": "text", "text": ")" }
+      ]
+    },
+    {
+      "number": 3,
+      "depth": 1,
+      "text": "::src:load_user[app/users.py:88]     ::repo[git+ssh://git@github.com/org/shop.git@a1b2c3d]",
+      "hidden": true,
+      "parent": 1,
+      "src": { "path": "app/profile.py", "start": 12, "end": 24, "inherited": true },
+      "tags": [
+        {
+          "raw": "::src:load_user[app/users.py:88]",
+          "kind": "src",
+          "value": "load_user",
+          "note": { "text": "app/users.py:88" }
+        },
+        {
+          "raw": "::repo[git+ssh://git@github.com/org/shop.git@a1b2c3d]",
+          "kind": "repo",
+          "note": { "text": "git+ssh://git@github.com/org/shop.git@a1b2c3d" }
+        }
+      ],
+      "segments": [
+        { "type": "tag", "raw": "::src:load_user[app/users.py:88]" },
+        { "type": "text", "text": "     " },
+        { "type": "tag", "raw": "::repo[git+ssh://git@github.com/org/shop.git@a1b2c3d]" }
+      ]
+    }
+  ]
+}

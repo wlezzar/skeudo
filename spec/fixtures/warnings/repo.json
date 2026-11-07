@@ -1,0 +1,138 @@
+{
+  "signature": { "name": "get_profile", "params": ["user_id"], "line": 1 },
+  "file": "app/profile.py",
+  "repo": {
+    "type": "local",
+    "url": "git+file:///home/me/shop@a1b2c3d",
+    "path": "/home/me/shop",
+    "rev": "a1b2c3d"
+  },
+  "indentUnit": 4,
+  "diagnostics": [
+    {
+      "line": 3,
+      "severity": "warning",
+      "message": "::repo needs a URL in its note, as in ::repo[git+https://github.com/org/repo@a1b2c3d]."
+    },
+    {
+      "line": 4,
+      "severity": "warning",
+      "message": "::repo needs a URL in its note, as in ::repo[git+https://github.com/org/repo@a1b2c3d]."
+    },
+    {
+      "line": 6,
+      "severity": "warning",
+      "message": "This sketch already names its repository on line 5; only the first ::repo applies."
+    }
+  ],
+  "variables": {
+    "user_id": { "origin": "param", "line": 1 },
+    "row": { "origin": "binding", "line": 2 }
+  },
+  "lines": [
+    {
+      "number": 1,
+      "depth": 0,
+      "text": "get_profile(user_id):                    ::src[app/profile.py:12-24]",
+      "signature": true,
+      "header": true,
+      "src": { "path": "app/profile.py", "start": 12, "end": 24 },
+      "tags": [
+        {
+          "raw": "::src[app/profile.py:12-24]",
+          "kind": "src",
+          "note": { "text": "app/profile.py:12-24" },
+          "trailing": true
+        }
+      ],
+      "segments": [
+        { "type": "fn", "text": "get_profile" },
+        { "type": "text", "text": "(" },
+        { "type": "var", "text": "user_id", "name": "user_id", "definition": true },
+        { "type": "text", "text": "):" }
+      ]
+    },
+    {
+      "number": 2,
+      "depth": 1,
+      "text": "row = load_user(user_id)             ::read:postgres.users",
+      "parent": 1,
+      "binding": "row",
+      "src": { "path": "app/profile.py", "start": 12, "end": 24, "inherited": true },
+      "tags": [
+        {
+          "raw": "::read:postgres.users",
+          "kind": "read",
+          "value": "postgres.users",
+          "trailing": true
+        }
+      ],
+      "segments": [
+        { "type": "var", "text": "row", "name": "row", "definition": true },
+        { "type": "text", "text": " = " },
+        { "type": "call", "text": "load_user", "name": "load_user" },
+        { "type": "text", "text": "(" },
+        { "type": "var", "text": "user_id", "name": "user_id" },
+        { "type": "text", "text": ")" }
+      ]
+    },
+    {
+      "number": 3,
+      "depth": 1,
+      "text": "::repo",
+      "hidden": true,
+      "parent": 1,
+      "src": { "path": "app/profile.py", "start": 12, "end": 24, "inherited": true },
+      "tags": [{ "raw": "::repo", "kind": "repo" }],
+      "segments": [{ "type": "tag", "raw": "::repo" }]
+    },
+    {
+      "number": 4,
+      "depth": 1,
+      "text": "::repo[github.com/org/shop]",
+      "hidden": true,
+      "parent": 1,
+      "src": { "path": "app/profile.py", "start": 12, "end": 24, "inherited": true },
+      "tags": [
+        {
+          "raw": "::repo[github.com/org/shop]",
+          "kind": "repo",
+          "note": { "text": "github.com/org/shop" }
+        }
+      ],
+      "segments": [{ "type": "tag", "raw": "::repo[github.com/org/shop]" }]
+    },
+    {
+      "number": 5,
+      "depth": 1,
+      "text": "::repo[git+file:///home/me/shop@a1b2c3d]",
+      "hidden": true,
+      "parent": 1,
+      "src": { "path": "app/profile.py", "start": 12, "end": 24, "inherited": true },
+      "tags": [
+        {
+          "raw": "::repo[git+file:///home/me/shop@a1b2c3d]",
+          "kind": "repo",
+          "note": { "text": "git+file:///home/me/shop@a1b2c3d" }
+        }
+      ],
+      "segments": [{ "type": "tag", "raw": "::repo[git+file:///home/me/shop@a1b2c3d]" }]
+    },
+    {
+      "number": 6,
+      "depth": 1,
+      "text": "::repo[git+https://github.com/org/shop@a1b2c3d]",
+      "hidden": true,
+      "parent": 1,
+      "src": { "path": "app/profile.py", "start": 12, "end": 24, "inherited": true },
+      "tags": [
+        {
+          "raw": "::repo[git+https://github.com/org/shop@a1b2c3d]",
+          "kind": "repo",
+          "note": { "text": "git+https://github.com/org/shop@a1b2c3d" }
+        }
+      ],
+      "segments": [{ "type": "tag", "raw": "::repo[git+https://github.com/org/shop@a1b2c3d]" }]
+    }
+  ]
+}

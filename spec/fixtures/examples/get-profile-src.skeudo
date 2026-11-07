@@ -10,3 +10,4 @@ get_profile(user_id):                    ::src[app/profile.py:12-24]
         return row
     ::src:load_user[app/users.py:88]
     ::src:cache.set[lib/cache.py:31]
+    ::repo[git+https://github.com/org/shop@a1b2c3d]

@@ -22,6 +22,18 @@ describe('sketch fences', () => {
     expect(render(fenced('sketch', SKETCH), { langs: ['skeudo'] })).not.toContain('class="sketch');
   });
 
+  test('links ::src locations to the repository the sketch names, with no options', () => {
+    const sketch = 'get_user(id):    ::src[app/users.py:3-9]\n    ::repo[git+https://github.com/org/shop@a1b2c3d]\n';
+    expect(render(fenced('skeudo', sketch))).toContain('href="https://github.com/org/shop/blob/a1b2c3d/app/users.py#L3-L9"');
+  });
+
+  test('gives srcHref the sketch and the env passed to render', () => {
+    const md = markdownit().use(markdownItSkeudo, {
+      srcHref: (loc, sketch, env) => `${env.base}/${sketch.signature?.name}/${loc.path}`,
+    });
+    expect(md.render(fenced('skeudo', 'get_user(id):    ::src[app/users.py:3]\n'), { base: '/docs' })).toContain('href="/docs/get_user/app/users.py"');
+  });
+
   test('finds the fences of both languages in a document', () => {
     const doc = `${fenced('skeudo', SKETCH)}\n${fenced('sketch', 'f(x):\n')}`;
     expect(sketchFences(markdownit(), doc).map((f) => f.content)).toEqual([SKETCH, 'f(x):\n']);

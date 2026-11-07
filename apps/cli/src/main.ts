@@ -22,7 +22,8 @@ when it has a sketch fence.
 Options for render:
   -o, --output <file>  Write the page to a file instead of stdout.
   --src-base <url>     Base URL for ::src links, such as https://github.com/org/repo/blob/<sha>/.
-                       Defaults to srcBase in the document's front matter.
+                       Without it, a sketch links to the repository its ::repo tag names, or
+                       under srcBase in the document's front matter.
 
   -h, --help           Show this help.
   -v, --version        Show the version.

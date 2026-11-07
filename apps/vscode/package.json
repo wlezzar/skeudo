@@ -24,7 +24,9 @@
     "code review"
   ],
   "main": "./dist/extension.js",
-  "activationEvents": [],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
   "files": [
     "dist/extension.js",
     "dist/preview.js",
@@ -92,6 +94,28 @@
           },
           "default": {},
           "markdownDescription": "CSS colors for tag kinds, such as `{ \"todo\": \"#8b5cf6\" }`. They override the default colors."
+        },
+        "skeudo.repositories": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "default": {},
+          "scope": "machine",
+          "markdownDescription": "Local copies of repositories, for sketches that name theirs with `::repo`, such as `{ \"github.com/org/shop\": \"~/code/shop\" }`. Not needed for a repository you have opened in VS Code since installing the extension."
+        },
+        "skeudo.gitHosts": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string",
+            "enum": [
+              "github",
+              "gitlab",
+              "bitbucket"
+            ]
+          },
+          "default": {},
+          "markdownDescription": "Other GitHub, GitLab or Bitbucket servers, such as `{ \"git.example.com\": \"gitlab\" }`, so sketches of their repositories link to them when there is no local copy."
         }
       }
     }
