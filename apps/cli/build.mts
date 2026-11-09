@@ -13,7 +13,7 @@ export async function build(outdir: string): Promise<string> {
   const common = { bundle: true, target: 'es2022', logLevel: 'warning' } as const;
 
   const manifest = JSON.parse(await readFile(new URL('package.json', import.meta.url), 'utf8'));
-  // Rendered pages inline skeudo.css with the page's own styles, and the script that highlights variables.
+  // Rendered pages inline skeudo.css with the page's own styles, and the script that makes the sketches interactive.
   const css = readStylesheet(new URL(import.meta.resolve('@skeudo/html/skeudo.css'))) + '\n' + (await readFile(src('page.css'), 'utf8'));
   const script = await bundle({ ...common, entryPoints: [src('page.ts')], write: false, platform: 'browser', format: 'iife', minify: true });
 

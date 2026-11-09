@@ -1,0 +1,16 @@
+{
+  "tables": [{ "name": "exercise", "columns": [{ "name": "practiced" }], "line": 2 }],
+  "diagnostics": [
+    { "line": 5, "severity": "warning", "message": "exercise has no column practised." }
+  ],
+  "steps": [
+    {
+      "title": "Practice",
+      "changes": [
+        { "op": "+", "table": "exercise", "id": "x1", "values": { "practised": "true" }, "line": 5 }
+      ],
+      "line": 4,
+      "rows": { "exercise": [{ "id": "x1", "status": "new" }] }
+    }
+  ]
+}

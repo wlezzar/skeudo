@@ -1,0 +1,66 @@
+{
+  "tables": [
+    { "name": "media", "columns": [{ "name": "role" }], "line": 2 },
+    { "name": "attempt", "columns": [{ "name": "recording", "ref": "media" }], "line": 3 }
+  ],
+  "diagnostics": [
+    {
+      "line": 10,
+      "severity": "warning",
+      "message": "attempt a1.recording points at media m7, which doesn't exist at step 2."
+    },
+    {
+      "line": 16,
+      "severity": "warning",
+      "message": "attempt a1.recording points at media m3, which doesn't exist at step 4."
+    }
+  ],
+  "steps": [
+    {
+      "title": "Record",
+      "changes": [
+        { "op": "+", "table": "media", "id": "m3", "values": { "role": "upload" }, "line": 6 },
+        { "op": "+", "table": "attempt", "id": "a1", "values": { "recording": "m3" }, "line": 7 }
+      ],
+      "line": 5,
+      "rows": {
+        "media": [{ "id": "m3", "values": { "role": "upload" }, "status": "new" }],
+        "attempt": [{ "id": "a1", "values": { "recording": "m3" }, "status": "new" }]
+      }
+    },
+    {
+      "title": "Point at a file that isn't there",
+      "changes": [
+        { "op": "~", "table": "attempt", "id": "a1", "values": { "recording": "m7" }, "line": 10 }
+      ],
+      "line": 9,
+      "rows": {
+        "media": [{ "id": "m3", "values": { "role": "upload" } }],
+        "attempt": [{ "id": "a1", "values": { "recording": "m7" }, "was": { "recording": "m3" } }]
+      }
+    },
+    {
+      "title": "Still broken",
+      "changes": [
+        { "op": "~", "table": "media", "id": "m3", "values": { "role": "audio" }, "line": 13 }
+      ],
+      "line": 12,
+      "rows": {
+        "media": [{ "id": "m3", "values": { "role": "audio" }, "was": { "role": "upload" } }],
+        "attempt": [{ "id": "a1", "values": { "recording": "m7" } }]
+      }
+    },
+    {
+      "title": "Delete the file still in use",
+      "changes": [
+        { "op": "~", "table": "attempt", "id": "a1", "values": { "recording": "m3" }, "line": 16 },
+        { "op": "-", "table": "media", "id": "m3", "line": 17 }
+      ],
+      "line": 15,
+      "rows": {
+        "media": [{ "id": "m3", "values": { "role": "audio" }, "status": "removed" }],
+        "attempt": [{ "id": "a1", "values": { "recording": "m3" }, "was": { "recording": "m7" } }]
+      }
+    }
+  ]
+}

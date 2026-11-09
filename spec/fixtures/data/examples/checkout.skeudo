@@ -1,0 +1,37 @@
+data
+customer(name, email)
+  One account. A guest gets a row too, with no email.
+
+order(customer -> customer, state, total, payment -> payment)
+  What the customer buys. The order lines aren't shown.
+
+payment(provider, state, amount)
+  One attempt to charge a card. A declined payment is kept,
+  and a retry adds a new row.
+
+shipment(order -> order, carrier, tracking)
+
+Ana checks out as a guest
+  + customer c1  name: Ana | email: null
+  + order o1     customer: c1 | state: pending | total: 42.00
+
+Her card is declined
+  + payment p1   provider: stripe | state: declined | amount: 42.00
+  ~ order o1     payment: p1
+
+She pays with another card
+  The declined payment stays for the records, and the order
+  points at the new one.
+  + payment p2   provider: stripe | state: captured | amount: 42.00
+  ~ order o1     state: paid | payment: p2
+
+She creates an account
+  The guest row is upgraded in place, so her past orders stay hers.
+  ~ customer c1  email: ana@example.com
+
+The order ships
+  + shipment h1  order: o1 | carrier: UPS | tracking: 1Z999AA1
+  ~ order o1     state: shipped
+
+The declined payment is purged after 30 days
+  - payment p1

@@ -1,0 +1,40 @@
+{
+  "tables": [
+    {
+      "name": "media",
+      "columns": [{ "name": "role" }, { "name": "type" }],
+      "doc": ["Metadata for one stored file. Sources point here.", "A second paragraph."],
+      "line": 2
+    }
+  ],
+  "steps": [
+    {
+      "title": "Upload",
+      "doc": [
+        "The browser sends the file to storage first.",
+        "Then finalizing records it.",
+        "A last paragraph."
+      ],
+      "changes": [
+        {
+          "op": "+",
+          "table": "media",
+          "id": "m1",
+          "values": { "role": "upload", "type": "video/mp4" },
+          "line": 10
+        }
+      ],
+      "line": 8,
+      "rows": {
+        "media": [
+          { "id": "m1", "values": { "role": "upload", "type": "video/mp4" }, "status": "new" }
+        ]
+      }
+    },
+    {
+      "title": "Nothing happens",
+      "line": 15,
+      "rows": { "media": [{ "id": "m1", "values": { "role": "upload", "type": "video/mp4" } }] }
+    }
+  ]
+}

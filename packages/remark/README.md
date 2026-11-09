@@ -1,6 +1,6 @@
 # remark-skeudo
 
-A [remark](https://github.com/remarkjs/remark) plugin that renders sketches in Markdown and MDX. A sketch is pseudocode for code review where every outside effect is tagged. The format, Skeudo, is defined in [spec/spec.md](https://github.com/wlezzar/skeudo/blob/main/spec/spec.md).
+A [remark](https://github.com/remarkjs/remark) plugin that renders sketches in Markdown and MDX. A sketch is pseudocode for code review where every outside effect is tagged, or, when it starts with a `data` line, a data model drawn as tables and a story of how their rows change. The format, Skeudo, is defined in [spec/spec.md](https://github.com/wlezzar/skeudo/blob/main/spec/spec.md).
 
 - Every ` ```skeudo ` fence becomes a sketch (` ```sketch ` works too).
 - Inline code made only of tags, such as `` `::read:postgres.users` ``, becomes pills.
@@ -39,7 +39,7 @@ const js = await compile(mdx, { remarkPlugins: [remarkSkeudo] });
 
 Site generators built on remark take it in their list of remark plugins, such as `markdown.remarkPlugins` in Astro or `remarkPlugins` in a Docusaurus docs preset. To pass options, give the plugin and its options as a pair: `[remarkSkeudo, { inlineTags: false }]`.
 
-The page needs the stylesheet, `@skeudo/html/skeudo.css`. For variable highlighting (hovering a name highlights its other uses, clicking pins the highlight) and for showing `::doc` explanations in a popover, call `enhance()` from `@skeudo/html` in the browser once the page has loaded. Without it, explanations are the browser's tooltips.
+The page needs the stylesheet, `@skeudo/html/skeudo.css`. For variable highlighting (hovering a name highlights its other uses, clicking pins the highlight), for showing explanations in a popover, and for stepping through data sketches, call `enhance()` from `@skeudo/html` in the browser once the page has loaded. Without it, code explanations are the browser's tooltips, and a data sketch shows its last step.
 
 ## Options
 
@@ -58,4 +58,4 @@ The parser's warnings, listed under Warnings in the spec, are reported as messag
 
 ## In the syntax tree
 
-Each sketch fence is replaced by a `skeudo` node that keeps the fence's `lang`, `meta` and source `value`, and carries the rendered `div.sketch` in `data` for remark-rehype. TypeScript users get the node type from the plugin, as `Skeudo`. remark-stringify can't write a `skeudo` node back to Markdown, so use the plugin when the output is HTML or MDX.
+Each sketch fence is replaced by a `skeudo` node that keeps the fence's `lang`, `meta` and source `value`, and carries the rendered element (`div.sketch`, or `div.skd` for a data sketch) in `data` for remark-rehype. TypeScript users get the node type from the plugin, as `Skeudo`. remark-stringify can't write a `skeudo` node back to Markdown, so use the plugin when the output is HTML or MDX.

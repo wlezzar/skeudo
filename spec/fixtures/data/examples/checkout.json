@@ -1,0 +1,233 @@
+{
+  "tables": [
+    {
+      "name": "customer",
+      "columns": [{ "name": "name" }, { "name": "email" }],
+      "doc": ["One account. A guest gets a row too, with no email."],
+      "line": 2
+    },
+    {
+      "name": "order",
+      "columns": [
+        { "name": "customer", "ref": "customer" },
+        { "name": "state" },
+        { "name": "total" },
+        { "name": "payment", "ref": "payment" }
+      ],
+      "doc": ["What the customer buys. The order lines aren't shown."],
+      "line": 5
+    },
+    {
+      "name": "payment",
+      "columns": [{ "name": "provider" }, { "name": "state" }, { "name": "amount" }],
+      "doc": [
+        "One attempt to charge a card. A declined payment is kept, and a retry adds a new row."
+      ],
+      "line": 8
+    },
+    {
+      "name": "shipment",
+      "columns": [
+        { "name": "order", "ref": "order" },
+        { "name": "carrier" },
+        { "name": "tracking" }
+      ],
+      "line": 12
+    }
+  ],
+  "steps": [
+    {
+      "title": "Ana checks out as a guest",
+      "changes": [
+        {
+          "op": "+",
+          "table": "customer",
+          "id": "c1",
+          "values": { "name": "Ana", "email": null },
+          "line": 15
+        },
+        {
+          "op": "+",
+          "table": "order",
+          "id": "o1",
+          "values": { "customer": "c1", "state": "pending", "total": "42.00" },
+          "line": 16
+        }
+      ],
+      "line": 14,
+      "rows": {
+        "customer": [{ "id": "c1", "values": { "name": "Ana", "email": null }, "status": "new" }],
+        "order": [
+          {
+            "id": "o1",
+            "values": { "customer": "c1", "state": "pending", "total": "42.00" },
+            "status": "new"
+          }
+        ]
+      }
+    },
+    {
+      "title": "Her card is declined",
+      "changes": [
+        {
+          "op": "+",
+          "table": "payment",
+          "id": "p1",
+          "values": { "provider": "stripe", "state": "declined", "amount": "42.00" },
+          "line": 19
+        },
+        { "op": "~", "table": "order", "id": "o1", "values": { "payment": "p1" }, "line": 20 }
+      ],
+      "line": 18,
+      "rows": {
+        "customer": [{ "id": "c1", "values": { "name": "Ana", "email": null } }],
+        "order": [
+          {
+            "id": "o1",
+            "values": { "customer": "c1", "state": "pending", "total": "42.00", "payment": "p1" },
+            "was": { "payment": null }
+          }
+        ],
+        "payment": [
+          {
+            "id": "p1",
+            "values": { "provider": "stripe", "state": "declined", "amount": "42.00" },
+            "status": "new"
+          }
+        ]
+      }
+    },
+    {
+      "title": "She pays with another card",
+      "doc": ["The declined payment stays for the records, and the order points at the new one."],
+      "changes": [
+        {
+          "op": "+",
+          "table": "payment",
+          "id": "p2",
+          "values": { "provider": "stripe", "state": "captured", "amount": "42.00" },
+          "line": 25
+        },
+        {
+          "op": "~",
+          "table": "order",
+          "id": "o1",
+          "values": { "state": "paid", "payment": "p2" },
+          "line": 26
+        }
+      ],
+      "line": 22,
+      "rows": {
+        "customer": [{ "id": "c1", "values": { "name": "Ana", "email": null } }],
+        "order": [
+          {
+            "id": "o1",
+            "values": { "customer": "c1", "state": "paid", "total": "42.00", "payment": "p2" },
+            "was": { "state": "pending", "payment": "p1" }
+          }
+        ],
+        "payment": [
+          { "id": "p1", "values": { "provider": "stripe", "state": "declined", "amount": "42.00" } },
+          {
+            "id": "p2",
+            "values": { "provider": "stripe", "state": "captured", "amount": "42.00" },
+            "status": "new"
+          }
+        ]
+      }
+    },
+    {
+      "title": "She creates an account",
+      "doc": ["The guest row is upgraded in place, so her past orders stay hers."],
+      "changes": [
+        {
+          "op": "~",
+          "table": "customer",
+          "id": "c1",
+          "values": { "email": "ana@example.com" },
+          "line": 30
+        }
+      ],
+      "line": 28,
+      "rows": {
+        "customer": [
+          {
+            "id": "c1",
+            "values": { "name": "Ana", "email": "ana@example.com" },
+            "was": { "email": null }
+          }
+        ],
+        "order": [
+          {
+            "id": "o1",
+            "values": { "customer": "c1", "state": "paid", "total": "42.00", "payment": "p2" }
+          }
+        ],
+        "payment": [
+          { "id": "p1", "values": { "provider": "stripe", "state": "declined", "amount": "42.00" } },
+          { "id": "p2", "values": { "provider": "stripe", "state": "captured", "amount": "42.00" } }
+        ]
+      }
+    },
+    {
+      "title": "The order ships",
+      "changes": [
+        {
+          "op": "+",
+          "table": "shipment",
+          "id": "h1",
+          "values": { "order": "o1", "carrier": "UPS", "tracking": "1Z999AA1" },
+          "line": 33
+        },
+        { "op": "~", "table": "order", "id": "o1", "values": { "state": "shipped" }, "line": 34 }
+      ],
+      "line": 32,
+      "rows": {
+        "customer": [{ "id": "c1", "values": { "name": "Ana", "email": "ana@example.com" } }],
+        "order": [
+          {
+            "id": "o1",
+            "values": { "customer": "c1", "state": "shipped", "total": "42.00", "payment": "p2" },
+            "was": { "state": "paid" }
+          }
+        ],
+        "payment": [
+          { "id": "p1", "values": { "provider": "stripe", "state": "declined", "amount": "42.00" } },
+          { "id": "p2", "values": { "provider": "stripe", "state": "captured", "amount": "42.00" } }
+        ],
+        "shipment": [
+          {
+            "id": "h1",
+            "values": { "order": "o1", "carrier": "UPS", "tracking": "1Z999AA1" },
+            "status": "new"
+          }
+        ]
+      }
+    },
+    {
+      "title": "The declined payment is purged after 30 days",
+      "changes": [{ "op": "-", "table": "payment", "id": "p1", "line": 37 }],
+      "line": 36,
+      "rows": {
+        "customer": [{ "id": "c1", "values": { "name": "Ana", "email": "ana@example.com" } }],
+        "order": [
+          {
+            "id": "o1",
+            "values": { "customer": "c1", "state": "shipped", "total": "42.00", "payment": "p2" }
+          }
+        ],
+        "payment": [
+          {
+            "id": "p1",
+            "values": { "provider": "stripe", "state": "declined", "amount": "42.00" },
+            "status": "removed"
+          },
+          { "id": "p2", "values": { "provider": "stripe", "state": "captured", "amount": "42.00" } }
+        ],
+        "shipment": [
+          { "id": "h1", "values": { "order": "o1", "carrier": "UPS", "tracking": "1Z999AA1" } }
+        ]
+      }
+    }
+  ]
+}

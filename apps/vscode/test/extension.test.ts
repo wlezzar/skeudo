@@ -7,7 +7,7 @@ import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import markdownit from 'markdown-it';
 import { afterAll, beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
-import { parse } from '@skeudo/core';
+import { parseCode } from '@skeudo/core';
 import { build, previewCss } from '../build.mjs';
 import { activate } from '../src/extension';
 import { Git } from '../src/git';
@@ -191,7 +191,7 @@ describe('source links with ::repo', () => {
   });
   const inDocument = (path = join(notes, 'review.md')) => ({ currentDocument: { scheme: 'file', fsPath: path } });
   const href = (ctx: LinkContext, repo: string, env: Record<string, unknown> = inDocument()) =>
-    createSrcHref(ctx)(LOC, parse(`get_profile(user_id):    ::src[app/profile.py:1-2]\n    ::repo[${repo}]\n`), env);
+    createSrcHref(ctx)(LOC, parseCode(`get_profile(user_id):    ::src[app/profile.py:1-2]\n    ::repo[${repo}]\n`), env);
   const remembered = () => ({ [ID]: shop });
 
   test('open the local copy, with a path relative to the document', () => {

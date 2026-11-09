@@ -1,0 +1,88 @@
+{
+  "tables": [
+    { "name": "media", "columns": [{ "name": "role" }], "line": 2 },
+    { "name": "source", "columns": [{ "name": "input", "ref": "media" }], "line": 3 }
+  ],
+  "steps": [
+    {
+      "title": "Upload two files",
+      "changes": [
+        { "op": "+", "table": "media", "id": "m1", "values": { "role": "upload" }, "line": 6 },
+        { "op": "+", "table": "media", "id": "m2", "values": { "role": "upload" }, "line": 7 },
+        { "op": "+", "table": "media", "id": "tmp", "values": { "role": "scratch" }, "line": 8 },
+        { "op": "-", "table": "media", "id": "tmp", "line": 9 }
+      ],
+      "line": 5,
+      "rows": {
+        "media": [
+          { "id": "m1", "values": { "role": "upload" }, "status": "new" },
+          { "id": "m2", "values": { "role": "upload" }, "status": "new" }
+        ]
+      }
+    },
+    {
+      "title": "Drop the first",
+      "changes": [{ "op": "-", "table": "media", "id": "m1", "line": 12 }],
+      "line": 11,
+      "rows": {
+        "media": [
+          { "id": "m1", "values": { "role": "upload" }, "status": "removed" },
+          { "id": "m2", "values": { "role": "upload" } }
+        ]
+      }
+    },
+    {
+      "title": "Upload it again",
+      "changes": [
+        { "op": "+", "table": "media", "id": "m1", "values": { "role": "upload" }, "line": 15 }
+      ],
+      "line": 14,
+      "rows": {
+        "media": [
+          { "id": "m2", "values": { "role": "upload" } },
+          { "id": "m1", "values": { "role": "upload" }, "status": "new" }
+        ]
+      }
+    },
+    {
+      "title": "Replace the second in one step",
+      "changes": [
+        { "op": "-", "table": "media", "id": "m2", "line": 18 },
+        { "op": "+", "table": "media", "id": "m2", "values": { "role": "audio" }, "line": 19 }
+      ],
+      "line": 17,
+      "rows": {
+        "media": [
+          { "id": "m2", "values": { "role": "upload" }, "status": "removed" },
+          { "id": "m1", "values": { "role": "upload" } },
+          { "id": "m2", "values": { "role": "audio" }, "status": "new" }
+        ]
+      }
+    },
+    {
+      "title": "Point at it",
+      "changes": [
+        { "op": "+", "table": "source", "id": "s1", "values": { "input": "m2" }, "line": 22 }
+      ],
+      "line": 21,
+      "rows": {
+        "media": [
+          { "id": "m1", "values": { "role": "upload" } },
+          { "id": "m2", "values": { "role": "audio" } }
+        ],
+        "source": [{ "id": "s1", "values": { "input": "m2" }, "status": "new" }]
+      }
+    },
+    {
+      "title": "Nothing changes",
+      "line": 24,
+      "rows": {
+        "media": [
+          { "id": "m1", "values": { "role": "upload" } },
+          { "id": "m2", "values": { "role": "audio" } }
+        ],
+        "source": [{ "id": "s1", "values": { "input": "m2" } }]
+      }
+    }
+  ]
+}

@@ -20,7 +20,19 @@ The JSON is the parser's AST (`CodeSketch` in `packages/core/src/code/types.ts`)
 - `changes` is added from `analyze()`: each change tag, whether it covers a whole block, and the effects on the lines it covers, as `L<line> <raw tag>`.
 - `false`, missing values, empty arrays and empty objects are left out.
 
-`packages/core/test/fixture.ts` does this conversion. Warning messages are compared word for word, so rewording one means updating the fixtures that produce it.
+## data
+
+The fixtures in `data/` pin down the rules in [data.md](../data.md). Each starts with the `data` header.
+
+- `examples/` holds the spec's example, copied word for word.
+- `format/` and `story/` hold edge cases of the format and of how steps play. `header/` checks that line numbers count the header.
+- `warnings/` holds one sketch per warning in the spec.
+
+The JSON is the parser's output (`DataSketch` in `packages/core/src/data/types.ts`), without `view` and `source`. Each step gets a `rows` field, from `replayData()`: the rows of each table after that step, with `status` for a row the step added or deleted and `was` for the values it changed. `false`, missing values, empty arrays and empty objects are left out.
+
+## Both views
+
+`packages/core/test/fixture.ts` does the conversions. Warning messages are compared word for word, so rewording one means updating the fixtures that produce it.
 
 ## Running
 
@@ -31,4 +43,4 @@ pnpm test -u     # rewrite the .json files after an intended change
 
 A new `.skeudo` file gets its `.json` written the first time the tests run, except in CI. Read it against the spec before committing. The test only checks that the parser keeps doing what it does now, so a wrong `.json` locks a bug in.
 
-The same test run also checks that every sketch in `spec/code.md` and `skills/skeudo/SKILL.md` parses without warnings.
+The same test run also checks that every sketch in the spec and the agent skill parses without warnings.

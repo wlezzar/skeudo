@@ -1,0 +1,15 @@
+data
+media(role, type)
+  Metadata for one stored file.
+  Sources point here.
+
+  A second paragraph.
+
+Upload
+  The browser sends the file to storage first.
+  + media m1  role: upload | type: video/mp4
+  Then finalizing records it.
+
+  A last paragraph.
+
+Nothing happens

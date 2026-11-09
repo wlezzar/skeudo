@@ -1,0 +1,79 @@
+{
+  "tables": [
+    {
+      "name": "event",
+      "columns": [{ "name": "kind" }, { "name": "at" }, { "name": "note" }, { "name": "payload" }],
+      "line": 2
+    }
+  ],
+  "steps": [
+    {
+      "title": "Values",
+      "changes": [
+        {
+          "op": "+",
+          "table": "event",
+          "id": "e1",
+          "values": { "kind": "login", "at": "10:14", "note": null },
+          "line": 5
+        },
+        {
+          "op": "+",
+          "table": "event",
+          "id": "e2",
+          "values": { "kind": "null", "note": "a | b", "payload": "  padded  " },
+          "line": 6
+        },
+        {
+          "op": "+",
+          "table": "event",
+          "id": "e3",
+          "values": { "kind": "false", "at": "42", "note": "", "payload": "{\"a\": 1}" },
+          "line": 7
+        }
+      ],
+      "line": 4,
+      "rows": {
+        "event": [
+          {
+            "id": "e1",
+            "values": { "kind": "login", "at": "10:14", "note": null },
+            "status": "new"
+          },
+          {
+            "id": "e2",
+            "values": { "kind": "null", "note": "a | b", "payload": "  padded  " },
+            "status": "new"
+          },
+          {
+            "id": "e3",
+            "values": { "kind": "false", "at": "42", "note": "", "payload": "{\"a\": 1}" },
+            "status": "new"
+          }
+        ]
+      }
+    },
+    {
+      "title": "Change one",
+      "changes": [
+        { "op": "~", "table": "event", "id": "e1", "values": { "note": "now set" }, "line": 10 },
+        { "op": "~", "table": "event", "id": "e1", "values": { "note": "set twice" }, "line": 11 }
+      ],
+      "line": 9,
+      "rows": {
+        "event": [
+          {
+            "id": "e1",
+            "values": { "kind": "login", "at": "10:14", "note": "set twice" },
+            "was": { "note": null }
+          },
+          { "id": "e2", "values": { "kind": "null", "note": "a | b", "payload": "  padded  " } },
+          {
+            "id": "e3",
+            "values": { "kind": "false", "at": "42", "note": "", "payload": "{\"a\": 1}" }
+          }
+        ]
+      }
+    }
+  ]
+}

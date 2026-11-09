@@ -141,7 +141,7 @@ describe('render', () => {
     expect(stdout).toContain('<code class="sk-inline">');
     expect(stdout).toContain('--sk-bg:'); // skeudo.css
     expect(stdout).toContain('main.bare'); // the page's own styles
-    expect(stdout).toMatch(/<script>[^<]*mouseover/);
+    expect(stdout).toMatch(/<script>(?:(?!<\/script>)[\s\S])*mouseover/);
     expect(stdout).not.toMatch(/<link|<script src|@import|url\(/);
     // The front matter isn't shown.
     expect(stdout).not.toContain('srcBase');

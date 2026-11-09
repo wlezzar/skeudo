@@ -1,0 +1,24 @@
+data
+media(role)
+source(input -> media)
+
+Upload two files
+  + media m1   role: upload
+  + media m2   role: upload
+  + media tmp  role: scratch
+  - media tmp
+
+Drop the first
+  - media m1
+
+Upload it again
+  + media m1   role: upload
+
+Replace the second in one step
+  - media m2
+  + media m2   role: audio
+
+Point at it
+  + source s1  input: m2
+
+Nothing changes

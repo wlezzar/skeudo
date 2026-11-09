@@ -1,0 +1,15 @@
+data
+user(name, email)
+order.line(
+  order -> shop-order,
+  product → product,
+  quantity,
+)
+shop-order(user -> user, state)
+product(title,
+        price)
+
+Login (Google)
+  + user u1  name: Ana | email: ana@example.com
+
+Login(Google) fails

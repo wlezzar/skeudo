@@ -1,6 +1,6 @@
 # skeudo
 
-Checks sketches and renders them as standalone HTML pages. A sketch is pseudocode for code review where every outside effect is tagged. The format, Skeudo, is defined in [spec/spec.md](https://github.com/wlezzar/skeudo/blob/main/spec/spec.md).
+Checks sketches and renders them as standalone HTML pages. A sketch is pseudocode for code review where every outside effect is tagged, or, when it starts with a `data` line, a data model drawn as tables and a story of how their rows change. The format, Skeudo, is defined in [spec/spec.md](https://github.com/wlezzar/skeudo/blob/main/spec/spec.md).
 
 ```sh
 skeudo check docs/                  # warnings in every sketch under docs/
@@ -20,7 +20,7 @@ skeudo render pr-123.md -o pr.html  # a page to send to someone
 skeudo check [path...]
 ```
 
-Prints the parser's warnings, listed under Warnings in the spec, at their lines in the file, then a summary:
+Prints the parser's warnings, listed under Warnings in each view's spec, at their lines in the file, then a summary:
 
 ```
 docs/refunds.md:13: warning: ::fail needs a name, as in ::fail:NotFound.
@@ -43,7 +43,7 @@ EOF
 skeudo render [file] [-o out.html] [--src-base <url>]
 ```
 
-Writes one HTML page with the styles, the variable highlighting and the `::doc` popovers inlined, so it loads nothing from elsewhere and can be sent as a file. It follows the reader's light or dark mode. The page goes to stdout unless `-o` names a file, and warnings go to stderr; a sketch with warnings still renders.
+Writes one HTML page with the styles and the script inlined (variable highlighting, explanations on hover, and stepping through data sketches), so it loads nothing from elsewhere and can be sent as a file. It follows the reader's light or dark mode. The page goes to stdout unless `-o` names a file, and warnings go to stderr; a sketch with warnings still renders.
 
 The title is the front matter's `title`, or else the first `#` heading, the sketch's function name, or the file name.
 

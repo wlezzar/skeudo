@@ -1,0 +1,283 @@
+/* Styles for data sketches. The colors are the tokens in shared/base.css. Table rules carry an extra
+   class, and rows an always-true :nth-child(n), so a host page's table styles, such as borders and
+   striped rows, don't apply. */
+
+/* ---------- Layout ---------- */
+
+/* .skd is the box and the size container; .skd-body puts the story beside the tables. */
+.skd {
+  --skd-new-bg: color-mix(in srgb, var(--sk-green) 13%, transparent);
+  --skd-chg-bg: color-mix(in srgb, var(--sk-blue) 13%, transparent);
+  --skd-del-bg: color-mix(in srgb, var(--sk-red) 9%, transparent);
+  container: skd / inline-size;
+  font: 13.5px/1.4 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  color: var(--sk-fg);
+  background: var(--sk-bg);
+  border: 1px solid var(--sk-border);
+  border-radius: 8px;
+  padding: 14px;
+  text-align: left;
+}
+.skd,
+.skd * { box-sizing: border-box; }
+.skd:focus { outline: none; }
+.skd-body {
+  display: grid;
+  grid-template-columns: minmax(11em, 15em) minmax(0, 1fr);
+  gap: 18px 22px;
+  align-items: start;
+}
+.skd-body.skd-no-story { grid-template-columns: minmax(0, 1fr); }
+/* In a narrow space, the story goes above the tables. */
+@container skd (max-width: 44em) {
+  .skd-body { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* ---------- Story ---------- */
+
+.skd-steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.skd-step {
+  display: flex;
+  align-items: baseline;
+  margin: 0;
+  padding-right: 6px;
+  border-radius: 6px;
+  color: var(--sk-muted);
+}
+/* The current step keeps the same weight as the others, so its title never wraps differently. */
+.skd-step.skd-cur {
+  color: var(--sk-fg);
+  background: var(--sk-card);
+  box-shadow: 0 0 0 1px var(--sk-border);
+}
+.skd[data-skd-live] .skd-step:not(.skd-cur, .skd-past) { color: var(--sk-faint); }
+.skd[data-skd-live] .skd-step { cursor: pointer; }
+.skd[data-skd-live] .skd-step:hover { color: var(--sk-fg); }
+.skd-go {
+  display: flex;
+  flex: 0 1 auto;
+  gap: 8px;
+  align-items: baseline;
+  min-width: 0;
+  margin: 0;
+  padding: 5px 2px 5px 8px;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: inherit;
+}
+.skd-go:focus { outline: none; }
+.skd-go:focus-visible .skd-title {
+  outline: 1.5px solid color-mix(in srgb, var(--sk-blue) 60%, transparent);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+.skd-n {
+  flex: none;
+  min-width: 1.2em;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  color: var(--sk-faint);
+}
+.skd-cur .skd-n { color: var(--sk-muted); }
+
+/* The arrows show only once enhance() makes them work. */
+.skd-nav {
+  display: none;
+  gap: 6px;
+  align-items: center;
+  margin: 10px 0 0 8px;
+  color: var(--sk-faint);
+  font-size: 12px;
+}
+.skd[data-skd-live] .skd-nav { display: flex; }
+.skd-nav button {
+  width: 32px;
+  height: 28px;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--sk-border);
+  border-radius: 6px;
+  background: var(--sk-card);
+  color: var(--sk-fg);
+  font: inherit;
+  cursor: pointer;
+}
+.skd-nav button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.skd-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  margin: 12px 0 0 8px;
+  color: var(--sk-muted);
+  font-size: 12px;
+}
+.skd-legend > span::before {
+  content: '';
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-right: 5px;
+  vertical-align: -1px;
+  border-radius: 3px;
+  background: var(--skd-c-bg);
+  outline: 1px solid var(--skd-c);
+}
+.skd-l-new { --skd-c: var(--sk-green); --skd-c-bg: var(--skd-new-bg); }
+.skd-l-chg { --skd-c: var(--sk-blue); --skd-c-bg: var(--skd-chg-bg); }
+.skd-l-del { --skd-c: var(--sk-red); --skd-c-bg: var(--skd-del-bg); }
+
+/* ---------- Explanations ---------- */
+
+/* A step or table with an explanation has a small circled "i", drawn here so copying the page leaves it out. */
+.skd-mark {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: 15px;
+  height: 15px;
+  margin: 0 0 0 4px;
+  padding: 0;
+  border: 1px solid color-mix(in srgb, var(--sk-muted) 50%, transparent);
+  border-radius: 50%;
+  background: none;
+  color: var(--sk-muted);
+  font-size: 10px;
+  line-height: 1;
+  cursor: pointer;
+  user-select: none;
+  align-self: center;
+}
+.skd-mark::before {
+  content: 'i';
+  font: italic 700 1em/1 Georgia, 'Times New Roman', serif;
+}
+.skd-mark:hover,
+.skd-doc-on .skd-mark {
+  color: var(--sk-blue);
+  border-color: color-mix(in srgb, var(--sk-blue) 60%, transparent);
+}
+/* In the list, only the current or hovered step shows its mark, to keep the list quiet. */
+.skd-step:not(.skd-cur, :hover, .skd-doc-on) .skd-mark { visibility: hidden; }
+
+/* ---------- Tables ---------- */
+
+.skd-board {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  align-items: flex-start;
+  min-width: 0;
+}
+.skd-table {
+  max-width: 100%;
+  padding: 8px 4px 4px;
+  overflow-x: auto;
+  border: 1px solid var(--sk-border);
+  border-radius: 8px;
+  background: var(--sk-card);
+}
+.skd-name {
+  display: flex;
+  align-items: center;
+  margin: 0 8px 4px;
+  font-weight: 600;
+}
+.skd .skd-grid {
+  display: table;
+  margin: 0;
+  font: inherit;
+  border: 0;
+  border-collapse: collapse;
+  background: none;
+}
+.skd .skd-grid tr:nth-child(n) {
+  border: 0;
+  background: none;
+}
+.skd .skd-grid th,
+.skd .skd-grid td {
+  border: 0;
+  background: none;
+  white-space: nowrap;
+  text-align: left;
+  vertical-align: middle;
+}
+.skd .skd-grid th {
+  padding: 2px 8px 4px;
+  color: var(--sk-muted);
+  font-size: 12px;
+  font-weight: 400;
+}
+.skd .skd-grid td {
+  height: 28px;
+  padding: 0 8px;
+}
+.skd .skd-grid td:first-child { border-radius: 5px 0 0 5px; }
+.skd .skd-grid td:last-child { border-radius: 0 5px 5px 0; }
+.skd .skd-grid tbody[hidden] { display: none; }
+.skd-id {
+  color: var(--sk-muted);
+  font: 12px var(--sk-font);
+}
+.skd-null,
+.skd-slot .skd-id { color: var(--sk-faint); }
+/* A value longer than the renderer's cap (MAX_WIDTH in render.ts) is cut off; its cell's tooltip has all of it. */
+.skd-long {
+  display: inline-block;
+  max-width: 24ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: bottom;
+}
+.skd-ref {
+  padding: 0 5px;
+  border: 1px solid color-mix(in srgb, var(--sk-fg) 22%, transparent);
+  border-radius: 4px;
+  font: 12px var(--sk-font);
+}
+.skd-ref.skd-broken {
+  border-style: dashed;
+  border-color: var(--sk-red);
+}
+
+/* What the current step changed. These are the colors every view uses for changes. */
+.skd .skd-grid tr.skd-new td { background: var(--skd-new-bg); }
+.skd .skd-grid tr.skd-removed td {
+  background: var(--skd-del-bg);
+  color: var(--sk-muted);
+  text-decoration: line-through;
+  text-decoration-color: var(--sk-red);
+}
+.skd .skd-grid td.skd-chg { background: var(--skd-chg-bg); }
+@keyframes skd-flash {
+  from { filter: saturate(3) brightness(0.92); }
+  to { filter: none; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .skd[data-skd-live] tr.skd-new td,
+  .skd[data-skd-live] tr.skd-removed td,
+  .skd[data-skd-live] td.skd-chg { animation: skd-flash 0.9s ease-out; }
+}
+
+/* A reference and the row it points at, while either is hovered. */
+.skd .skd-grid tr.skd-hl td,
+.skd-ref.skd-hl { background: var(--sk-hl-bg); }
+.skd-ref.skd-hl { border-color: transparent; }
+
+.skd-warnings {
+  margin: 12px 0 0;
+  padding-left: 18px;
+  color: var(--sk-amber);
+  font-size: 12px;
+}

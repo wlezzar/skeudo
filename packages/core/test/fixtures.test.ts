@@ -4,7 +4,7 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, test } from 'vitest';
 import { parse, VIEWS, type ViewName } from '../src';
-import { format, project } from './fixture';
+import { format, project, projectData } from './fixture';
 
 // Files are listed at run time rather than with import.meta.glob, which Vitest's module cache
 // would freeze, so a new fixture would not run until this file changed.
@@ -12,7 +12,7 @@ const ROOT = fileURLToPath(new URL('../../../', import.meta.url));
 const FIXTURES = join(ROOT, 'spec/fixtures');
 
 /** Each view's fixtures are in a folder named after it, and have their own expected output. */
-const PROJECTIONS: Record<ViewName, (source: string) => unknown> = { code: project };
+const PROJECTIONS: Record<ViewName, (source: string) => unknown> = { code: project, data: projectData };
 
 for (const view of VIEWS) {
   const dir = join(FIXTURES, view.name);
@@ -35,7 +35,8 @@ for (const view of VIEWS) {
 }
 
 describe('sketches in the docs parse without warnings', () => {
-  for (const doc of ['spec/code.md', 'skills/skeudo/SKILL.md']) {
+  const docs = [...globSync('spec/*.md', { cwd: ROOT }), ...globSync('skills/skeudo/**/*.md', { cwd: ROOT })].sort();
+  for (const doc of docs) {
     const text = readFileSync(join(ROOT, doc), 'utf8');
     // The skill's output template holds a placeholder fence whose body is just "...".
     const blocks = [...text.matchAll(/^```skeudo\n([\s\S]*?)^```/gm)]

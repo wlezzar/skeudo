@@ -25,7 +25,7 @@ export function previewCss(css: string): string {
     '\n/* VS Code */\n' +
     // Same specificity as the theme rules above, so it must come after them.
     'body.vscode-body { --sk-font: var(--vscode-editor-font-family, monospace); }\n' +
-    'body.vscode-body .sketch { margin: 0 0 1rem; }\n'
+    'body.vscode-body .sketch,\nbody.vscode-body .skd { margin: 0 0 1rem; }\n'
   );
 }
 

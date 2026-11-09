@@ -1,6 +1,7 @@
 /*
  * Interaction for rendered code sketches, wired by enhance() in index.ts.
  */
+import { Popover, POPOVER_DELAY } from '../shared/popover';
 
 /** Variable highlighting and explanations for the code sketches under `root`. */
 export function enhanceCode(root: HTMLElement | Document): () => void {
@@ -37,13 +38,6 @@ function highlightVariables(root: HTMLElement | Document): () => void {
   };
 }
 
-/** How long the pointer rests on a call or a line before its explanation shows, in milliseconds. */
-const DOC_DELAY = 200;
-/** Space between the popover and the line, and between the popover and the edge of the window, in pixels. */
-const DOC_GAP = 4;
-const DOC_MARGIN = 8;
-let docPopovers = 0;
-
 /** A sketch row's depth, from the `--d` its style sets. */
 const rowDepth = (row: Element) => Number((row as HTMLElement).style.getPropertyValue('--d')) || 0;
 
@@ -55,8 +49,7 @@ const rowDepth = (row: Element) => Number((row as HTMLElement).style.getProperty
 function showDocs(root: HTMLElement | Document): () => void {
   const doc = root instanceof Document ? root : root.ownerDocument;
   const win = doc.defaultView;
-  const id = `sk-doc-pop-${++docPopovers}`;
-  let pop: HTMLElement | undefined;
+  const pop = new Popover(doc);
   /** The element whose explanation is shown, or is about to be. */
   let anchor: HTMLElement | undefined;
   /** The anchor's tooltip, while it is removed. */
@@ -75,52 +68,34 @@ function showDocs(root: HTMLElement | Document): () => void {
     return rows;
   }
 
-  function place(p: HTMLElement, el: HTMLElement) {
-    // Under the line, so it doesn't cover it. A call's explanation starts at the call, a line's where its text starts.
-    const row = (el.closest('.sk-row') ?? el).getBoundingClientRect();
+  /** Under the line, so it doesn't cover it. A call's explanation starts at the call, a line's where its text starts. */
+  function place(el: HTMLElement) {
     const start = el.classList.contains('sk-code')
       ? ([...el.children].find((c) => !c.classList.contains('sk-x') && !c.classList.contains('sk-doc-mark')) ?? el)
       : el;
-    p.style.left = '0px';
-    p.style.top = '0px';
-    const { width, height } = p.getBoundingClientRect();
-    const vw = doc.documentElement.clientWidth;
-    const vh = doc.documentElement.clientHeight;
-    const below = row.bottom + DOC_GAP;
-    const above = row.top - DOC_GAP - height;
-    const top = below + height <= vh - DOC_MARGIN || above < DOC_MARGIN ? below : above;
-    const left = Math.max(DOC_MARGIN, Math.min(start.getBoundingClientRect().left, vw - width - DOC_MARGIN));
-    p.style.left = `${left}px`;
-    p.style.top = `${top}px`;
+    pop.below((el.closest('.sk-row') ?? el).getBoundingClientRect(), start.getBoundingClientRect().left);
   }
 
   function show() {
     clearTimeout(timer);
     timer = undefined;
     if (!anchor) return;
-    if (!pop?.isConnected) {
-      pop = doc.createElement('div');
-      pop.className = 'sk-doc-pop';
-      pop.id = id;
-      pop.setAttribute('role', 'tooltip');
-      doc.body.append(pop);
-    }
     const text = anchor.getAttribute('data-doc') ?? '';
     // The rest of the tooltip, such as where a call is defined, goes under the explanation.
     const rest = title?.startsWith(text) ? title.slice(text.length).trim() : '';
     const main = doc.createElement('div');
     main.className = 'sk-doc-text';
     main.textContent = text;
-    pop.replaceChildren(main);
+    const content: Node[] = [main];
     if (rest) {
       const info = doc.createElement('div');
       info.className = 'sk-doc-info';
       info.textContent = rest;
-      pop.append(info);
+      content.push(info);
     }
-    pop.hidden = false;
-    place(pop, anchor);
-    anchor.setAttribute('aria-describedby', id);
+    pop.show(content);
+    place(anchor);
+    anchor.setAttribute('aria-describedby', pop.id);
     for (const row of scope(anchor)) row.classList.add('sk-doc-scope');
   }
 
@@ -134,7 +109,7 @@ function showDocs(root: HTMLElement | Document): () => void {
     }
     anchor = undefined;
     title = null;
-    if (pop) pop.hidden = true;
+    pop.hide();
   }
 
   function start(el: HTMLElement, delay: number) {
@@ -154,7 +129,7 @@ function showDocs(root: HTMLElement | Document): () => void {
 
   const over = (e: Event) => {
     const el = target(e);
-    if (el) start(el, DOC_DELAY);
+    if (el) start(el, POPOVER_DELAY);
     // The sketch was rendered again under the pointer, as VS Code's preview does on each edit.
     else if (anchor && !anchor.isConnected) hide();
   };
@@ -181,7 +156,7 @@ function showDocs(root: HTMLElement | Document): () => void {
   win?.addEventListener('resize', hide);
   return () => {
     hide();
-    pop?.remove();
+    pop.remove();
     root.removeEventListener('mouseover', over);
     root.removeEventListener('mouseout', out);
     root.removeEventListener('focusin', focusIn);

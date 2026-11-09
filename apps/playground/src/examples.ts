@@ -1,5 +1,7 @@
 import { frontMatter } from 'markdown-it-skeudo';
 import spec from '../../../spec/code.md?raw';
+import dataSpec from '../../../spec/data.md?raw';
+import checkout from '../../../spec/fixtures/data/examples/checkout.skeudo?raw';
 
 export interface Example {
   id: string;
@@ -193,8 +195,10 @@ export const examples: Example[] = [
   { id: 'run-agent', title: 'Runtime effects (run_agent)', source: runAgent },
   { id: 'cancel-order', title: 'A change (cancel_order)', source: cancelOrder },
   { id: 'real-code', title: 'Real code stays plain (load_config)', source: realCode },
+  { id: 'checkout', title: 'A data model and its story (checkout)', source: checkout },
   { id: 'pr-comment', title: 'Markdown: a review comment', source: prComment },
   { id: 'spec', title: 'Markdown: the code view spec', source: spec },
+  { id: 'data-spec', title: 'Markdown: the data view spec', source: dataSpec },
   ...Object.entries(localFiles)
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([path, raw]) => localExample(path, raw)),

@@ -17,7 +17,7 @@ export function h(tagName: string, properties: Properties, children: ElementCont
 /** A text node, or none for an empty string. */
 export const text = (value: string): Text[] => (value ? [{ type: 'text', value }] : []);
 
-const VOID_ELEMENTS = new Set(['wbr']);
+const VOID_ELEMENTS = new Set(['wbr', 'col']);
 
 function attributeName(property: string): string {
   if (property === 'className') return 'class';

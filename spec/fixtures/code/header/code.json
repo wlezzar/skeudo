@@ -1,0 +1,59 @@
+{
+  "signature": { "name": "handleUpload", "params": ["file"], "line": 2 },
+  "indentUnit": 2,
+  "variables": {
+    "file": { "origin": "param", "line": 2 },
+    "url": { "origin": "binding", "line": 3 },
+    "sent": { "origin": "binding", "line": 4 }
+  },
+  "lines": [
+    { "number": 1, "depth": 0, "text": "", "blank": true },
+    {
+      "number": 2,
+      "depth": 0,
+      "text": "handleUpload(file):",
+      "signature": true,
+      "header": true,
+      "segments": [
+        { "type": "fn", "text": "handleUpload" },
+        { "type": "text", "text": "(" },
+        { "type": "var", "text": "file", "name": "file", "definition": true },
+        { "type": "text", "text": "):" }
+      ]
+    },
+    {
+      "number": 3,
+      "depth": 1,
+      "text": "url = sign(file) ::read:s3",
+      "parent": 2,
+      "binding": "url",
+      "tags": [{ "raw": "::read:s3", "kind": "read", "value": "s3", "trailing": true }],
+      "segments": [
+        { "type": "var", "text": "url", "name": "url", "definition": true },
+        { "type": "text", "text": " = " },
+        { "type": "call", "text": "sign", "name": "sign" },
+        { "type": "text", "text": "(" },
+        { "type": "var", "text": "file", "name": "file" },
+        { "type": "text", "text": ")" }
+      ]
+    },
+    {
+      "number": 4,
+      "depth": 1,
+      "text": "sent = upload(url, file) ::write:s3",
+      "parent": 2,
+      "binding": "sent",
+      "tags": [{ "raw": "::write:s3", "kind": "write", "value": "s3", "trailing": true }],
+      "segments": [
+        { "type": "var", "text": "sent", "name": "sent", "definition": true },
+        { "type": "text", "text": " = " },
+        { "type": "call", "text": "upload", "name": "upload" },
+        { "type": "text", "text": "(" },
+        { "type": "var", "text": "url", "name": "url" },
+        { "type": "text", "text": ", " },
+        { "type": "var", "text": "file", "name": "file" },
+        { "type": "text", "text": ")" }
+      ]
+    }
+  ]
+}

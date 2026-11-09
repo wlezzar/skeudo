@@ -319,24 +319,6 @@ a.sk-file:hover { color: var(--sk-blue); text-decoration: underline; }
 /* The rows a block header's explanation covers, while it shows. */
 .sk-row.sk-doc-scope { background: var(--sk-row-hover); }
 
-/* The popover enhance() shows. It sits on the page's body, outside the sketch, so it sets its own font. */
-.sk-doc-pop {
-  position: fixed;
-  z-index: 1000;
-  max-width: min(34rem, calc(100vw - 16px));
-  padding: 0.45rem 0.7rem;
-  border: 1px solid var(--sk-border);
-  border-radius: 6px;
-  background: var(--sk-bg);
-  color: var(--sk-fg);
-  box-shadow: 0 6px 20px rgb(0 0 0 / 0.16);
-  font: 13px/1.45 system-ui, -apple-system, 'Segoe UI', sans-serif;
-  white-space: pre-line;
-  overflow-wrap: anywhere;
-  text-align: left;
-  pointer-events: none;
-}
-.sk-doc-pop[hidden] { display: none; }
 .sk-doc-info {
   margin-top: 0.35rem;
   color: var(--sk-muted);

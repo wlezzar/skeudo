@@ -1,0 +1,10 @@
+{
+  "tables": [{ "name": "media", "columns": [{ "name": "role" }], "line": 3 }],
+  "diagnostics": [
+    {
+      "line": 2,
+      "severity": "warning",
+      "message": "This line is indented but has no table or step above it."
+    }
+  ]
+}

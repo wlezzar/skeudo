@@ -1,0 +1,17 @@
+{
+  "tables": [{ "name": "media", "columns": [{ "name": "role" }], "line": 2 }],
+  "diagnostics": [
+    { "line": 5, "severity": "warning", "message": "media m9 doesn't exist at this step." },
+    { "line": 6, "severity": "warning", "message": "media m9 doesn't exist at this step." }
+  ],
+  "steps": [
+    {
+      "title": "Change a row that isn't there",
+      "changes": [
+        { "op": "~", "table": "media", "id": "m9", "values": { "role": "audio" }, "line": 5 },
+        { "op": "-", "table": "media", "id": "m9", "line": 6 }
+      ],
+      "line": 4
+    }
+  ]
+}

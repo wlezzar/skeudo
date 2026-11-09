@@ -1,0 +1,4 @@
+{
+  "diagnostics": [{ "line": 1, "severity": "warning", "message": "No tables are declared." }],
+  "steps": [{ "title": "A step with nothing to change", "line": 2 }]
+}

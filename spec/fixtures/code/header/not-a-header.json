@@ -1,0 +1,20 @@
+{
+  "indentUnit": 2,
+  "lines": [
+    {
+      "number": 1,
+      "depth": 0,
+      "text": "data flows",
+      "header": true,
+      "segments": [{ "type": "word", "text": "data" }, { "type": "text", "text": " flows" }]
+    },
+    {
+      "number": 2,
+      "depth": 1,
+      "text": "read the rows ::read:db",
+      "parent": 1,
+      "tags": [{ "raw": "::read:db", "kind": "read", "value": "db", "trailing": true }],
+      "segments": [{ "type": "word", "text": "read" }, { "type": "text", "text": " the rows" }]
+    }
+  ]
+}

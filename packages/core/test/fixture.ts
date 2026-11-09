@@ -1,4 +1,18 @@
-import { analyze, parseCode } from '../src';
+import { analyze, parseCode, parseData, replayData } from '../src';
+
+/**
+ * The expected output of a data fixture: the parsed tables and steps, with the rows each table holds
+ * after each step.
+ */
+export function projectData(source: string): unknown {
+  const sketch = parseData(source);
+  const states = replayData(sketch);
+  const { view: _view, source: _source, steps, ...rest } = sketch;
+  return clean({
+    ...rest,
+    steps: steps.map((step, i) => ({ ...step, rows: Object.fromEntries(states[i]) })),
+  });
+}
 
 /**
  * The expected output of a fixture: the AST with offsets and derivable fields removed,

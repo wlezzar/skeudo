@@ -100,7 +100,7 @@ export function renderPage(doc: Doc, opts: PageOptions): string {
     '</head>',
     '<body>',
     body,
-    // Variable highlighting. `</` can't appear inside a script element.
+    // enhance(), which makes the sketches interactive. `</` can't appear inside a script element.
     `<script>${opts.script.replace(/<\//g, '<\\/')}</script>`,
     '</body>',
     '</html>',

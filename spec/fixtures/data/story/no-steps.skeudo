@@ -1,0 +1,3 @@
+data
+user(name)
+  Only tables: the view draws them empty.

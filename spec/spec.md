@@ -9,12 +9,26 @@ Skeudo is a set of small text formats for explaining code to a reader: a reviewe
 | View | What it shows | Spec |
 | --- | --- | --- |
 | code | Pseudocode for code review: loose about logic, strict about effects, with every outside effect tagged | [code.md](code.md) |
+| data | A data model: a few tables, example rows, and a story of how the rows change | [data.md](data.md) |
 
 ## Blocks
 
 A block of any view is a **sketch**. In Markdown, a sketch lives in a fenced code block tagged `skeudo`. Renderers also accept `sketch`, the format's former working name. A file holding a single sketch has the extension `.skeudo`.
 
-Every sketch is in the code view for now.
+Every view uses the same fence and extension. A sketch names its view on its first line, as Mermaid diagrams do:
+
+```skeudo
+data
+customer(name, email)
+
+Ana signs up
+  + customer c1  name: Ana | email: ana@example.com
+```
+
+- **The header** is a view's name alone on the first line that isn't blank: `code` or `data`. Spaces around it don't count.
+- **A sketch without a header is in the code view.** So a code sketch doesn't need one. A code sketch whose first line is exactly a view's name needs a `code` header.
+- **The header is a line of the sketch.** Line numbers count it, so a warning's line matches the line in the block. Renderers don't show it.
+- **Why a line, not a fence per view or a word after `skeudo`.** The view travels with the text when it is copied out of its fence, piped to the CLI or saved as a file. A new view adds no fence, file extension or editor language.
 
 ## Rules every view follows
 

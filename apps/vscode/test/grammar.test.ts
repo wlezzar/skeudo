@@ -3,7 +3,7 @@ import { globSync, readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { parseCode, type CodeSketch, type SketchLine } from '@skeudo/core';
+import { parseCode, parseData, type CodeSketch, type SketchLine } from '@skeudo/core';
 import { FENCE_LANGS } from 'markdown-it-skeudo';
 import { OnigScanner, OnigString, loadWASM } from 'vscode-oniguruma';
 import { INITIAL, Registry, type IGrammar, type IRawGrammar } from 'vscode-textmate';
@@ -265,6 +265,154 @@ describe('scopes', () => {
   test('takes the first word of a sketch indented as a whole', () => {
     expect(sketchScopes('    When a webhook arrives:', 'When')).toContain('keyword.control.first-word.skeudo');
   });
+});
+
+// --- The data view -----------------------------------------------------------------------------------------
+
+describe('the data view', () => {
+  const SOURCE = [
+    'data', // 1
+    'order(customer -> customer, state, total)',
+    '  What the customer buys.',
+    'customer(',
+    '  name,', // 5
+    '  email → address,',
+    ')',
+    '',
+    'Ana checks out (as a guest)',
+    '  + customer c1  name: Ana | email: null', // 10
+    '  ~ order o1     state: "paid | done" | total: 10:14',
+    '  - order o1',
+    '  Explained after the changes.',
+    'Login(Google) fails',
+  ].join('\n');
+  let lines: Token[][];
+  beforeAll(() => {
+    lines = tokenize(sketchTm, SOURCE);
+  });
+  const at = (line: number, text: string) => {
+    const col = SOURCE.split('\n')[line - 1].indexOf(text);
+    return lines[line - 1].find((t) => t.start <= col && col < t.end)!.scopes;
+  };
+
+  test('starts with a header that names the view', () => {
+    expect(at(1, 'data')).toEqual(['source.skeudo', 'keyword.control.view.skeudo']);
+  });
+
+  test('declarations name a table, its columns and the tables they point at', () => {
+    expect(at(2, 'order')).toContain('entity.name.type.table.skeudo');
+    expect(at(2, 'customer ->')).toContain('variable.other.property.column.skeudo');
+    expect(at(2, '->')).toContain('keyword.operator.reference.skeudo');
+    expect(at(2, 'customer,')).toContain('entity.name.type.table.skeudo');
+    expect(at(2, 'state')).toContain('variable.other.property.column.skeudo');
+  });
+
+  test('a declaration may run over several lines', () => {
+    expect(at(5, 'name')).toEqual(expect.arrayContaining(['meta.declaration.table.skeudo', 'variable.other.property.column.skeudo']));
+    expect(at(6, '→')).toContain('keyword.operator.reference.skeudo');
+    expect(at(7, ')')).toContain('punctuation.definition.columns.end.skeudo');
+  });
+
+  test('other lines that are not indented are step titles, and other indented lines are explanations', () => {
+    expect(at(9, 'Ana')).toContain('markup.heading.step.skeudo');
+    expect(at(14, 'Login')).toContain('markup.heading.step.skeudo');
+    expect(at(14, 'Google')).toContain('markup.heading.step.skeudo');
+    expect(at(3, 'What')).toContain('comment.block.documentation.explanation.skeudo');
+    expect(at(13, 'Explained')).toContain('comment.block.documentation.explanation.skeudo');
+  });
+
+  test('changes name their kind, table, row, columns and values', () => {
+    expect(at(10, '+')).toContain('markup.inserted.skeudo');
+    expect(at(11, '~')).toContain('markup.changed.skeudo');
+    expect(at(12, '-')).toContain('markup.deleted.skeudo');
+    expect(at(10, 'customer')).toContain('entity.name.type.table.skeudo');
+    expect(at(10, 'c1')).toContain('variable.other.constant.id.skeudo');
+    expect(at(10, 'name')).toContain('variable.other.property.column.skeudo');
+    expect(at(10, 'Ana')).toContain('string.unquoted.value.skeudo');
+    expect(at(10, 'email')).toContain('variable.other.property.column.skeudo');
+    expect(at(10, 'null')).toContain('constant.language.null.skeudo');
+    expect(at(11, '"paid')).toContain('string.quoted.double.skeudo');
+    expect(at(11, 'done"')).toContain('string.quoted.double.skeudo');
+    expect(at(11, 'total')).toContain('variable.other.property.column.skeudo');
+    // A value is split from its column at the first colon only.
+    expect(at(11, '14')).toContain('string.unquoted.value.skeudo');
+  });
+
+  test('a later line reading data is a line of code', () => {
+    expect(sketchScopes('x = 1\ndata', 'data')).not.toContain('keyword.control.view.skeudo');
+  });
+
+  test('a code header keeps the signature on the line after it', () => {
+    const source = ['code', '', 'charge(card):', '    stripe.charge(card)'].join('\n');
+    expect(sketchScopes(source, 'code')).toContain('keyword.control.view.skeudo');
+    expect(sketchScopes(source, 'charge(')).toContain('meta.function.signature.skeudo');
+    expect(sketchScopes(source, 'card)')).toContain('variable.parameter.skeudo');
+  });
+
+  test('in a Markdown fence', () => {
+    const doc = ['```skeudo', 'data', 'media(role)', '', 'Upload', '  + media m1  role: x', '```', 'After.'].join('\n');
+    const tokens = tokenize(markdownTm, doc);
+    const first = (line: number) => tokens[line - 1].find((t) => t.text.trim())!.scopes;
+    expect(first(2)).toContain('keyword.control.view.skeudo');
+    expect(first(3)).toContain('entity.name.type.table.skeudo');
+    expect(first(5)).toContain('markup.heading.step.skeudo');
+    expect(tokens[5].map((t) => t.scopes).flat()).toContain('markup.inserted.skeudo');
+    expect(first(7)).toContain('punctuation.definition.markdown');
+    expect(first(8).join(' ')).not.toContain('skeudo');
+  });
+});
+
+/** What each line of a data sketch is, to the parser: the header, a declaration, a step, a change, or an explanation. */
+function dataKinds(source: string): string[] {
+  const sketch = parseData(source);
+  const raws = source.split('\n');
+  const kinds: string[] = raws.map((raw) => (raw.trim() ? 'explanation' : ''));
+  kinds[raws.findIndex((raw) => raw.trim())] = 'header';
+  for (const t of sketch.tables) {
+    // A declaration runs on to the line with its closing parenthesis.
+    let i = t.line - 1;
+    kinds[i] = 'table';
+    while (!raws[i].includes(')') && raws[i + 1]?.trim()) kinds[++i] = 'table';
+  }
+  for (const s of sketch.steps) {
+    kinds[s.line - 1] = 'step';
+    for (const c of s.changes) kinds[c.line - 1] = 'change';
+  }
+  return kinds;
+}
+
+/** The same, to the grammar, from the scopes of each line's first token. */
+function grammarKinds(source: string): string[] {
+  return tokenize(sketchTm, source).map((tokens) => {
+    const scopes = tokens.find((t) => t.text.trim())?.scopes ?? [];
+    if (has(scopes, 'keyword.control.view')) return 'header';
+    if (has(scopes, 'meta.declaration.table')) return 'table';
+    if (has(scopes, 'meta.change')) return 'change';
+    if (has(scopes, 'markup.heading.step')) return 'step';
+    if (has(scopes, 'comment.block.documentation.explanation')) return 'explanation';
+    return scopes.length ? scopes.join(' ') : '';
+  });
+}
+
+describe('the data view agrees with the parser', () => {
+  const dir = join(ROOT, 'spec/fixtures/data');
+  const sketches = [
+    ...globSync('**/*.skeudo', { cwd: dir })
+      .sort()
+      .map((name) => ({ name, source: readFileSync(join(dir, name), 'utf8').replace(/\n$/, '') })),
+    ...docSketches('spec/data.md'),
+    ...docSketches('spec/spec.md'),
+  ].filter(({ source }) => !parseData(source).diagnostics.length);
+
+  test('on some sketches', () => {
+    expect(sketches.length).toBeGreaterThan(5);
+  });
+
+  for (const { name, source } of sketches) {
+    test(name, () => {
+      expect(grammarKinds(source)).toEqual(dataKinds(source));
+    });
+  }
 });
 
 describe('in a theme', () => {

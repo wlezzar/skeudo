@@ -1,0 +1,10 @@
+{
+  "tables": [{ "name": "media", "columns": [{ "name": "role" }, { "name": "type" }], "line": 2 }],
+  "diagnostics": [
+    {
+      "line": 2,
+      "severity": "warning",
+      "message": "\"bad col\" isn't a column: write a name, or name -> table."
+    }
+  ]
+}

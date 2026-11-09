@@ -1,0 +1,8 @@
+data
+media(role)
+
+Upload
+  + media m1  role: upload
+
+Delete
+  - media m1  role: upload

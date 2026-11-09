@@ -98,7 +98,8 @@ const legendHtml = () =>
 // ---------- Review ----------
 interface Parsed {
   sketch: Sketch;
-  review: Review;
+  /** What analyze() finds in a code sketch. Other views have no review yet. */
+  review?: Review;
   /** Line in the editor where the sketch starts (markdown mode). */
   offset: number;
 }
@@ -112,12 +113,27 @@ function reviewSection({ sketch, review: r, offset }: Parsed, index: number, mar
   const ln = (line: number) => `<span class="rv-ln">L${line + offset - 1}</span>`;
   const row = (line: number, body: string, cls = '') =>
     `<li class="rv-row${cls ? ` ${cls}` : ''}" data-sketch-index="${index}" data-line="${line}">${ln(line)}<span class="rv-body">${body}</span></li>`;
+  const stat = (n: number, label: string, cls = '') => `<span class="rv-stat ${n ? cls : 'zero'}"><b>${n}</b> ${label}${n === 1 ? '' : 's'}</span>`;
+  const diagnostics = () => {
+    if (!sketch.diagnostics.length) return '';
+    let html = `<h3>Diagnostics</h3><ol class="rv-list">`;
+    for (const d of sketch.diagnostics) html += row(d.line, `<span class="rv-flag rv-flag-warning">${d.severity}</span><span class="rv-ctx">${esc(d.message)}</span>`);
+    return html + `</ol>`;
+  };
+
+  if (sketch.view === 'data' || !r) {
+    let html = `<section class="rv">`;
+    if (markdown) html += `<h2>${esc(`Data sketch at line ${offset}`)}</h2>`;
+    if (sketch.view === 'data') {
+      html += `<div class="rv-stats">${stat(sketch.tables.length, 'table')}${stat(sketch.steps.length, 'step')}${stat(sketch.diagnostics.length, 'warning', 'amber')}</div>`;
+    }
+    return html + diagnostics() + `</section>`;
+  }
   // Removed effects are ones the code no longer has, so they aren't counted.
   const current = r.effects.filter((e) => e.change !== 'removed');
   const reads = current.filter((e) => e.direction === 'read').length;
   const writes = current.length - reads;
   const dangers = r.flags.filter((f) => f.kind === 'danger').length;
-  const stat = (n: number, label: string, cls = '') => `<span class="rv-stat ${n ? cls : 'zero'}"><b>${n}</b> ${label}${n === 1 ? '' : 's'}</span>`;
 
   const title = sketch.signature ? sketch.signature.name : `Sketch at line ${offset}`;
   let html = `<section class="rv" data-sketch-scope>`;
@@ -192,13 +208,7 @@ function reviewSection({ sketch, review: r, offset }: Parsed, index: number, mar
     html += `</ul>`;
   }
 
-  if (r.diagnostics.length) {
-    html += `<h3>Diagnostics</h3><ol class="rv-list">`;
-    for (const d of r.diagnostics) html += row(d.line, `<span class="rv-flag rv-flag-warning">${d.severity}</span><span class="rv-ctx">${esc(d.message)}</span>`);
-    html += `</ol>`;
-  }
-
-  return html + `</section>`;
+  return html + diagnostics() + `</section>`;
 }
 
 // ---------- Render loop ----------
@@ -213,12 +223,12 @@ function render() {
     preview.innerHTML = `<article class="md">${md.render(source)}</article>`;
     parsed = sketchFences(md, source).map((f) => {
       const sketch = parse(f.content);
-      return { sketch, review: analyze(sketch), offset: f.line + 1 };
+      return { sketch, review: sketch.view === 'code' ? analyze(sketch) : undefined, offset: f.line + 1 };
     });
   } else {
     const sketch = parse(source);
-    parsed = [{ sketch, review: analyze(sketch), offset: 1 }];
-    preview.innerHTML = toHtml(sketch, opts) + legendHtml();
+    parsed = [{ sketch, review: sketch.view === 'code' ? analyze(sketch) : undefined, offset: 1 }];
+    preview.innerHTML = toHtml(sketch, opts) + (sketch.view === 'code' ? legendHtml() : '');
   }
 
   review.innerHTML = reviewHtml(parsed, mode === 'markdown');
@@ -231,8 +241,8 @@ function render() {
     2,
   );
 
-  const warnings = parsed.reduce((n, p) => n + p.review.diagnostics.length, 0);
-  const effects = parsed.reduce((n, p) => n + p.review.effects.filter((e) => e.change !== 'removed').length, 0);
+  const warnings = parsed.reduce((n, p) => n + p.sketch.diagnostics.length, 0);
+  const effects = parsed.reduce((n, p) => n + (p.review?.effects.filter((e) => e.change !== 'removed').length ?? 0), 0);
   reviewCount.textContent = String(effects);
   status.innerHTML =
     (mode === 'markdown' ? `Markdown · ${parsed.length} sketch${parsed.length === 1 ? '' : 'es'}` : `Sketch · ${source.split('\n').length} lines`) +

@@ -1,0 +1,22 @@
+{
+  "tables": [{ "name": "media", "columns": [{ "name": "role" }], "line": 2 }],
+  "diagnostics": [{ "line": 8, "severity": "warning", "message": "media m1 already exists." }],
+  "steps": [
+    {
+      "title": "Upload",
+      "changes": [
+        { "op": "+", "table": "media", "id": "m1", "values": { "role": "upload" }, "line": 5 }
+      ],
+      "line": 4,
+      "rows": { "media": [{ "id": "m1", "values": { "role": "upload" }, "status": "new" }] }
+    },
+    {
+      "title": "Upload again",
+      "changes": [
+        { "op": "+", "table": "media", "id": "m1", "values": { "role": "audio" }, "line": 8 }
+      ],
+      "line": 7,
+      "rows": { "media": [{ "id": "m1", "values": { "role": "upload" } }] }
+    }
+  ]
+}

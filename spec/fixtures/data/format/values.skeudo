@@ -1,0 +1,11 @@
+data
+event(kind, at, note, payload)
+
+Values
+  + event e1  kind: login | at: 10:14 | note: null
+  + event e2  kind: "null" | note: "a | b" | payload: "  padded  "
+  + event e3  kind: false | at: 42 | note: | payload: {"a": 1} |
+
+Change one
+  ~ event e1  note: now set
+  ~ event e1  note: set twice

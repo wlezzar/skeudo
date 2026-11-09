@@ -1,6 +1,6 @@
 # Skeudo for VS Code
 
-Highlights sketches in the editor and renders them in VS Code's Markdown preview. A sketch is pseudocode for code review where every outside effect is tagged; the format is defined in [spec/spec.md](https://github.com/wlezzar/skeudo/blob/main/spec/spec.md).
+Highlights sketches in the editor and renders them in VS Code's Markdown preview. A sketch is pseudocode for code review where every outside effect is tagged, or, when it starts with a `data` line, a data model drawn as tables and a story of how their rows change. The format is defined in [spec/spec.md](https://github.com/wlezzar/skeudo/blob/main/spec/spec.md).
 
 ````markdown
 ```skeudo
@@ -44,7 +44,21 @@ The colors come from your theme, so they vary from theme to theme; VS Code's def
 
 Each whole tag is also `meta.tag.<family>.skeudo`, for rules that need it as a parent scope: `read`, `write`, `fail`, `label`, `danger`, `new`, `changed`, `removed`, `src`, `doc` or `other`.
 
-The editor can't match everything the preview does. It doesn't know which words are variables, so a line that starts with one still gets its first word colored, and it takes a call alone on the first line for a signature even when no indented lines follow.
+In a data sketch:
+
+| Element | Scope |
+| --- | --- |
+| The `data` or `code` line that names the view | `keyword.control.view.skeudo` |
+| Table name, in a declaration or a change | `entity.name.type.table.skeudo` |
+| Column | `variable.other.property.column.skeudo` |
+| `->` in a reference | `keyword.operator.reference.skeudo` |
+| Step title | `markup.heading.step.skeudo` |
+| `+`, `~`, `-` | `markup.inserted.skeudo`, `markup.changed.skeudo`, `markup.deleted.skeudo` |
+| Row id | `variable.other.constant.id.skeudo` |
+| Value, `null`, quoted value | `string.unquoted.value.skeudo`, `constant.language.null.skeudo`, `string.quoted.double.skeudo` |
+| Explanation | `comment.block.documentation.explanation.skeudo` |
+
+The editor can't match everything the preview does. It doesn't know which words are variables, so a line that starts with one still gets its first word colored, and it takes a call alone on the first line for a signature even when no indented lines follow. In a data sketch inside a Markdown list item, every line is indented by the list, so step titles are colored as explanations.
 
 ## Preview
 
@@ -54,6 +68,7 @@ Open a Markdown file and run **Markdown: Open Preview to the Side** (`Ctrl+K V`)
 - Hovering over a call or a line explained with `::doc`, or moving to it with Tab, shows the explanation. Lines with one have a small ⓘ after their code.
 - Clicking a `::src` location opens the file with those lines selected. See Source links below.
 - Inline code made only of tags, such as `` `::read:postgres` ``, renders as pills.
+- A data sketch starts at its first step. Click a step, or use the arrow keys after clicking the sketch, to see the rows change. Hovering over a reference highlights the row it points at. Resting on a step or a table's name shows its explanation, and clicking its ⓘ keeps it open.
 
 Colors follow VS Code's light or dark theme, and sketches use the editor's font.
 

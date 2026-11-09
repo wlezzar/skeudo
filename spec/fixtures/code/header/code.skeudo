@@ -1,0 +1,4 @@
+code
+handleUpload(file):
+  url = sign(file) ::read:s3
+  sent = upload(url, file) ::write:s3

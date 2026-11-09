@@ -1,6 +1,6 @@
 ---
 name: skeudo
-description: Write a Skeudo sketch, readable pseudocode for code review where every outside effect is tagged, for a function, a file, a commit or a pull request. Use when the user asks to "sketch" code, to explain a commit, PR or flow as pseudocode, or for a reviewable summary of what code reads and writes (databases, APIs, storage, queues, devices).
+description: Write a Skeudo sketch, readable pseudocode for code review where every outside effect is tagged, for a function, a file, a commit or a pull request; or a data sketch, a data model drawn as a few tables with example rows and a story of how the rows change. Use when the user asks to "sketch" code, to explain a commit, PR or flow as pseudocode, for a reviewable summary of what code reads and writes (databases, APIs, storage, queues, devices), or how a system stores its data and what happens to it during a flow.
 ---
 
 # Skeudo
@@ -8,6 +8,8 @@ description: Write a Skeudo sketch, readable pseudocode for code review where ev
 A sketch is pseudocode for code review. Logic is written freely; every interaction with the outside world is tagged so a reviewer finds it at a glance.
 
 The contract: **loose about logic, strict about effects.** You may merge, reorder or drop internal steps (loops, mapping, null checks, logging). You may never hide, merge or reorder an effect: anything that reads or changes state outside the running process.
+
+When the question is how data is stored or what happens to it during a flow, rather than what code does, write a data sketch instead: read [data.md](data.md), next to this file. The rest of this file is about code sketches.
 
 ## Syntax
 

@@ -1,4 +1,5 @@
 import type { Diagnostic } from '../diagnostic';
+import { firstLine, splitLines } from '../header';
 import type {
   ChangeKind,
   CodeSketch,
@@ -215,8 +216,11 @@ export function parseCode(source: string, options: ParseOptions = {}): CodeSketc
   const diagnostics: Diagnostic[] = [];
   const warn = (line: number, message: string) => diagnostics.push({ line, severity: 'warning', message });
 
-  const rawLines = source.replace(/\r\n?/g, '\n').split('\n');
+  const rawLines = splitLines(source);
   while (rawLines.length && rawLines[rawLines.length - 1].trim() === '') rawLines.pop();
+  // A `code` header only names the view. It stays a line, left blank, so line numbers still count it.
+  const header = firstLine(rawLines);
+  if (header?.text === 'code') rawLines[header.index] = '';
 
   const indents: number[] = [];
   const lines: SketchLine[] = rawLines.map((raw, idx) => {

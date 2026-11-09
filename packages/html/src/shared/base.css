@@ -10,6 +10,7 @@
   --sk-border: #e3e5ec;
   --sk-guide: #e6e8ee;
   --sk-row-hover: #f1f2f7;
+  --sk-card: #ffffff;
 
   --sk-violet: #6d28d9;
   --sk-blue: #1d4ed8;
@@ -36,6 +37,7 @@
     --sk-border: #2a2f3a;
     --sk-guide: #272c37;
     --sk-row-hover: #1e222b;
+    --sk-card: #1f232c;
 
     --sk-violet: #a78bfa;
     --sk-blue: #93c5fd;
@@ -61,6 +63,7 @@
   --sk-border: #2a2f3a;
   --sk-guide: #272c37;
   --sk-row-hover: #1e222b;
+  --sk-card: #1f232c;
 
   --sk-violet: #a78bfa;
   --sk-blue: #93c5fd;

@@ -1,0 +1,17 @@
+data
+media(role)
+attempt(recording -> media)
+
+Record
+  + media m3     role: upload
+  + attempt a1   recording: m3
+
+Point at a file that isn't there
+  ~ attempt a1   recording: m7
+
+Still broken
+  ~ media m3     role: audio
+
+Delete the file still in use
+  ~ attempt a1   recording: m3
+  - media m3
