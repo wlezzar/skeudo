@@ -8,7 +8,7 @@ Vitest runs every `*.test.ts` in the repository from the root, with no per-packa
 | --- | --- |
 | `packages/core/test/fixtures.test.ts` | Each fixture parses into its `.json`. Every ```` ```skeudo ```` block in `spec/*.md` and `skills/skeudo/**/*.md` parses with no warnings. |
 | `packages/core/test/repo.test.ts` | `parseRepo` and `repoId`, the `::repo` URL forms. |
-| `packages/html/test/` | Rendered markup: data tables, steps, folders and groups, `::doc`, `sk-fit-N` classes, source links. |
+| `packages/html/test/` | Rendered markup: data tables, steps, substeps, reads, folders and groups, `::doc`, `sk-fit-N` classes, source links. |
 | `packages/markdown-it/test/`, `packages/remark/test/` | Fences, inline tag pills, front matter, MDX. |
 | `apps/cli/test/cli.test.ts` | Builds the CLI bundle into a temporary folder and runs it as an installed CLI would run. |
 | `apps/vscode/test/extension.test.ts` | The extension against a stand-in `vscode` module. Source links use real git repositories made in a temporary folder. |

@@ -1,0 +1,8 @@
+data
+[Media]
+  ? media m1
+table media(role)
+  ? media m1
+
+Upload
+  + media m1  role: upload

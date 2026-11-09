@@ -19,6 +19,8 @@ agent-browser close
 
 `$S` is a scratch folder. Read the PNGs to see them. `set media` and `set viewport` apply to the open page without a reload. To step through a data sketch, `agent-browser click` a step, or click the sketch and `agent-browser press ArrowRight`, then take another screenshot and compare. `agent-browser snapshot` lists the elements with refs to click. (Seen working 2026-11-09.)
 
+`agent-browser eval` runs each script in the same page scope, so a second `const x` fails with "Identifier 'x' has already been declared". Wrap each script in `(() => { … })()`. It is also the quickest way to check that no box moves: click each `li[data-skd-at]` in turn and compare the `getBoundingClientRect()` of every `.skd-table`, `.skd-folder` and `.skd-step`. (Seen 2026-11-09.)
+
 `--no-sandbox` is needed on this machine ([environment.md](environment.md#known-limits)). Use it only for local pages like these, and say that you did.
 
 The fixtures under `spec/fixtures/*/examples/` cover each view's main features. A Markdown file renders every sketch in it on one page.
@@ -30,5 +32,7 @@ The fixtures under `spec/fixtures/*/examples/` cover each view's main features. 
 ## The VS Code preview
 
 VS Code can't run here ([environment.md](environment.md#known-limits)). What worked instead (2026-10-31): build the extension with `pnpm --filter skeudo-vscode build`, load `apps/vscode/dist/extension.js` in Node with a stand-in `vscode` module, render a Markdown file through the `extendMarkdownIt` that `activate` returns, and open the HTML in agent-browser with a copy of VS Code's preview stylesheet (`extensions/markdown-language-features/media/markdown.css` in the vscode repository) and a `vscode-dark` or `vscode-light` class on `body`. `apps/vscode/test/extension.test.ts` has a stand-in to start from.
+
+On 2026-11-09 a short CommonJS script in the scratchpad did this without Vitest: it replaced `Module._load` so that `require('vscode')` returns the stand-in, called `activate(...).extendMarkdownIt(md)` with the `markdown-it` from `apps/vscode`, and wrote the rendered Markdown into a page with `apps/vscode/dist/skeudo.css` and `apps/vscode/dist/preview.js` inlined. To mimic the preview rendering again on an edit, remove the sketches and insert their markup again: `enhance()` should start them at the frame they showed.
 
 That checks the bundle, the CSS and the theming, not VS Code itself. Tell the user what is left for them to check in the editor, such as links opening files and the highlighting.

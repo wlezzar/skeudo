@@ -1,0 +1,33 @@
+{
+  "tables": [{ "kind": "table", "name": "media", "columns": [{ "name": "role" }], "line": 2 }],
+  "diagnostics": [
+    {
+      "line": 8,
+      "severity": "warning",
+      "message": "Reads go under a substep once a step has substeps."
+    }
+  ],
+  "steps": [
+    {
+      "title": "Upload",
+      "changes": [
+        { "op": "+", "table": "media", "id": "m1", "values": { "role": "upload" }, "line": 5 }
+      ],
+      "line": 4,
+      "rows": { "media": [{ "id": "m1", "values": { "role": "upload" }, "status": "new" }] }
+    },
+    {
+      "title": "Find it, then delete it",
+      "substeps": [
+        {
+          "title": "It deletes it",
+          "changes": [{ "op": "-", "table": "media", "id": "m1", "line": 10 }],
+          "reads": [{ "table": "media", "id": "m1", "line": 8, "found": ["m1"] }],
+          "line": 9,
+          "rows": { "media": [{ "id": "m1", "values": { "role": "upload" }, "status": "removed" }] }
+        }
+      ],
+      "line": 7
+    }
+  ]
+}

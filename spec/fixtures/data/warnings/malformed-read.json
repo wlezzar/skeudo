@@ -1,0 +1,40 @@
+{
+  "tables": [{ "kind": "table", "name": "media", "columns": [{ "name": "role" }], "line": 2 }],
+  "diagnostics": [
+    {
+      "line": 8,
+      "severity": "warning",
+      "message": "A read needs a row id, a path prefix or col: value, as in ? media m1."
+    },
+    {
+      "line": 9,
+      "severity": "warning",
+      "message": "A read needs a row id, a path prefix or col: value, as in ? media m1."
+    },
+    {
+      "line": 10,
+      "severity": "warning",
+      "message": "A read needs a row id, a path prefix or col: value, as in ? media m1."
+    },
+    {
+      "line": 11,
+      "severity": "warning",
+      "message": "A read needs a row id, a path prefix or col: value, as in ? media m1."
+    }
+  ],
+  "steps": [
+    {
+      "title": "Upload",
+      "changes": [
+        { "op": "+", "table": "media", "id": "m1", "values": { "role": "upload" }, "line": 5 }
+      ],
+      "line": 4,
+      "rows": { "media": [{ "id": "m1", "values": { "role": "upload" }, "status": "new" }] }
+    },
+    {
+      "title": "Read",
+      "line": 7,
+      "rows": { "media": [{ "id": "m1", "values": { "role": "upload" } }] }
+    }
+  ]
+}

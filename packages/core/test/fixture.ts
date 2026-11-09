@@ -2,15 +2,21 @@ import { analyze, parseCode, parseData, replayData } from '../src';
 
 /**
  * The expected output of a data fixture: the parsed tables and steps, with the rows each table holds
- * after each step.
+ * after each step without substeps and after each substep, and the rows each read finds.
  */
 export function projectData(source: string): unknown {
   const sketch = parseData(source);
-  const states = replayData(sketch);
+  const frames = replayData(sketch);
   const { view: _view, source: _source, steps, ...rest } = sketch;
+  const played = <T extends object>(part: T, step: number, substep?: number) => {
+    const frame = frames.find((f) => f.step === step && f.substep === substep)!;
+    return { ...part, reads: frame.reads, rows: Object.fromEntries(frame.state) };
+  };
   return clean({
     ...rest,
-    steps: steps.map((step, i) => ({ ...step, rows: Object.fromEntries(states[i]) })),
+    steps: steps.map((step, i) =>
+      step.substeps.length ? { ...step, substeps: step.substeps.map((sub, k) => played(sub, i, k)) } : played(step, i),
+    ),
   });
 }
 

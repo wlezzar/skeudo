@@ -1,0 +1,150 @@
+{
+  "tables": [
+    {
+      "kind": "table",
+      "name": "media",
+      "columns": [{ "name": "owner" }, { "name": "role" }, { "name": "note" }],
+      "line": 2
+    },
+    { "kind": "folder", "name": "uploads", "columns": [{ "name": "size" }], "line": 3 }
+  ],
+  "steps": [
+    {
+      "title": "Upload",
+      "changes": [
+        {
+          "op": "+",
+          "table": "uploads",
+          "id": "ana/m1/raw.mp4",
+          "values": { "size": "120 MB" },
+          "line": 6
+        },
+        {
+          "op": "+",
+          "table": "uploads",
+          "id": "ana/m2/raw.mp4",
+          "values": { "size": "3 MB" },
+          "line": 7
+        },
+        {
+          "op": "+",
+          "table": "uploads",
+          "id": "ben/m3/raw.mp4",
+          "values": { "size": "9 MB" },
+          "line": 8
+        },
+        {
+          "op": "+",
+          "table": "media",
+          "id": "m1",
+          "values": { "owner": "ana", "role": "upload", "note": null },
+          "line": 9
+        },
+        {
+          "op": "+",
+          "table": "media",
+          "id": "m2",
+          "values": { "owner": "ana", "role": "upload", "note": "a | b" },
+          "line": 10
+        },
+        {
+          "op": "+",
+          "table": "media",
+          "id": "m3",
+          "values": { "owner": "ben", "role": "copy" },
+          "line": 11
+        }
+      ],
+      "line": 5,
+      "rows": {
+        "media": [
+          {
+            "id": "m1",
+            "values": { "owner": "ana", "role": "upload", "note": null },
+            "status": "new"
+          },
+          {
+            "id": "m2",
+            "values": { "owner": "ana", "role": "upload", "note": "a | b" },
+            "status": "new"
+          },
+          { "id": "m3", "values": { "owner": "ben", "role": "copy" }, "status": "new" }
+        ],
+        "uploads": [
+          { "id": "ana/m1/raw.mp4", "values": { "size": "120 MB" }, "status": "new" },
+          { "id": "ana/m2/raw.mp4", "values": { "size": "3 MB" }, "status": "new" },
+          { "id": "ben/m3/raw.mp4", "values": { "size": "9 MB" }, "status": "new" }
+        ]
+      }
+    },
+    {
+      "title": "Read by id, by prefix and by values",
+      "reads": [
+        { "table": "media", "id": "m1", "line": 14, "found": ["m1"] },
+        {
+          "table": "uploads",
+          "prefix": "ana/",
+          "line": 15,
+          "found": ["ana/m1/raw.mp4", "ana/m2/raw.mp4"]
+        },
+        {
+          "table": "media",
+          "match": { "owner": "ana", "role": "upload" },
+          "line": 16,
+          "found": ["m1", "m2"]
+        },
+        { "table": "media", "match": { "note": null }, "line": 17, "found": ["m1", "m3"] },
+        { "table": "media", "match": { "note": "a | b" }, "line": 18, "found": ["m2"] },
+        { "table": "media", "match": { "owner": "cy" }, "line": 19 }
+      ],
+      "line": 13,
+      "rows": {
+        "media": [
+          { "id": "m1", "values": { "owner": "ana", "role": "upload", "note": null } },
+          { "id": "m2", "values": { "owner": "ana", "role": "upload", "note": "a | b" } },
+          { "id": "m3", "values": { "owner": "ben", "role": "copy" } }
+        ],
+        "uploads": [
+          { "id": "ana/m1/raw.mp4", "values": { "size": "120 MB" } },
+          { "id": "ana/m2/raw.mp4", "values": { "size": "3 MB" } },
+          { "id": "ben/m3/raw.mp4", "values": { "size": "9 MB" } }
+        ]
+      }
+    },
+    {
+      "title": "Read at its line",
+      "changes": [
+        { "op": "~", "table": "media", "id": "m3", "values": { "role": "upload" }, "line": 23 },
+        {
+          "op": "+",
+          "table": "media",
+          "id": "m4",
+          "values": { "owner": "cy", "role": "copy" },
+          "line": 25
+        },
+        { "op": "-", "table": "uploads", "id": "ana/m2/raw.mp4", "line": 28 }
+      ],
+      "reads": [
+        { "table": "media", "match": { "role": "copy" }, "line": 22, "found": ["m3"] },
+        { "table": "media", "match": { "role": "copy" }, "line": 24 },
+        { "table": "media", "match": { "owner": "cy" }, "line": 26, "found": ["m4"] },
+        { "table": "uploads", "id": "ana/m2/raw.mp4", "line": 27, "found": ["ana/m2/raw.mp4"] },
+        { "table": "uploads", "prefix": "ana/", "line": 29, "found": ["ana/m1/raw.mp4"] }
+      ],
+      "line": 21,
+      "rows": {
+        "media": [
+          { "id": "m1", "values": { "owner": "ana", "role": "upload", "note": null } },
+          { "id": "m2", "values": { "owner": "ana", "role": "upload", "note": "a | b" } },
+          { "id": "m3", "values": { "owner": "ben", "role": "upload" }, "was": { "role": "copy" } },
+          { "id": "m4", "values": { "owner": "cy", "role": "copy" }, "status": "new" }
+        ],
+        "uploads": [
+          { "id": "ana/m1/raw.mp4", "values": { "size": "120 MB" } },
+          { "id": "ana/m2/raw.mp4", "values": { "size": "3 MB" }, "status": "removed" },
+          { "id": "ben/m3/raw.mp4", "values": { "size": "9 MB" } }
+        ]
+      }
+    }
+  ]
+}

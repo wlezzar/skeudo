@@ -1,0 +1,32 @@
+{
+  "tables": [{ "kind": "table", "name": "media", "columns": [{ "name": "role" }], "line": 2 }],
+  "diagnostics": [
+    {
+      "line": 5,
+      "severity": "warning",
+      "message": "Changes go under a substep once a step has substeps."
+    }
+  ],
+  "steps": [
+    {
+      "title": "Upload",
+      "substeps": [
+        {
+          "title": "Then a second",
+          "changes": [
+            { "op": "+", "table": "media", "id": "m1", "values": { "role": "upload" }, "line": 5 },
+            { "op": "+", "table": "media", "id": "m2", "values": { "role": "upload" }, "line": 7 }
+          ],
+          "line": 6,
+          "rows": {
+            "media": [
+              { "id": "m1", "values": { "role": "upload" }, "status": "new" },
+              { "id": "m2", "values": { "role": "upload" }, "status": "new" }
+            ]
+          }
+        }
+      ],
+      "line": 4
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+data
+table media(owner, state, file -> uploads)
+  One video or photo.
+
+folder uploads(type, size)
+  The bucket the browser uploads to. Keys are owner/media/name, so one
+  listing finds a person's files, or a video's.
+
+Ana uploads a video
+  + uploads ana/m1/raw.mp4   type: video/mp4 | size: 120 MB
+  + media m1                 owner: ana | state: uploaded | file: ana/m1/raw.mp4
+
+Ben uploads a photo
+  + uploads ben/m2/raw.jpg   type: image/jpeg | size: 3 MB
+  + media m2                 owner: ben | state: uploaded | file: ben/m2/raw.jpg
+
+The transcoder makes a smaller copy
+  > It writes the 720p file
+    + uploads ana/m1/720p.mp4  type: video/mp4 | size: 18 MB
+  > It points the video at the copy
+    The file is written first, so the row never points at a missing file.
+    ~ media m1                 state: ready | file: ana/m1/720p.mp4
+
+Ana opens her library
+  ? media  owner: ana
+
+She downloads everything she uploaded
+  One listing by prefix finds all her files, the raw upload included,
+  since keys start with the owner.
+  ? uploads ana/

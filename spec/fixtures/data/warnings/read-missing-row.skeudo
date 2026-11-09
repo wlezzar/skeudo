@@ -1,0 +1,14 @@
+data
+table media(role)
+
+Upload
+  + media m1  role: upload
+
+Read a row that isn't there
+  ? media m9
+
+Read it before it is added
+  > It reads it
+    ? media m2
+  > It adds it
+    + media m2  role: upload

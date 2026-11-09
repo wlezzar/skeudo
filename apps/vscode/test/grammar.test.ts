@@ -288,6 +288,14 @@ describe('the data view', () => {
     '[Billing / S3]', // 15
     '  Explains the group.',
     'folder invoices(order -> order)',
+    '', // 18
+    'She checks out again',
+    '  > Checkout finds her by email', // 20
+    '    ? customer  email: ana@example.com',
+    '  > It lists her files',
+    '    ? invoices  ana/',
+    '    ? order o1',
+    '    + order o2  customer: c1', // 25
   ].join('\n');
   let lines: Token[][];
   beforeAll(() => {
@@ -352,6 +360,19 @@ describe('the data view', () => {
     expect(at(11, '14')).toContain('string.unquoted.value.skeudo');
   });
 
+  test('a substep is a heading, and a read names its table and what it finds', () => {
+    expect(at(20, '>')).toContain('punctuation.definition.heading.substep.skeudo');
+    expect(at(20, 'Checkout')).toEqual(expect.arrayContaining(['meta.substep.skeudo', 'markup.heading.substep.skeudo']));
+    expect(at(21, '?')).toEqual(expect.arrayContaining(['meta.read.skeudo', 'support.type.read.skeudo']));
+    expect(at(21, 'customer')).toContain('entity.name.type.table.skeudo');
+    expect(at(21, 'email')).toContain('variable.other.property.column.skeudo');
+    expect(at(21, 'ana@')).toContain('string.unquoted.value.skeudo');
+    expect(at(23, 'invoices')).toContain('entity.name.type.table.skeudo');
+    expect(at(23, 'ana/')).toContain('variable.other.constant.id.skeudo');
+    expect(at(24, 'o1')).toContain('variable.other.constant.id.skeudo');
+    expect(at(25, '+')).toContain('markup.inserted.skeudo');
+  });
+
   test('a later line reading data is a line of code', () => {
     expect(sketchScopes('x = 1\ndata', 'data')).not.toContain('keyword.control.view.skeudo');
   });
@@ -376,7 +397,7 @@ describe('the data view', () => {
   });
 });
 
-/** What each line of a data sketch is, to the parser: the header, a group, a declaration, a step, a change, or an explanation. */
+/** What each line of a data sketch is, to the parser: the header, a group, a declaration, a step, a substep, a change, a read, or an explanation. */
 function dataKinds(source: string): string[] {
   const sketch = parseData(source);
   const raws = source.split('\n');
@@ -391,7 +412,11 @@ function dataKinds(source: string): string[] {
   for (const g of sketch.groups) kinds[g.line - 1] = 'group';
   for (const s of sketch.steps) {
     kinds[s.line - 1] = 'step';
-    for (const c of s.changes) kinds[c.line - 1] = 'change';
+    for (const part of [s, ...s.substeps]) {
+      for (const c of part.changes) kinds[c.line - 1] = 'change';
+      for (const r of part.reads) kinds[r.line - 1] = 'read';
+    }
+    for (const sub of s.substeps) kinds[sub.line - 1] = 'substep';
   }
   return kinds;
 }
@@ -404,6 +429,8 @@ function grammarKinds(source: string): string[] {
     if (has(scopes, 'meta.group')) return 'group';
     if (has(scopes, 'meta.declaration.table')) return 'table';
     if (has(scopes, 'meta.change')) return 'change';
+    if (has(scopes, 'meta.read')) return 'read';
+    if (has(scopes, 'meta.substep')) return 'substep';
     if (has(scopes, 'markup.heading.step')) return 'step';
     if (has(scopes, 'comment.block.documentation.explanation')) return 'explanation';
     return scopes.length ? scopes.join(' ') : '';

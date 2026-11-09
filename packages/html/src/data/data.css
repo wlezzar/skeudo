@@ -9,6 +9,9 @@
   --skd-new-bg: color-mix(in srgb, var(--sk-green) 13%, transparent);
   --skd-chg-bg: color-mix(in srgb, var(--sk-blue) 13%, transparent);
   --skd-del-bg: color-mix(in srgb, var(--sk-red) 9%, transparent);
+  /* Reads are aqua, the code view's color for them. */
+  --skd-read: var(--sk-aqua);
+  position: relative;
   container: skd / inline-size;
   font: 13.5px/1.4 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   color: var(--sk-fg);
@@ -87,6 +90,38 @@
 }
 .skd-cur .skd-n { color: var(--sk-muted); }
 
+/* A step with substeps lists them under its title, on a thin line. They are always listed, so the list
+   keeps its height as the reader steps. */
+.skd-step.skd-multi { display: block; }
+.skd-head {
+  display: flex;
+  align-items: baseline;
+}
+.skd-subs {
+  margin: -2px 0 6px calc(8px + 1.2em + 3px);
+  padding: 0;
+  list-style: none;
+  border-left: 1.5px solid var(--sk-border);
+}
+.skd-sub {
+  display: flex;
+  align-items: baseline;
+  margin: 0 0 0 -1.5px;
+  border-left: 1.5px solid transparent;
+}
+.skd-sub .skd-go {
+  padding: 2px 2px 2px 8px;
+  font-size: 12.5px;
+  line-height: 1.35;
+}
+.skd[data-skd-live] .skd-step:not(.skd-cur) .skd-sub { color: var(--sk-faint); }
+.skd-step.skd-cur .skd-sub { color: var(--sk-muted); }
+.skd-step.skd-cur .skd-sub.skd-cur {
+  color: var(--sk-fg);
+  border-left-color: var(--sk-fg);
+}
+.skd[data-skd-live] .skd-sub:hover { color: var(--sk-fg); }
+
 /* The arrows show only once enhance() makes them work. */
 .skd-nav {
   display: none;
@@ -136,6 +171,7 @@
 .skd-l-new { --skd-c: var(--sk-green); --skd-c-bg: var(--skd-new-bg); }
 .skd-l-chg { --skd-c: var(--sk-blue); --skd-c-bg: var(--skd-chg-bg); }
 .skd-l-del { --skd-c: var(--sk-red); --skd-c-bg: var(--skd-del-bg); }
+.skd-l-read { --skd-c: var(--skd-read); --skd-c-bg: transparent; }
 
 /* ---------- Explanations ---------- */
 
@@ -167,8 +203,17 @@
   color: var(--sk-blue);
   border-color: color-mix(in srgb, var(--sk-blue) 60%, transparent);
 }
-/* In the list, only the current or hovered step shows its mark, to keep the list quiet. */
-.skd-step:not(.skd-cur, :hover, .skd-doc-on) .skd-mark { visibility: hidden; }
+/* In the list, only the current or hovered step or substep shows its mark, to keep the list quiet. */
+.skd-step .skd-mark { visibility: hidden; }
+.skd-step:is(.skd-cur, :hover) > .skd-mark,
+.skd-step:is(.skd-cur, :hover) > .skd-head > .skd-mark,
+.skd-sub:is(.skd-cur, :hover) > .skd-mark,
+.skd-doc-on > .skd-mark { visibility: visible; }
+.skd-sub .skd-mark {
+  width: 14px;
+  height: 14px;
+  font-size: 9.5px;
+}
 
 /* ---------- Tables ---------- */
 
@@ -342,6 +387,63 @@
   .skd[data-skd-live] tr.skd-removed td,
   .skd[data-skd-live] td.skd-chg { animation: skd-flash 0.9s ease-out; }
 }
+
+/* A row a read finds has a ring, so it can't be mistaken for a change, which fills. */
+.skd .skd-grid tr.skd-read td { box-shadow: inset 0 1.5px var(--skd-read), inset 0 -1.5px var(--skd-read); }
+.skd .skd-grid tr.skd-read td:first-child {
+  box-shadow: inset 1.5px 0 var(--skd-read), inset 0 1.5px var(--skd-read), inset 0 -1.5px var(--skd-read);
+}
+.skd .skd-grid tr.skd-read td:last-child {
+  box-shadow: inset -1.5px 0 var(--skd-read), inset 0 1.5px var(--skd-read), inset 0 -1.5px var(--skd-read);
+}
+.skd .skd-grid tr.skd-read td:first-child:last-child { box-shadow: inset 0 0 0 1.5px var(--skd-read); }
+/* What the read matched on: the id, the prefix of a path, or the cells of the lookup's columns, whose
+   names are underlined while the read shows. */
+.skd .skd-grid td.skd-read-key,
+.skd .skd-grid .skd-read-key { color: var(--skd-read); }
+.skd .skd-grid td.skd-read-key .skd-ref { border-color: var(--skd-read); }
+.skd .skd-grid th.skd-on {
+  color: var(--skd-read);
+  text-decoration: underline 1.5px;
+  text-underline-offset: 3px;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .skd[data-skd-live] tr.skd-read td { animation: skd-flash 0.9s ease-out; }
+}
+/* A read that finds nothing: a badge beside the table's name. A table keeps room for it, so nothing
+   moves; a folder's tab would look empty, so it grows instead. */
+.skd-nomatch {
+  margin-left: 8px;
+  padding: 0 6px;
+  border: 1px dashed var(--skd-read);
+  border-radius: 4px;
+  color: var(--skd-read);
+  font-size: 11.5px;
+  font-weight: 400;
+  line-height: 1.5;
+  white-space: nowrap;
+}
+.skd-nomatch:not(.skd-on) { visibility: hidden; }
+.skd-folder .skd-nomatch:not(.skd-on) { display: none; }
+
+/* The lines enhance() draws from the current step to the rows its reads find. They never take a click. */
+.skd-lines {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+  color: var(--skd-read);
+}
+.skd-lines .skd-line {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  opacity: 0.85;
+}
+.skd-lines .skd-arrow { fill: currentColor; opacity: 0.85; }
 
 /* A reference and the row it points at, while either is hovered. */
 .skd .skd-grid tr.skd-hl td,

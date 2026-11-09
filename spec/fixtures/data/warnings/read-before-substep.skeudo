@@ -1,0 +1,10 @@
+data
+table media(role)
+
+Upload
+  + media m1  role: upload
+
+Find it, then delete it
+  ? media m1
+  > It deletes it
+    - media m1

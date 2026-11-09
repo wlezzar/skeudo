@@ -44,12 +44,42 @@ export interface DataChange {
   line: number;
 }
 
-/** A step of the story: a title, an explanation, and the changes it makes. */
+/**
+ * `? table id`, `? table col: value | …` or `? folder prefix/`: a read, which finds rows and changes nothing.
+ * One of `id`, `prefix` and `match` is set.
+ */
+export interface DataRead {
+  table: string;
+  /** The row's id. */
+  id?: string;
+  /** The start of the paths of the files it finds, ending with `/`. */
+  prefix?: string;
+  /** The values every row it finds has, by column. */
+  match?: DataValues;
+  line: number;
+}
+
+/** `> title` under a step: a pause inside it, with its own explanation, changes and reads. */
+export interface DataSubstep {
+  title: string;
+  /** Paragraphs of explanation. */
+  doc: string[];
+  changes: DataChange[];
+  reads: DataRead[];
+  line: number;
+}
+
+/**
+ * A step of the story: a title, an explanation, and the changes and reads it makes. A step with substeps
+ * has no changes or reads of its own: they are its substeps'.
+ */
 export interface DataStep {
   title: string;
   /** Paragraphs of explanation. */
   doc: string[];
   changes: DataChange[];
+  reads: DataRead[];
+  substeps: DataSubstep[];
   line: number;
 }
 
@@ -90,3 +120,21 @@ export interface DataRow {
 
 /** The rows of each table after a step, by table name. Rows keep the order they were added in. */
 export type DataState = Map<string, DataRow[]>;
+
+/** A read played at its line. */
+export interface DataFound extends DataRead {
+  /** The ids of the rows it finds, in the order the rows were added. */
+  found: string[];
+}
+
+/** What the board shows at once: a substep, or a whole step that has none. */
+export interface DataFrame {
+  /** The index of its step. */
+  step: number;
+  /** The index of its substep in the step, for a step with substeps. */
+  substep?: number;
+  /** The rows of each table after the frame's changes. */
+  state: DataState;
+  /** The frame's reads, with the rows each one finds. */
+  reads: DataFound[];
+}

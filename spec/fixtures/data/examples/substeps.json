@@ -1,0 +1,219 @@
+{
+  "tables": [
+    {
+      "kind": "table",
+      "name": "media",
+      "columns": [{ "name": "owner" }, { "name": "state" }, { "name": "file", "ref": "uploads" }],
+      "doc": ["One video or photo."],
+      "line": 2
+    },
+    {
+      "kind": "folder",
+      "name": "uploads",
+      "columns": [{ "name": "type" }, { "name": "size" }],
+      "doc": [
+        "The bucket the browser uploads to. Keys are owner/media/name, so one listing finds a person's files, or a video's."
+      ],
+      "line": 5
+    }
+  ],
+  "steps": [
+    {
+      "title": "Ana uploads a video",
+      "changes": [
+        {
+          "op": "+",
+          "table": "uploads",
+          "id": "ana/m1/raw.mp4",
+          "values": { "type": "video/mp4", "size": "120 MB" },
+          "line": 10
+        },
+        {
+          "op": "+",
+          "table": "media",
+          "id": "m1",
+          "values": { "owner": "ana", "state": "uploaded", "file": "ana/m1/raw.mp4" },
+          "line": 11
+        }
+      ],
+      "line": 9,
+      "rows": {
+        "media": [
+          {
+            "id": "m1",
+            "values": { "owner": "ana", "state": "uploaded", "file": "ana/m1/raw.mp4" },
+            "status": "new"
+          }
+        ],
+        "uploads": [
+          {
+            "id": "ana/m1/raw.mp4",
+            "values": { "type": "video/mp4", "size": "120 MB" },
+            "status": "new"
+          }
+        ]
+      }
+    },
+    {
+      "title": "Ben uploads a photo",
+      "changes": [
+        {
+          "op": "+",
+          "table": "uploads",
+          "id": "ben/m2/raw.jpg",
+          "values": { "type": "image/jpeg", "size": "3 MB" },
+          "line": 14
+        },
+        {
+          "op": "+",
+          "table": "media",
+          "id": "m2",
+          "values": { "owner": "ben", "state": "uploaded", "file": "ben/m2/raw.jpg" },
+          "line": 15
+        }
+      ],
+      "line": 13,
+      "rows": {
+        "media": [
+          {
+            "id": "m1",
+            "values": { "owner": "ana", "state": "uploaded", "file": "ana/m1/raw.mp4" }
+          },
+          {
+            "id": "m2",
+            "values": { "owner": "ben", "state": "uploaded", "file": "ben/m2/raw.jpg" },
+            "status": "new"
+          }
+        ],
+        "uploads": [
+          { "id": "ana/m1/raw.mp4", "values": { "type": "video/mp4", "size": "120 MB" } },
+          {
+            "id": "ben/m2/raw.jpg",
+            "values": { "type": "image/jpeg", "size": "3 MB" },
+            "status": "new"
+          }
+        ]
+      }
+    },
+    {
+      "title": "The transcoder makes a smaller copy",
+      "substeps": [
+        {
+          "title": "It writes the 720p file",
+          "changes": [
+            {
+              "op": "+",
+              "table": "uploads",
+              "id": "ana/m1/720p.mp4",
+              "values": { "type": "video/mp4", "size": "18 MB" },
+              "line": 19
+            }
+          ],
+          "line": 18,
+          "rows": {
+            "media": [
+              {
+                "id": "m1",
+                "values": { "owner": "ana", "state": "uploaded", "file": "ana/m1/raw.mp4" }
+              },
+              {
+                "id": "m2",
+                "values": { "owner": "ben", "state": "uploaded", "file": "ben/m2/raw.jpg" }
+              }
+            ],
+            "uploads": [
+              { "id": "ana/m1/raw.mp4", "values": { "type": "video/mp4", "size": "120 MB" } },
+              { "id": "ben/m2/raw.jpg", "values": { "type": "image/jpeg", "size": "3 MB" } },
+              {
+                "id": "ana/m1/720p.mp4",
+                "values": { "type": "video/mp4", "size": "18 MB" },
+                "status": "new"
+              }
+            ]
+          }
+        },
+        {
+          "title": "It points the video at the copy",
+          "doc": ["The file is written first, so the row never points at a missing file."],
+          "changes": [
+            {
+              "op": "~",
+              "table": "media",
+              "id": "m1",
+              "values": { "state": "ready", "file": "ana/m1/720p.mp4" },
+              "line": 22
+            }
+          ],
+          "line": 20,
+          "rows": {
+            "media": [
+              {
+                "id": "m1",
+                "values": { "owner": "ana", "state": "ready", "file": "ana/m1/720p.mp4" },
+                "was": { "state": "uploaded", "file": "ana/m1/raw.mp4" }
+              },
+              {
+                "id": "m2",
+                "values": { "owner": "ben", "state": "uploaded", "file": "ben/m2/raw.jpg" }
+              }
+            ],
+            "uploads": [
+              { "id": "ana/m1/raw.mp4", "values": { "type": "video/mp4", "size": "120 MB" } },
+              { "id": "ben/m2/raw.jpg", "values": { "type": "image/jpeg", "size": "3 MB" } },
+              { "id": "ana/m1/720p.mp4", "values": { "type": "video/mp4", "size": "18 MB" } }
+            ]
+          }
+        }
+      ],
+      "line": 17
+    },
+    {
+      "title": "Ana opens her library",
+      "reads": [{ "table": "media", "match": { "owner": "ana" }, "line": 25, "found": ["m1"] }],
+      "line": 24,
+      "rows": {
+        "media": [
+          { "id": "m1", "values": { "owner": "ana", "state": "ready", "file": "ana/m1/720p.mp4" } },
+          {
+            "id": "m2",
+            "values": { "owner": "ben", "state": "uploaded", "file": "ben/m2/raw.jpg" }
+          }
+        ],
+        "uploads": [
+          { "id": "ana/m1/raw.mp4", "values": { "type": "video/mp4", "size": "120 MB" } },
+          { "id": "ben/m2/raw.jpg", "values": { "type": "image/jpeg", "size": "3 MB" } },
+          { "id": "ana/m1/720p.mp4", "values": { "type": "video/mp4", "size": "18 MB" } }
+        ]
+      }
+    },
+    {
+      "title": "She downloads everything she uploaded",
+      "doc": [
+        "One listing by prefix finds all her files, the raw upload included, since keys start with the owner."
+      ],
+      "reads": [
+        {
+          "table": "uploads",
+          "prefix": "ana/",
+          "line": 30,
+          "found": ["ana/m1/raw.mp4", "ana/m1/720p.mp4"]
+        }
+      ],
+      "line": 27,
+      "rows": {
+        "media": [
+          { "id": "m1", "values": { "owner": "ana", "state": "ready", "file": "ana/m1/720p.mp4" } },
+          {
+            "id": "m2",
+            "values": { "owner": "ben", "state": "uploaded", "file": "ben/m2/raw.jpg" }
+          }
+        ],
+        "uploads": [
+          { "id": "ana/m1/raw.mp4", "values": { "type": "video/mp4", "size": "120 MB" } },
+          { "id": "ben/m2/raw.jpg", "values": { "type": "image/jpeg", "size": "3 MB" } },
+          { "id": "ana/m1/720p.mp4", "values": { "type": "video/mp4", "size": "18 MB" } }
+        ]
+      }
+    }
+  ]
+}

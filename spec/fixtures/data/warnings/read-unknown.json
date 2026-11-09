@@ -1,0 +1,28 @@
+{
+  "tables": [{ "kind": "table", "name": "media", "columns": [{ "name": "role" }], "line": 2 }],
+  "diagnostics": [
+    { "line": 8, "severity": "warning", "message": "No table named medai." },
+    { "line": 9, "severity": "warning", "message": "media has no column rol." },
+    { "line": 10, "severity": "warning", "message": "\"nope\" should be column: value." }
+  ],
+  "steps": [
+    {
+      "title": "Upload",
+      "changes": [
+        { "op": "+", "table": "media", "id": "m1", "values": { "role": "upload" }, "line": 5 }
+      ],
+      "line": 4,
+      "rows": { "media": [{ "id": "m1", "values": { "role": "upload" }, "status": "new" }] }
+    },
+    {
+      "title": "Read",
+      "reads": [
+        { "table": "medai", "id": "m1", "line": 8 },
+        { "table": "media", "match": { "rol": "upload" }, "line": 9 },
+        { "table": "media", "match": { "role": "upload" }, "line": 10, "found": ["m1"] }
+      ],
+      "line": 7,
+      "rows": { "media": [{ "id": "m1", "values": { "role": "upload" } }] }
+    }
+  ]
+}

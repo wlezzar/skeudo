@@ -1,0 +1,45 @@
+{
+  "tables": [
+    { "kind": "table", "name": "media", "columns": [{ "name": "role" }], "line": 2 },
+    {
+      "kind": "table",
+      "name": "source",
+      "columns": [{ "name": "input", "ref": "media" }],
+      "line": 3
+    }
+  ],
+  "diagnostics": [
+    {
+      "line": 7,
+      "severity": "warning",
+      "message": "source s1.input points at media m1, which doesn't exist at step 1.1."
+    }
+  ],
+  "steps": [
+    {
+      "title": "Upload",
+      "substeps": [
+        {
+          "title": "It points at the file first",
+          "changes": [
+            { "op": "+", "table": "source", "id": "s1", "values": { "input": "m1" }, "line": 7 }
+          ],
+          "line": 6,
+          "rows": { "source": [{ "id": "s1", "values": { "input": "m1" }, "status": "new" }] }
+        },
+        {
+          "title": "Then uploads it",
+          "changes": [
+            { "op": "+", "table": "media", "id": "m1", "values": { "role": "upload" }, "line": 9 }
+          ],
+          "line": 8,
+          "rows": {
+            "media": [{ "id": "m1", "values": { "role": "upload" }, "status": "new" }],
+            "source": [{ "id": "s1", "values": { "input": "m1" } }]
+          }
+        }
+      ],
+      "line": 5
+    }
+  ]
+}

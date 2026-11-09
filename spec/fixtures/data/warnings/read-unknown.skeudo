@@ -1,0 +1,10 @@
+data
+table media(role)
+
+Upload
+  + media m1  role: upload
+
+Read
+  ? medai m1
+  ? media rol: upload
+  ? media role: upload | nope

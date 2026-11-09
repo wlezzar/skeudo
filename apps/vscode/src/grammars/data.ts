@@ -2,7 +2,7 @@
  * TextMate rules for data sketches, which grammars/index.ts puts in `source.skeudo` after a `data` header.
  *
  * They follow the parser (packages/core/src/data/parse.ts) line by line: a group line, a declaration, a
- * step title, a change, or an explanation. One gap: in a fence inside a Markdown list item, every line is
+ * step title, a substep, a change, a read, or an explanation. One gap: in a fence inside a Markdown list item, every line is
  * indented by the list, so step titles are colored as explanations.
  *
  * Repository names start with `data-`, since every view's rules share one grammar.
@@ -62,6 +62,26 @@ export const dataRepository: Record<string, Rule> = {
     name: 'meta.change.skeudo',
     patterns: [{ include: '#data-values' }],
   },
+  // `> title`, which starts a substep.
+  'data-substep': {
+    match: String.raw`^\s+(>)(?=\s|$)\s*(.*)$`,
+    captures: {
+      1: { name: 'punctuation.definition.heading.substep.skeudo' },
+      2: { name: 'markup.heading.substep.skeudo entity.name.section.substep.skeudo' },
+    },
+    name: 'meta.substep.skeudo',
+  },
+  // `? table id`, `? folder prefix/` or `? table col: value | …`. One word after the table is an id or a prefix.
+  'data-read': {
+    begin: String.raw`^\s+(\?)(?=\s|$)(?:\s+(\S+))?`,
+    beginCaptures: { 1: { name: 'support.type.read.skeudo' }, 2: { name: TABLE } },
+    end: '$',
+    name: 'meta.read.skeudo',
+    patterns: [
+      { match: String.raw`\G\s+(?!${NAME}\s*:)([^\s|]+)\s*$`, captures: { 1: { name: 'variable.other.constant.id.skeudo' } } },
+      { include: '#data-values' },
+    ],
+  },
   // A column starts the values, right after the id, and each part after a `|`. A value is text up to the next `|`.
   'data-values': {
     patterns: [
@@ -89,7 +109,9 @@ export const dataRepository: Record<string, Rule> = {
 export const dataPatterns: Rule[] = [
   { include: '#data-group' },
   { include: '#data-declaration' },
+  { include: '#data-substep' },
   { include: '#data-change' },
+  { include: '#data-read' },
   { include: '#data-explanation' },
   { include: '#data-step' },
 ];

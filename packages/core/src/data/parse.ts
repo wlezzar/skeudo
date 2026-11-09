@@ -4,7 +4,19 @@
 import type { Diagnostic } from '../diagnostic';
 import { firstLine, splitLines } from '../header';
 import { checkData } from './replay';
-import { DATA_KINDS, type DataChange, type DataColumn, type DataGroup, type DataKind, type DataSketch, type DataStep, type DataTable, type DataValues } from './types';
+import {
+  DATA_KINDS,
+  type DataChange,
+  type DataColumn,
+  type DataGroup,
+  type DataKind,
+  type DataRead,
+  type DataSketch,
+  type DataStep,
+  type DataSubstep,
+  type DataTable,
+  type DataValues,
+} from './types';
 
 const NAME = String.raw`[\p{L}\p{N}_.-]+`;
 const KIND = DATA_KINDS.join('|');
@@ -21,21 +33,27 @@ const GROUP = /^\[(.*)\]$/;
 const COLUMN = new RegExp(String.raw`^(${NAME})(?:\s*(?:->|→)\s*(${NAME}))?$`, 'u');
 /** `+ table id  values`. */
 const CHANGE = /^([+~-])\s+(\S+)\s+(\S+)\s*(.*)$/;
+/** `? table what`, where what is an id, a path prefix or values. */
+const READ = /^\?\s+(\S+)\s*(.*)$/;
 /** `column: value`, split at the first colon, so `expires: 10:14` works. */
 const VALUE = new RegExp(String.raw`^(${NAME})\s*:\s*(.*)$`, 'u');
 
-/** What indented lines belong to: the table, group or step above them. Only a step has changes. */
+/** What indented lines belong to: the table, group, step or substep above them. Only a step or substep has changes and reads. */
 interface Owner {
   doc: string[];
   changes?: DataChange[];
+  reads?: DataRead[];
 }
+
+type Warn = (line: number, message: string) => void;
 
 /**
  * Parses a data block. Lines that aren't indented start a group, as `[label]`, declare a table, as
  * `table name(col, col -> table)` or `folder name(col)`, or start a step. Indented lines under any of them
- * are its explanation, except under a step, where lines starting with `+`, `~` or `-` and a space are its
- * changes. A blank line splits an explanation into paragraphs. A `data` header on the first line is
- * skipped. The diagnostics include what playing the story finds (checkData).
+ * are its explanation, except under a step. There, a line starting with `>` starts a substep, and lines
+ * starting with `+`, `~` or `-` and a space are changes and lines starting with `?` are reads, of the
+ * substep or step above them. A blank line splits an explanation into paragraphs. A `data` header on the
+ * first line is skipped. The diagnostics include what playing the story finds (checkData).
  */
 export function parseData(source: string): DataSketch {
   const lines = splitLines(source);
@@ -45,8 +63,10 @@ export function parseData(source: string): DataSketch {
   const groups: DataGroup[] = [];
   const steps: DataStep[] = [];
   let owner: Owner | undefined;
-  /** What `owner` is, for the warning about a change under it. */
-  let ownerIs: 'table' | 'group' | 'step' = 'step';
+  /** What `owner` is when it isn't a step or substep, for the warning about a change under it. */
+  let ownerIs: 'table' | 'group' = 'table';
+  /** The step that indented lines are under, if any: `owner` is it or one of its substeps. */
+  let step: DataStep | undefined;
   /** The group that tables declared now belong to. Steps don't end it, only the next group line does. */
   let group: DataGroup | undefined;
   /** Whether the line before continues the same paragraph of explanation. */
@@ -74,6 +94,7 @@ export function parseData(source: string): DataSketch {
         groups.push(group);
         owner = group;
         ownerIs = 'group';
+        step = undefined;
         continue;
       }
       const declaration = DECLARATION.exec(body);
@@ -97,17 +118,31 @@ export function parseData(source: string): DataSketch {
         }
         owner = table;
         ownerIs = 'table';
+        step = undefined;
         continue;
       }
-      const step: DataStep = { title: body, doc: [], changes: [], line };
+      step = { title: body, doc: [], changes: [], reads: [], substeps: [], line };
       steps.push(step);
       owner = step;
-      ownerIs = 'step';
       continue;
     }
 
     if (!owner) {
       warn(line, 'This line is indented but has no table or step above it.');
+      continue;
+    }
+
+    if (/^>(\s|$)/.test(body)) {
+      paragraph = false;
+      if (!step) {
+        warn(line, `Substeps go under a step, not under a ${ownerIs}.`);
+        continue;
+      }
+      const title = body.slice(1).trim();
+      if (!title) warn(line, 'A substep needs a title, as in > Checkout looks her email up.');
+      const substep: DataSubstep = { title, doc: [], changes: [], reads: [], line };
+      step.substeps.push(substep);
+      owner = substep;
       continue;
     }
 
@@ -123,17 +158,21 @@ export function parseData(source: string): DataSketch {
         continue;
       }
       const [, op, table, id, rest] = m;
-      const values: DataValues = {};
+      let values: DataValues = {};
       if (op === '-' && rest) warn(line, 'A deletion takes no values.');
-      else if (rest) {
-        for (const part of splitPipes(rest).map((p) => p.trim())) {
-          if (!part) continue;
-          const kv = VALUE.exec(part);
-          if (kv) values[kv[1]] = parseValue(kv[2].trim());
-          else warn(line, `"${part}" should be column: value.`);
-        }
-      }
+      else values = parseValues(rest, line, warn);
       owner.changes.push({ op: op as DataChange['op'], table, id, values, line });
+      continue;
+    }
+
+    if (/^\?(\s|$)/.test(body)) {
+      paragraph = false;
+      if (!owner.reads) {
+        warn(line, `Reads go under a step, not under a ${ownerIs}.`);
+        continue;
+      }
+      const read = parseRead(body, line, warn);
+      if (read) owner.reads.push(read);
       continue;
     }
 
@@ -141,6 +180,18 @@ export function parseData(source: string): DataSketch {
     if (paragraph) owner.doc[owner.doc.length - 1] += ' ' + body;
     else owner.doc.push(body);
     paragraph = true;
+  }
+
+  // Once a step has substeps, what is written above the first one plays with it.
+  for (const s of steps) {
+    const [first] = s.substeps;
+    if (!first) continue;
+    for (const c of s.changes) warn(c.line, 'Changes go under a substep once a step has substeps.');
+    for (const r of s.reads) warn(r.line, 'Reads go under a substep once a step has substeps.');
+    first.changes.unshift(...s.changes);
+    first.reads.unshift(...s.reads);
+    s.changes = [];
+    s.reads = [];
   }
 
   const names = new Set(tables.map((t) => t.name));
@@ -158,8 +209,40 @@ export function parseData(source: string): DataSketch {
   return { view: 'data', source, tables, groups, steps, diagnostics };
 }
 
+/**
+ * `? table id`, `? folder prefix/` or `? table col: value | …`. It is a lookup when its first part is
+ * `col: value`, a prefix when it ends with a slash, and an id otherwise.
+ */
+function parseRead(body: string, line: number, warn: Warn): DataRead | undefined {
+  const m = READ.exec(body);
+  const [table, rest] = m ? [m[1], m[2]] : [];
+  if (!table || !rest) {
+    warn(line, 'A read needs a row id, a path prefix or col: value, as in ? media m1.');
+    return undefined;
+  }
+  if (VALUE.test(splitPipes(rest)[0].trim())) return { table, match: parseValues(rest, line, warn), line };
+  // An id or a prefix is one word.
+  if (/[\s|]/.test(rest)) {
+    warn(line, 'A read needs a row id, a path prefix or col: value, as in ? media m1.');
+    return undefined;
+  }
+  return rest.endsWith('/') ? { table, prefix: rest, line } : { table, id: rest, line };
+}
+
+/** `col: value | col: value`, as a change or a lookup lists them. */
+function parseValues(text: string, line: number, warn: Warn): DataValues {
+  const values: DataValues = {};
+  for (const part of splitPipes(text).map((p) => p.trim())) {
+    if (!part) continue;
+    const kv = VALUE.exec(part);
+    if (kv) values[kv[1]] = parseValue(kv[2].trim());
+    else warn(line, `"${part}" should be column: value.`);
+  }
+  return values;
+}
+
 /** The columns between a declaration's parentheses. */
-function columns(inside: string, table: string, line: number, warn: (line: number, message: string) => void): DataColumn[] {
+function columns(inside: string, table: string, line: number, warn: Warn): DataColumn[] {
   const out: DataColumn[] = [];
   for (const part of inside.split(',').map((s) => s.trim())) {
     if (!part) continue;

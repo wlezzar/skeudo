@@ -1,0 +1,9 @@
+data
+table media(role)
+table source(input -> media)
+
+Upload
+  > It points at the file first
+    + source s1  input: m1
+  > Then uploads it
+    + media m1   role: upload

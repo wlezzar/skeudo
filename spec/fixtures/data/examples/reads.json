@@ -1,0 +1,512 @@
+{
+  "tables": [
+    {
+      "kind": "table",
+      "name": "customer",
+      "columns": [{ "name": "name" }, { "name": "email" }],
+      "doc": ["One account per email."],
+      "line": 2
+    },
+    {
+      "kind": "table",
+      "name": "order",
+      "columns": [
+        { "name": "customer", "ref": "customer" },
+        { "name": "state" },
+        { "name": "total" },
+        { "name": "payment", "ref": "payment" }
+      ],
+      "doc": ["What the customer buys. payment points at the attempt that counts."],
+      "line": 5
+    },
+    {
+      "kind": "table",
+      "name": "payment",
+      "columns": [{ "name": "provider" }, { "name": "state" }, { "name": "amount" }],
+      "doc": ["One attempt to charge a card. A declined payment is kept for 30 days."],
+      "line": 8
+    },
+    {
+      "kind": "table",
+      "name": "shipment",
+      "columns": [
+        { "name": "order", "ref": "order" },
+        { "name": "carrier" },
+        { "name": "tracking" }
+      ],
+      "line": 11
+    }
+  ],
+  "steps": [
+    {
+      "title": "Ana checks out",
+      "substeps": [
+        {
+          "title": "Checkout looks her email up",
+          "doc": ["The email is the only way to tell a returning customer from a new one."],
+          "reads": [{ "table": "customer", "match": { "email": "ana@example.com" }, "line": 16 }],
+          "line": 14
+        },
+        {
+          "title": "No one has it, so she gets an account",
+          "doc": ["The account and the order are written in one transaction."],
+          "changes": [
+            {
+              "op": "+",
+              "table": "customer",
+              "id": "c1",
+              "values": { "name": "Ana", "email": "ana@example.com" },
+              "line": 19
+            },
+            {
+              "op": "+",
+              "table": "order",
+              "id": "o1",
+              "values": { "customer": "c1", "state": "pending", "total": "42.00" },
+              "line": 20
+            }
+          ],
+          "line": 17,
+          "rows": {
+            "customer": [
+              {
+                "id": "c1",
+                "values": { "name": "Ana", "email": "ana@example.com" },
+                "status": "new"
+              }
+            ],
+            "order": [
+              {
+                "id": "o1",
+                "values": { "customer": "c1", "state": "pending", "total": "42.00" },
+                "status": "new"
+              }
+            ]
+          }
+        }
+      ],
+      "line": 13
+    },
+    {
+      "title": "Her card is declined",
+      "changes": [
+        {
+          "op": "+",
+          "table": "payment",
+          "id": "p1",
+          "values": { "provider": "stripe", "state": "declined", "amount": "42.00" },
+          "line": 23
+        },
+        { "op": "~", "table": "order", "id": "o1", "values": { "payment": "p1" }, "line": 24 }
+      ],
+      "line": 22,
+      "rows": {
+        "customer": [{ "id": "c1", "values": { "name": "Ana", "email": "ana@example.com" } }],
+        "order": [
+          {
+            "id": "o1",
+            "values": { "customer": "c1", "state": "pending", "total": "42.00", "payment": "p1" },
+            "was": { "payment": null }
+          }
+        ],
+        "payment": [
+          {
+            "id": "p1",
+            "values": { "provider": "stripe", "state": "declined", "amount": "42.00" },
+            "status": "new"
+          }
+        ]
+      }
+    },
+    {
+      "title": "She pays with another card",
+      "changes": [
+        {
+          "op": "+",
+          "table": "payment",
+          "id": "p2",
+          "values": { "provider": "stripe", "state": "captured", "amount": "42.00" },
+          "line": 27
+        },
+        {
+          "op": "~",
+          "table": "order",
+          "id": "o1",
+          "values": { "state": "paid", "payment": "p2" },
+          "line": 28
+        }
+      ],
+      "line": 26,
+      "rows": {
+        "customer": [{ "id": "c1", "values": { "name": "Ana", "email": "ana@example.com" } }],
+        "order": [
+          {
+            "id": "o1",
+            "values": { "customer": "c1", "state": "paid", "total": "42.00", "payment": "p2" },
+            "was": { "state": "pending", "payment": "p1" }
+          }
+        ],
+        "payment": [
+          { "id": "p1", "values": { "provider": "stripe", "state": "declined", "amount": "42.00" } },
+          {
+            "id": "p2",
+            "values": { "provider": "stripe", "state": "captured", "amount": "42.00" },
+            "status": "new"
+          }
+        ]
+      }
+    },
+    {
+      "title": "She checks out again",
+      "substeps": [
+        {
+          "title": "Checkout finds her by email",
+          "reads": [
+            {
+              "table": "customer",
+              "match": { "email": "ana@example.com" },
+              "line": 32,
+              "found": ["c1"]
+            }
+          ],
+          "line": 31,
+          "rows": {
+            "customer": [{ "id": "c1", "values": { "name": "Ana", "email": "ana@example.com" } }],
+            "order": [
+              {
+                "id": "o1",
+                "values": { "customer": "c1", "state": "paid", "total": "42.00", "payment": "p2" }
+              }
+            ],
+            "payment": [
+              {
+                "id": "p1",
+                "values": { "provider": "stripe", "state": "declined", "amount": "42.00" }
+              },
+              {
+                "id": "p2",
+                "values": { "provider": "stripe", "state": "captured", "amount": "42.00" }
+              }
+            ]
+          }
+        },
+        {
+          "title": "Stripe charges her card",
+          "doc": [
+            "The payment is saved before the order, so a crash leaves a payment with no order rather than an order nobody paid for."
+          ],
+          "changes": [
+            {
+              "op": "+",
+              "table": "payment",
+              "id": "p3",
+              "values": { "provider": "stripe", "state": "captured", "amount": "18.00" },
+              "line": 36
+            }
+          ],
+          "line": 33,
+          "rows": {
+            "customer": [{ "id": "c1", "values": { "name": "Ana", "email": "ana@example.com" } }],
+            "order": [
+              {
+                "id": "o1",
+                "values": { "customer": "c1", "state": "paid", "total": "42.00", "payment": "p2" }
+              }
+            ],
+            "payment": [
+              {
+                "id": "p1",
+                "values": { "provider": "stripe", "state": "declined", "amount": "42.00" }
+              },
+              {
+                "id": "p2",
+                "values": { "provider": "stripe", "state": "captured", "amount": "42.00" }
+              },
+              {
+                "id": "p3",
+                "values": { "provider": "stripe", "state": "captured", "amount": "18.00" },
+                "status": "new"
+              }
+            ]
+          }
+        },
+        {
+          "title": "The order goes to her account",
+          "changes": [
+            {
+              "op": "+",
+              "table": "order",
+              "id": "o2",
+              "values": { "customer": "c1", "state": "paid", "total": "18.00", "payment": "p3" },
+              "line": 38
+            }
+          ],
+          "line": 37,
+          "rows": {
+            "customer": [{ "id": "c1", "values": { "name": "Ana", "email": "ana@example.com" } }],
+            "order": [
+              {
+                "id": "o1",
+                "values": { "customer": "c1", "state": "paid", "total": "42.00", "payment": "p2" }
+              },
+              {
+                "id": "o2",
+                "values": { "customer": "c1", "state": "paid", "total": "18.00", "payment": "p3" },
+                "status": "new"
+              }
+            ],
+            "payment": [
+              {
+                "id": "p1",
+                "values": { "provider": "stripe", "state": "declined", "amount": "42.00" }
+              },
+              {
+                "id": "p2",
+                "values": { "provider": "stripe", "state": "captured", "amount": "42.00" }
+              },
+              {
+                "id": "p3",
+                "values": { "provider": "stripe", "state": "captured", "amount": "18.00" }
+              }
+            ]
+          }
+        }
+      ],
+      "line": 30
+    },
+    {
+      "title": "She opens her orders",
+      "substeps": [
+        {
+          "title": "The page lists her orders",
+          "reads": [
+            { "table": "order", "match": { "customer": "c1" }, "line": 42, "found": ["o1", "o2"] }
+          ],
+          "line": 41,
+          "rows": {
+            "customer": [{ "id": "c1", "values": { "name": "Ana", "email": "ana@example.com" } }],
+            "order": [
+              {
+                "id": "o1",
+                "values": { "customer": "c1", "state": "paid", "total": "42.00", "payment": "p2" }
+              },
+              {
+                "id": "o2",
+                "values": { "customer": "c1", "state": "paid", "total": "18.00", "payment": "p3" }
+              }
+            ],
+            "payment": [
+              {
+                "id": "p1",
+                "values": { "provider": "stripe", "state": "declined", "amount": "42.00" }
+              },
+              {
+                "id": "p2",
+                "values": { "provider": "stripe", "state": "captured", "amount": "42.00" }
+              },
+              {
+                "id": "p3",
+                "values": { "provider": "stripe", "state": "captured", "amount": "18.00" }
+              }
+            ]
+          }
+        },
+        {
+          "title": "It shows each order's payment",
+          "doc": ["It follows the order's pointer, so the declined attempt is never read."],
+          "reads": [
+            { "table": "payment", "id": "p2", "line": 45, "found": ["p2"] },
+            { "table": "payment", "id": "p3", "line": 46, "found": ["p3"] }
+          ],
+          "line": 43,
+          "rows": {
+            "customer": [{ "id": "c1", "values": { "name": "Ana", "email": "ana@example.com" } }],
+            "order": [
+              {
+                "id": "o1",
+                "values": { "customer": "c1", "state": "paid", "total": "42.00", "payment": "p2" }
+              },
+              {
+                "id": "o2",
+                "values": { "customer": "c1", "state": "paid", "total": "18.00", "payment": "p3" }
+              }
+            ],
+            "payment": [
+              {
+                "id": "p1",
+                "values": { "provider": "stripe", "state": "declined", "amount": "42.00" }
+              },
+              {
+                "id": "p2",
+                "values": { "provider": "stripe", "state": "captured", "amount": "42.00" }
+              },
+              {
+                "id": "p3",
+                "values": { "provider": "stripe", "state": "captured", "amount": "18.00" }
+              }
+            ]
+          }
+        }
+      ],
+      "line": 40
+    },
+    {
+      "title": "The first order ships",
+      "changes": [
+        {
+          "op": "+",
+          "table": "shipment",
+          "id": "h1",
+          "values": { "order": "o1", "carrier": "UPS", "tracking": "1Z999AA1" },
+          "line": 49
+        },
+        { "op": "~", "table": "order", "id": "o1", "values": { "state": "shipped" }, "line": 50 }
+      ],
+      "line": 48,
+      "rows": {
+        "customer": [{ "id": "c1", "values": { "name": "Ana", "email": "ana@example.com" } }],
+        "order": [
+          {
+            "id": "o1",
+            "values": { "customer": "c1", "state": "shipped", "total": "42.00", "payment": "p2" },
+            "was": { "state": "paid" }
+          },
+          {
+            "id": "o2",
+            "values": { "customer": "c1", "state": "paid", "total": "18.00", "payment": "p3" }
+          }
+        ],
+        "payment": [
+          { "id": "p1", "values": { "provider": "stripe", "state": "declined", "amount": "42.00" } },
+          { "id": "p2", "values": { "provider": "stripe", "state": "captured", "amount": "42.00" } },
+          { "id": "p3", "values": { "provider": "stripe", "state": "captured", "amount": "18.00" } }
+        ],
+        "shipment": [
+          {
+            "id": "h1",
+            "values": { "order": "o1", "carrier": "UPS", "tracking": "1Z999AA1" },
+            "status": "new"
+          }
+        ]
+      }
+    },
+    {
+      "title": "She tracks the parcel",
+      "doc": ["order has no shipment column, so the page looks the shipment up by its order."],
+      "reads": [{ "table": "shipment", "match": { "order": "o1" }, "line": 55, "found": ["h1"] }],
+      "line": 52,
+      "rows": {
+        "customer": [{ "id": "c1", "values": { "name": "Ana", "email": "ana@example.com" } }],
+        "order": [
+          {
+            "id": "o1",
+            "values": { "customer": "c1", "state": "shipped", "total": "42.00", "payment": "p2" }
+          },
+          {
+            "id": "o2",
+            "values": { "customer": "c1", "state": "paid", "total": "18.00", "payment": "p3" }
+          }
+        ],
+        "payment": [
+          { "id": "p1", "values": { "provider": "stripe", "state": "declined", "amount": "42.00" } },
+          { "id": "p2", "values": { "provider": "stripe", "state": "captured", "amount": "42.00" } },
+          { "id": "p3", "values": { "provider": "stripe", "state": "captured", "amount": "18.00" } }
+        ],
+        "shipment": [
+          { "id": "h1", "values": { "order": "o1", "carrier": "UPS", "tracking": "1Z999AA1" } }
+        ]
+      }
+    },
+    {
+      "title": "Declined payments are purged after 30 days",
+      "doc": ["A nightly job, outside any request."],
+      "substeps": [
+        {
+          "title": "It finds the declined payments",
+          "doc": ["The age check isn't shown."],
+          "reads": [
+            { "table": "payment", "match": { "state": "declined" }, "line": 61, "found": ["p1"] }
+          ],
+          "line": 59,
+          "rows": {
+            "customer": [{ "id": "c1", "values": { "name": "Ana", "email": "ana@example.com" } }],
+            "order": [
+              {
+                "id": "o1",
+                "values": {
+                  "customer": "c1",
+                  "state": "shipped",
+                  "total": "42.00",
+                  "payment": "p2"
+                }
+              },
+              {
+                "id": "o2",
+                "values": { "customer": "c1", "state": "paid", "total": "18.00", "payment": "p3" }
+              }
+            ],
+            "payment": [
+              {
+                "id": "p1",
+                "values": { "provider": "stripe", "state": "declined", "amount": "42.00" }
+              },
+              {
+                "id": "p2",
+                "values": { "provider": "stripe", "state": "captured", "amount": "42.00" }
+              },
+              {
+                "id": "p3",
+                "values": { "provider": "stripe", "state": "captured", "amount": "18.00" }
+              }
+            ],
+            "shipment": [
+              { "id": "h1", "values": { "order": "o1", "carrier": "UPS", "tracking": "1Z999AA1" } }
+            ]
+          }
+        },
+        {
+          "title": "It deletes them",
+          "changes": [{ "op": "-", "table": "payment", "id": "p1", "line": 63 }],
+          "line": 62,
+          "rows": {
+            "customer": [{ "id": "c1", "values": { "name": "Ana", "email": "ana@example.com" } }],
+            "order": [
+              {
+                "id": "o1",
+                "values": {
+                  "customer": "c1",
+                  "state": "shipped",
+                  "total": "42.00",
+                  "payment": "p2"
+                }
+              },
+              {
+                "id": "o2",
+                "values": { "customer": "c1", "state": "paid", "total": "18.00", "payment": "p3" }
+              }
+            ],
+            "payment": [
+              {
+                "id": "p1",
+                "values": { "provider": "stripe", "state": "declined", "amount": "42.00" },
+                "status": "removed"
+              },
+              {
+                "id": "p2",
+                "values": { "provider": "stripe", "state": "captured", "amount": "42.00" }
+              },
+              {
+                "id": "p3",
+                "values": { "provider": "stripe", "state": "captured", "amount": "18.00" }
+              }
+            ],
+            "shipment": [
+              { "id": "h1", "values": { "order": "o1", "carrier": "UPS", "tracking": "1Z999AA1" } }
+            ]
+          }
+        }
+      ],
+      "line": 57
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+data
+table media(role, state)
+
+Upload
+  + media m1  role: upload | state: new
+
+Transcode
+  The job runs in the background.
+
+  It never blocks the upload.
+  > Mark it busy
+    + media m2  role: copy | state: new
+    ~ media m1  state: busy
+  > Write the copy
+        Indented deeper, still the substep's.
+    ~ media m2  state: ready
+  > Mark it done
+    ~ media m1  state: done
+    - media m2
+
+Nothing changes

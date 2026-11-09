@@ -50,13 +50,15 @@ In a data sketch:
 | --- | --- |
 | The `data` or `code` line that names the view | `keyword.control.view.skeudo` |
 | `table` or `folder`, the word that starts a declaration | `storage.type.kind.skeudo` |
-| Table or folder name, in a declaration or a change | `entity.name.type.table.skeudo` |
+| Table or folder name, in a declaration, a change or a read | `entity.name.type.table.skeudo` |
 | Column | `variable.other.property.column.skeudo` |
 | `->` in a reference | `keyword.operator.reference.skeudo` |
 | Group label, in `[label]` | `entity.name.namespace.group.skeudo` |
 | Step title | `markup.heading.step.skeudo` |
+| Substep title, after `>` | `markup.heading.substep.skeudo` |
 | `+`, `~`, `-` | `markup.inserted.skeudo`, `markup.changed.skeudo`, `markup.deleted.skeudo` |
-| Row id | `variable.other.constant.id.skeudo` |
+| `?`, which starts a read | `support.type.read.skeudo`, as for `::read` tags |
+| Row id, or the path prefix a read lists | `variable.other.constant.id.skeudo` |
 | Value, `null`, quoted value | `string.unquoted.value.skeudo`, `constant.language.null.skeudo`, `string.quoted.double.skeudo` |
 | Explanation | `comment.block.documentation.explanation.skeudo` |
 

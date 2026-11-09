@@ -1,0 +1,26 @@
+{
+  "tables": [{ "kind": "table", "name": "media", "columns": [{ "name": "role" }], "line": 2 }],
+  "diagnostics": [
+    {
+      "line": 8,
+      "severity": "warning",
+      "message": "media isn't a folder, so it has no paths to list."
+    }
+  ],
+  "steps": [
+    {
+      "title": "Upload",
+      "changes": [
+        { "op": "+", "table": "media", "id": "ana/m1", "values": { "role": "upload" }, "line": 5 }
+      ],
+      "line": 4,
+      "rows": { "media": [{ "id": "ana/m1", "values": { "role": "upload" }, "status": "new" }] }
+    },
+    {
+      "title": "List",
+      "reads": [{ "table": "media", "prefix": "ana/", "line": 8, "found": ["ana/m1"] }],
+      "line": 7,
+      "rows": { "media": [{ "id": "ana/m1", "values": { "role": "upload" } }] }
+    }
+  ]
+}

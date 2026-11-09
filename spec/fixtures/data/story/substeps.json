@@ -1,0 +1,100 @@
+{
+  "tables": [
+    {
+      "kind": "table",
+      "name": "media",
+      "columns": [{ "name": "role" }, { "name": "state" }],
+      "line": 2
+    }
+  ],
+  "steps": [
+    {
+      "title": "Upload",
+      "changes": [
+        {
+          "op": "+",
+          "table": "media",
+          "id": "m1",
+          "values": { "role": "upload", "state": "new" },
+          "line": 5
+        }
+      ],
+      "line": 4,
+      "rows": {
+        "media": [{ "id": "m1", "values": { "role": "upload", "state": "new" }, "status": "new" }]
+      }
+    },
+    {
+      "title": "Transcode",
+      "doc": ["The job runs in the background.", "It never blocks the upload."],
+      "substeps": [
+        {
+          "title": "Mark it busy",
+          "changes": [
+            {
+              "op": "+",
+              "table": "media",
+              "id": "m2",
+              "values": { "role": "copy", "state": "new" },
+              "line": 12
+            },
+            { "op": "~", "table": "media", "id": "m1", "values": { "state": "busy" }, "line": 13 }
+          ],
+          "line": 11,
+          "rows": {
+            "media": [
+              {
+                "id": "m1",
+                "values": { "role": "upload", "state": "busy" },
+                "was": { "state": "new" }
+              },
+              { "id": "m2", "values": { "role": "copy", "state": "new" }, "status": "new" }
+            ]
+          }
+        },
+        {
+          "title": "Write the copy",
+          "doc": ["Indented deeper, still the substep's."],
+          "changes": [
+            { "op": "~", "table": "media", "id": "m2", "values": { "state": "ready" }, "line": 16 }
+          ],
+          "line": 14,
+          "rows": {
+            "media": [
+              { "id": "m1", "values": { "role": "upload", "state": "busy" } },
+              {
+                "id": "m2",
+                "values": { "role": "copy", "state": "ready" },
+                "was": { "state": "new" }
+              }
+            ]
+          }
+        },
+        {
+          "title": "Mark it done",
+          "changes": [
+            { "op": "~", "table": "media", "id": "m1", "values": { "state": "done" }, "line": 18 },
+            { "op": "-", "table": "media", "id": "m2", "line": 19 }
+          ],
+          "line": 17,
+          "rows": {
+            "media": [
+              {
+                "id": "m1",
+                "values": { "role": "upload", "state": "done" },
+                "was": { "state": "busy" }
+              },
+              { "id": "m2", "values": { "role": "copy", "state": "ready" }, "status": "removed" }
+            ]
+          }
+        }
+      ],
+      "line": 7
+    },
+    {
+      "title": "Nothing changes",
+      "line": 21,
+      "rows": { "media": [{ "id": "m1", "values": { "role": "upload", "state": "done" } }] }
+    }
+  ]
+}

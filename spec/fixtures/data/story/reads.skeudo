@@ -1,0 +1,29 @@
+data
+table media(owner, role, note)
+folder uploads(size)
+
+Upload
+  + uploads ana/m1/raw.mp4  size: 120 MB
+  + uploads ana/m2/raw.mp4  size: 3 MB
+  + uploads ben/m3/raw.mp4  size: 9 MB
+  + media m1  owner: ana | role: upload | note: null
+  + media m2  owner: ana | role: upload | note: "a | b"
+  + media m3  owner: ben | role: copy
+
+Read by id, by prefix and by values
+  ? media m1
+  ? uploads ana/
+  ? media owner: ana | role: upload
+  ? media note: null
+  ? media note: "a | b"
+  ? media owner: cy
+
+Read at its line
+  ? media role: copy
+  ~ media m3  role: upload
+  ? media role: copy
+  + media m4  owner: cy | role: copy
+  ? media owner: cy
+  ? uploads ana/m2/raw.mp4
+  - uploads ana/m2/raw.mp4
+  ? uploads ana/

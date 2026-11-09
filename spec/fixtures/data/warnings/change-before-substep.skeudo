@@ -1,0 +1,7 @@
+data
+table media(role)
+
+Upload
+  + media m1  role: upload
+  > Then a second
+    + media m2  role: upload

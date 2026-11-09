@@ -1,0 +1,63 @@
+data
+table customer(name, email)
+  One account per email.
+
+table order(customer -> customer, state, total, payment -> payment)
+  What the customer buys. payment points at the attempt that counts.
+
+table payment(provider, state, amount)
+  One attempt to charge a card. A declined payment is kept for 30 days.
+
+table shipment(order -> order, carrier, tracking)
+
+Ana checks out
+  > Checkout looks her email up
+    The email is the only way to tell a returning customer from a new one.
+    ? customer     email: ana@example.com
+  > No one has it, so she gets an account
+    The account and the order are written in one transaction.
+    + customer c1  name: Ana | email: ana@example.com
+    + order o1     customer: c1 | state: pending | total: 42.00
+
+Her card is declined
+  + payment p1   provider: stripe | state: declined | amount: 42.00
+  ~ order o1     payment: p1
+
+She pays with another card
+  + payment p2   provider: stripe | state: captured | amount: 42.00
+  ~ order o1     state: paid | payment: p2
+
+She checks out again
+  > Checkout finds her by email
+    ? customer     email: ana@example.com
+  > Stripe charges her card
+    The payment is saved before the order, so a crash leaves a payment
+    with no order rather than an order nobody paid for.
+    + payment p3   provider: stripe | state: captured | amount: 18.00
+  > The order goes to her account
+    + order o2     customer: c1 | state: paid | total: 18.00 | payment: p3
+
+She opens her orders
+  > The page lists her orders
+    ? order        customer: c1
+  > It shows each order's payment
+    It follows the order's pointer, so the declined attempt is never read.
+    ? payment p2
+    ? payment p3
+
+The first order ships
+  + shipment h1  order: o1 | carrier: UPS | tracking: 1Z999AA1
+  ~ order o1     state: shipped
+
+She tracks the parcel
+  order has no shipment column, so the page looks the shipment up by
+  its order.
+  ? shipment     order: o1
+
+Declined payments are purged after 30 days
+  A nightly job, outside any request.
+  > It finds the declined payments
+    The age check isn't shown.
+    ? payment      state: declined
+  > It deletes them
+    - payment p1

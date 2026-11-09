@@ -28,7 +28,7 @@ The fixtures in `data/` pin down the rules in [data.md](../data.md). Each starts
 - `format/` and `story/` hold edge cases of the format and of how steps play. `header/` checks that line numbers count the header.
 - `warnings/` holds one sketch per warning in the spec.
 
-The JSON is the parser's output (`DataSketch` in `packages/core/src/data/types.ts`), without `view` and `source`. Each step gets a `rows` field, from `replayData()`: the rows of each table after that step, with `status` for a row the step added or deleted and `was` for the values it changed. `false`, missing values, empty arrays and empty objects are left out.
+The JSON is the parser's output (`DataSketch` in `packages/core/src/data/types.ts`), without `view` and `source`. Each step without substeps, and each substep, gets a `rows` field, from `replayData()`: the rows of each table after it, with `status` for a row it added or deleted and `was` for the values it changed. Each read gets a `found` field: the ids of the rows it finds at its line. `false`, missing values, empty arrays and empty objects are left out, so a read that finds nothing has no `found`.
 
 ## Both views
 
