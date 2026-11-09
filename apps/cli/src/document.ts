@@ -87,7 +87,8 @@ export function renderPage(doc: Doc, opts: PageOptions): string {
     body = `<main class="bare">${doc.sketches.length ? toHtml(doc.sketches[0].sketch, html) : ''}</main>`;
   }
   const fileName = doc.name === '<stdin>' ? undefined : doc.name.replace(/^.*[\\/]/, '').replace(/\.[^.]+$/, '');
-  const title = doc.meta.title || heading || doc.sketches[0]?.sketch.signature?.name || fileName || 'Sketch';
+  const first = doc.sketches[0]?.sketch;
+  const title = doc.meta.title || heading || (first?.view === 'code' ? first.signature?.name : undefined) || fileName || 'Sketch';
   return [
     '<!doctype html>',
     '<html lang="en">',

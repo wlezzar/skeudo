@@ -3,12 +3,12 @@ import { globSync, readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { parse, type Sketch, type SketchLine } from '@skeudo/core';
+import { parseCode, type CodeSketch, type SketchLine } from '@skeudo/core';
 import { FENCE_LANGS } from 'markdown-it-skeudo';
 import { OnigScanner, OnigString, loadWASM } from 'vscode-oniguruma';
 import { INITIAL, Registry, type IGrammar, type IRawGrammar } from 'vscode-textmate';
 import { beforeAll, describe, expect, test } from 'vitest';
-import { markdownInjection, sketchGrammar } from '../src/grammar';
+import { markdownInjection, sketchGrammar } from '../src/grammars';
 
 const ROOT = fileURLToPath(new URL('../../../', import.meta.url));
 const require = createRequire(import.meta.url);
@@ -128,11 +128,11 @@ function grammarMarks(tokens: Token[]): Marks {
 }
 
 /**
- * The parser's marks, adjusted where the grammar is expected to differ: as the header of src/grammar.ts
+ * The parser's marks, adjusted where the grammar is expected to differ: as the header of src/grammars/code.ts
  * says, a line starting with a tracked variable keeps its first word. The other gap, a call alone on a first
  * line without a block, doesn't occur in these sketches.
  */
-function allowedDifferences(sketch: Sketch, line: SketchLine, raw: string, marks: Marks): Marks {
+function allowedDifferences(sketch: CodeSketch, line: SketchLine, raw: string, marks: Marks): Marks {
   const expected = structuredClone(marks);
   const lead = raw.length - raw.trimStart().length;
   const ident = /^[\p{L}_][\p{L}\p{N}_]*/u.exec(line.text)?.[0];
@@ -151,10 +151,10 @@ const docSketches = (doc: string) =>
     .map((source, i) => ({ name: `${doc} #${i + 1}`, source }));
 
 const SKETCHES = [
-  ...globSync('**/*.skeudo', { cwd: join(ROOT, 'spec/fixtures') })
+  ...globSync('**/*.skeudo', { cwd: join(ROOT, 'spec/fixtures/code') })
     .sort()
-    .map((name) => ({ name, source: readFileSync(join(ROOT, 'spec/fixtures', name), 'utf8').replace(/\n$/, '') })),
-  ...docSketches('spec/spec.md'),
+    .map((name) => ({ name, source: readFileSync(join(ROOT, 'spec/fixtures/code', name), 'utf8').replace(/\n$/, '') })),
+  ...docSketches('spec/code.md'),
   ...docSketches('skills/skeudo/SKILL.md'),
 ];
 
@@ -165,7 +165,7 @@ describe('agrees with the parser', () => {
 
   for (const { name, source } of SKETCHES) {
     test(name, () => {
-      const sketch = parse(source);
+      const sketch = parseCode(source);
       const tokens = tokenize(sketchTm, source);
       const raws = source.split('\n');
       for (const line of sketch.lines) {

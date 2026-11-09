@@ -1,5 +1,5 @@
 {
   "extends": "./tsconfig.base.json",
   "compilerOptions": { "types": ["vite/client"], "noEmit": true, "allowImportingTsExtensions": true },
-  "include": ["packages/*/src", "packages/*/test", "apps/*/src", "apps/*/test", "apps/*/*.mts"]
+  "include": ["packages/*/src", "packages/*/test", "apps/*/src", "apps/*/test", "apps/*/*.mts", "scripts"]
 }

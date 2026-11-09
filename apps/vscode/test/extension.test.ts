@@ -11,7 +11,7 @@ import { parse } from '@skeudo/core';
 import { build, previewCss } from '../build.mjs';
 import { activate } from '../src/extension';
 import { Git } from '../src/git';
-import { markdownInjection, sketchGrammar } from '../src/grammar';
+import { markdownInjection, sketchGrammar } from '../src/grammars';
 import { createSrcHref, workspaceHref, type LinkContext } from '../src/links';
 import manifest from '../package.json';
 
@@ -323,7 +323,7 @@ describe('build', () => {
   });
 
   test("colors sketches for VS Code's light and dark themes", async () => {
-    const css = await readFile(join(out, 'sketch.css'), 'utf8');
+    const css = await readFile(join(out, 'skeudo.css'), 'utf8');
     expect(css).toMatch(/:root,\nbody\.vscode-light, body\.vscode-high-contrast-light \{\n  --sk-font/);
     expect(css).toMatch(/:root\[data-theme='dark'\],\nbody\.vscode-dark, [^{]+\{\n  --sk-bg: #171a21/);
   });

@@ -3,31 +3,39 @@ import { globSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, test } from 'vitest';
-import { parse } from '../src';
+import { parse, VIEWS, type ViewName } from '../src';
 import { format, project } from './fixture';
 
 // Files are listed at run time rather than with import.meta.glob, which Vitest's module cache
 // would freeze, so a new fixture would not run until this file changed.
 const ROOT = fileURLToPath(new URL('../../../', import.meta.url));
 const FIXTURES = join(ROOT, 'spec/fixtures');
-const fixtures = globSync('**/*.skeudo', { cwd: FIXTURES }).sort();
 
-describe('spec fixtures', () => {
-  test('exist', () => {
-    expect(fixtures.length).toBeGreaterThan(0);
-  });
+/** Each view's fixtures are in a folder named after it, and have their own expected output. */
+const PROJECTIONS: Record<ViewName, (source: string) => unknown> = { code: project };
 
-  for (const name of fixtures) {
-    test(name, async () => {
-      const source = readFileSync(join(FIXTURES, name), 'utf8');
-      const expected = join(FIXTURES, name.replace(/\.skeudo$/, '.json'));
-      await expect(format(project(source)) + '\n').toMatchFileSnapshot(expected);
+for (const view of VIEWS) {
+  const dir = join(FIXTURES, view.name);
+  const fixtures = globSync('**/*.skeudo', { cwd: dir }).sort();
+
+  describe(`${view.name} fixtures`, () => {
+    test('exist', () => {
+      expect(fixtures.length).toBeGreaterThan(0);
     });
-  }
-});
+
+    for (const name of fixtures) {
+      test(name, async () => {
+        const source = readFileSync(join(dir, name), 'utf8');
+        expect(parse(source).view).toBe(view.name);
+        const expected = join(dir, name.replace(/\.skeudo$/, '.json'));
+        await expect(format(PROJECTIONS[view.name](source)) + '\n').toMatchFileSnapshot(expected);
+      });
+    }
+  });
+}
 
 describe('sketches in the docs parse without warnings', () => {
-  for (const doc of ['spec/spec.md', 'skills/skeudo/SKILL.md']) {
+  for (const doc of ['spec/code.md', 'skills/skeudo/SKILL.md']) {
     const text = readFileSync(join(ROOT, doc), 'utf8');
     // The skill's output template holds a placeholder fence whose body is just "...".
     const blocks = [...text.matchAll(/^```skeudo\n([\s\S]*?)^```/gm)]

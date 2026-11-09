@@ -1,5 +1,6 @@
 import { CHANGE_KINDS } from './parse';
-import type { ChangeKind, Diagnostic, Note, Sketch, SketchLine, Tag, Variable } from './types';
+import type { Diagnostic } from '../diagnostic';
+import type { ChangeKind, CodeSketch, Note, SketchLine, Tag, Variable } from './types';
 
 export interface Effect {
   line: number;
@@ -90,7 +91,7 @@ export function lineContext(line: SketchLine): string {
   return text.replace(/\s+/g, ' ').trim();
 }
 
-export function analyze(sketch: Sketch): Review {
+export function analyze(sketch: CodeSketch): Review {
   const byNumber = new Map(sketch.lines.map((l) => [l.number, l]));
   const effects: Effect[] = [];
   const failures: Failure[] = [];

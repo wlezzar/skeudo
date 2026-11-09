@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import { describe, expect, test } from 'vitest';
 import { toHtml } from '../src';
 
-const CSS = readFileSync(new URL('../src/sketch.css', import.meta.url), 'utf8');
+const CSS = readFileSync(new URL('../src/code/code.css', import.meta.url), 'utf8');
 
 /** The `sk-fit-*` or `sk-under` class of a rendered line, or undefined. */
 function fitOf(html: string, line: number): string | undefined {
@@ -18,7 +18,7 @@ const CROWDED_TAGS =
   '::write:postgres.durable_job ::write:postgres.attempt ::write?:postgres.media ::changed[now passes a failure code]';
 
 describe('tag column fit', () => {
-  test('sketch.css has a rule for every width the renderer marks', () => {
+  test('code.css has a rule for every width the renderer marks', () => {
     const rules = [...CSS.matchAll(/@container sketch \(max-width: (\d+)ch\) \{ \.sk-fit-(\d+) > \.sk-tags \{/g)];
     for (const [, query, cls] of rules) expect(cls).toBe(query);
     const widths = rules.map((r) => Number(r[1]));

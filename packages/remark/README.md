@@ -39,7 +39,7 @@ const js = await compile(mdx, { remarkPlugins: [remarkSkeudo] });
 
 Site generators built on remark take it in their list of remark plugins, such as `markdown.remarkPlugins` in Astro or `remarkPlugins` in a Docusaurus docs preset. To pass options, give the plugin and its options as a pair: `[remarkSkeudo, { inlineTags: false }]`.
 
-The page needs the stylesheet, `@skeudo/html/sketch.css`. For variable highlighting (hovering a name highlights its other uses, clicking pins the highlight) and for showing `::doc` explanations in a popover, call `enhance()` from `@skeudo/html` in the browser once the page has loaded. Without it, explanations are the browser's tooltips.
+The page needs the stylesheet, `@skeudo/html/skeudo.css`. For variable highlighting (hovering a name highlights its other uses, clicking pins the highlight) and for showing `::doc` explanations in a popover, call `enhance()` from `@skeudo/html` in the browser once the page has loaded. Without it, explanations are the browser's tooltips.
 
 ## Options
 

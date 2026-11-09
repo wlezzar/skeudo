@@ -1,0 +1,78 @@
+/* Skeudo styles shared by every view: the color tokens, in light and dark. Colors follow the spec:
+   violet, blue, aqua, orange, red, plus amber for dangers and green, blue and red for changes. */
+
+:root {
+  --sk-font: ui-monospace, 'JetBrains Mono', 'SF Mono', SFMono-Regular, Menlo, Consolas, monospace;
+  --sk-bg: #fbfbfd;
+  --sk-fg: #1f2330;
+  --sk-muted: #5b6275;
+  --sk-faint: #9aa1b2;
+  --sk-border: #e3e5ec;
+  --sk-guide: #e6e8ee;
+  --sk-row-hover: #f1f2f7;
+
+  --sk-violet: #6d28d9;
+  --sk-blue: #1d4ed8;
+  --sk-aqua: #0f766e;
+  --sk-orange: #c2410c;
+  --sk-red: #b91c1c;
+  --sk-green: #15803d;
+  --sk-amber: #a15c07;
+  --sk-neutral: #556070;
+  --sk-untrusted: #be185d;
+  --sk-secret: #7c3aed;
+
+  --sk-hl-bg: #fde68a;
+  --sk-pin-bg: #fcd34d;
+  --sk-indent: 4ch;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --sk-bg: #171a21;
+    --sk-fg: #e4e6ee;
+    --sk-muted: #9aa1b4;
+    --sk-faint: #5e6578;
+    --sk-border: #2a2f3a;
+    --sk-guide: #272c37;
+    --sk-row-hover: #1e222b;
+
+    --sk-violet: #a78bfa;
+    --sk-blue: #93c5fd;
+    --sk-aqua: #5eead4;
+    --sk-orange: #fdba74;
+    --sk-red: #fca5a5;
+    --sk-green: #86efac;
+    --sk-amber: #fcd34d;
+    --sk-neutral: #a3acbd;
+    --sk-untrusted: #f9a8d4;
+    --sk-secret: #c4b5fd;
+
+    --sk-hl-bg: #5b4a12;
+    --sk-pin-bg: #7a5f0e;
+  }
+}
+
+:root[data-theme='dark'] {
+  --sk-bg: #171a21;
+  --sk-fg: #e4e6ee;
+  --sk-muted: #9aa1b4;
+  --sk-faint: #5e6578;
+  --sk-border: #2a2f3a;
+  --sk-guide: #272c37;
+  --sk-row-hover: #1e222b;
+
+  --sk-violet: #a78bfa;
+  --sk-blue: #93c5fd;
+  --sk-aqua: #5eead4;
+  --sk-orange: #fdba74;
+  --sk-red: #fca5a5;
+  --sk-green: #86efac;
+  --sk-amber: #fcd34d;
+  --sk-neutral: #a3acbd;
+  --sk-untrusted: #f9a8d4;
+  --sk-secret: #c4b5fd;
+
+  --sk-hl-bg: #5b4a12;
+  --sk-pin-bg: #7a5f0e;
+}

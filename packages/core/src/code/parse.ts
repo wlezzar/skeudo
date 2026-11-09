@@ -1,12 +1,12 @@
+import type { Diagnostic } from '../diagnostic';
 import type {
   ChangeKind,
-  Diagnostic,
+  CodeSketch,
   ParseOptions,
   Repo,
   ResolvedSrc,
   Segment,
   Signature,
-  Sketch,
   SketchLine,
   SrcLocation,
   Tag,
@@ -29,8 +29,6 @@ const BINDING_RE = /^([\p{L}_][\p{L}\p{N}_]*)\s*=(?![=>])/u;
 const WORD_RE = /^[\p{L}][\p{L}\p{N}_'’-]*/u;
 
 const DEFAULT_LABEL_KINDS = ['untrusted', 'secret'];
-/** Fence languages that hold a sketch: skeudo, and sketch, the format's working name, which older documents use. */
-export const FENCE_LANGS: readonly string[] = ['skeudo', 'sketch'];
 /** Tag kinds that mark what a commit or pull request did to a line. */
 export const CHANGE_KINDS: ReadonlySet<string> = new Set<ChangeKind>(['new', 'changed', 'removed']);
 /** Tag kinds that renderers hide: `::src` and `::repo` become links, and `::doc` shows on hover. */
@@ -211,7 +209,8 @@ function matchSignature(text: string): { name: string; params: string[]; colon: 
   };
 }
 
-export function parse(source: string, options: ParseOptions = {}): Sketch {
+/** Parses a block of the code view. */
+export function parseCode(source: string, options: ParseOptions = {}): CodeSketch {
   const labelKinds = new Set(options.labelKinds ?? DEFAULT_LABEL_KINDS);
   const diagnostics: Diagnostic[] = [];
   const warn = (line: number, message: string) => diagnostics.push({ line, severity: 'warning', message });
@@ -441,7 +440,7 @@ export function parse(source: string, options: ParseOptions = {}): Sketch {
     }
   }
 
-  return { source, signature, file, repo, indentUnit, lines, variables, callSources, callDocs, diagnostics };
+  return { view: 'code', source, signature, file, repo, indentUnit, lines, variables, callSources, callDocs, diagnostics };
 }
 
 /** Splits the content part of a line (everything before the tag column) into segments. */

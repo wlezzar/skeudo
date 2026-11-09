@@ -1,13 +1,14 @@
-import { analyze, parse } from '../src';
+import { analyze, parseCode } from '../src';
 
 /**
  * The expected output of a fixture: the AST with offsets and derivable fields removed,
  * plus label flows. spec/fixtures/README.md describes the shape.
  */
 export function project(source: string): unknown {
-  const sketch = parse(source);
+  const sketch = parseCode(source);
   const review = analyze(sketch);
-  const { source: _source, variables, lines, ...rest } = sketch;
+  // The fixture's folder gives the view.
+  const { view: _view, source: _source, variables, lines, ...rest } = sketch;
   return clean({
     ...rest,
     variables: Object.fromEntries(Object.values(variables).map(({ name, ...v }) => [name, v])),

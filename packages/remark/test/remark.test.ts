@@ -37,7 +37,7 @@ const find = (tree: HastRoot, cls: string) => [...elements(tree)].filter((e) => 
 /** A tree without the source positions remark-rehype adds, to compare with the renderer's. */
 const bare = (node: unknown): unknown => JSON.parse(JSON.stringify(node, (key, value) => (key === 'position' ? undefined : value)));
 
-const fixturesDir = new URL('../../../spec/fixtures/', import.meta.url);
+const fixturesDir = new URL('../../../spec/fixtures/code/', import.meta.url);
 const fixtures = readdirSync(fixturesDir, { withFileTypes: true })
   .filter((d) => d.isDirectory())
   .flatMap((d) =>

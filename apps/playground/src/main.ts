@@ -2,7 +2,7 @@ import markdownit, { type MarkdownIt } from 'markdown-it';
 import { analyze, formatLocation, parse, parseTagsOnly, type Review, type Sketch } from '@skeudo/core';
 import { enhance, escapeHtml as esc, repoHref, srcBaseHref, tagHtml, toHtml, type HtmlOptions } from '@skeudo/html';
 import markdownItSkeudo, { FENCE_LANGS, sketchFences } from 'markdown-it-skeudo';
-import '@skeudo/html/sketch.css';
+import '@skeudo/html/skeudo.css';
 import './style.css';
 import { examples } from './examples';
 

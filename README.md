@@ -5,21 +5,25 @@ The format spec lives in [spec/spec.md](spec/spec.md).
 
 ## Layout
 
+Skeudo has views, like Mermaid's diagram types: each is a kind of sketch with its own grammar and rendering. Only the code view exists so far. Each view's code lives in a folder named after it inside `spec/`, `packages/core/src`, `packages/html/src` and `apps/vscode/src/grammars`. The rest goes through the registry in `packages/core/src/views.ts` and never names a view.
+
 ```
 spec/
-  spec.md        # the format: syntax, variables and labels, rendering
-  fixtures/      # .skeudo inputs and the .json the parser must produce
+  spec.md        # what every view shares: fences, files, warnings
+  code.md        # the code view: syntax, variables and labels, rendering
+  fixtures/      # per view: .skeudo inputs and the .json the parser must produce
 skills/
   skeudo/        # agent skill that writes sketches of code, commits and PRs
 packages/
-  core/          # parser (parse), analysis (analyze), AST types
-  html/          # toHtml(), toHast(), tagHtml(), enhance() + sketch.css
+  core/          # parse() and the view registry; per view: parser, analysis, AST types
+  html/          # toHtml(), toHast(), enhance() + skeudo.css; per view: renderer, interaction, styles
   markdown-it/   # markdown-it-skeudo: renders ```skeudo fences and inline tag code
   remark/        # remark-skeudo: the same for remark and MDX, as a hast tree
 apps/
   cli/           # skeudo: checks sketches and renders them as standalone HTML pages
   playground/    # live editor: preview, review panel, AST
   vscode/        # VS Code extension: highlights sketches and renders them in the Markdown preview
+scripts/         # build helpers the apps share
 ```
 
 Packages export their TypeScript sources directly; there is no build step until we publish. The CLI and the VS Code extension bundle them.

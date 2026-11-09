@@ -1,9 +1,8 @@
 /**
- * TextMate grammars for sketches: `source.skeudo` for .skeudo files, and an injection that embeds it in
- * Markdown's ```skeudo fences, and the ```sketch fences older documents use. The build writes them to dist/ as JSON.
+ * TextMate rules for code sketches, which grammars/index.ts puts in `source.skeudo`.
  *
  * TextMate grammars match one line at a time with regular expressions, so this follows the parser
- * (packages/core/src/parse.ts) as far as that allows, with two gaps:
+ * (packages/core/src/code/parse.ts) as far as that allows, with two gaps:
  * - It can't know which words are tracked variables, so a line starting with one, such as `cached is
  *   stale`, still gets its first word colored.
  * - It can't see the next line, so a first line such as `charge(card, amount)` is taken for a signature
@@ -13,7 +12,7 @@
  * them for anyone who wants to recolor them.
  */
 
-type Rule = Record<string, unknown>;
+import { LINE_START, NEVER, type Rule } from './shared.ts';
 
 // The parser's patterns, in Oniguruma syntax.
 const NAME = String.raw`[\p{L}\p{N}_][\p{L}\p{N}_-]*`;
@@ -23,13 +22,6 @@ const CHAIN = String.raw`${IDENT}(?:(?:\.|::)${IDENT})*`;
 /** Balanced parentheses on one line. It must be the whole of a group, since it recurses into the group it sits in. */
 const PARENS = String.raw`\((?:[^()]|\g<-1>)*\)`;
 const WORD = String.raw`[\p{L}][\p{L}\p{N}_'’-]*`;
-/**
- * The start of a line, after any indentation. `\G` also matches where an enclosing rule left off: after the
- * indentation of a list item that holds a fence, and where a sketch's first line starts.
- */
-const LINE_START = String.raw`(?:^|\G)\s*`;
-/** Never matches, for rules that last until the end of the sketch. */
-const NEVER = String.raw`(?!)`;
 
 /** Bold, in the color themes give escape sequences: amber in dark themes, red in light ones. */
 const DANGER = 'markup.bold.danger.skeudo constant.character.escape.danger.skeudo';
@@ -119,7 +111,7 @@ const NESTED: Rule[] = [
   patterns: [{ include: '#nested' }],
 }));
 
-const grammarRepository = {
+export const codeRepository = {
   line: {
     patterns: [
       ...Object.entries(FAMILIES).map(([family, f]) => tagRule(family, f)),
@@ -151,59 +143,20 @@ const grammarRepository = {
   },
 };
 
-export const sketchGrammar = {
-  name: 'Skeudo',
-  scopeName: 'source.skeudo',
-  fileTypes: ['skeudo'],
-  // The first line is either a signature or the start of a signature-less sketch. Both rules run to the
-  // end of the sketch, so the signature can only be found on the first line.
-  patterns: [
-    {
-      begin: String.raw`${LINE_START}(${CHAIN})(\()((?:[^()]|(${PARENS}))*)(\))(?=\s*(?::|$))`,
-      // Each capture names the signature, since one with its own patterns loses the scopes of those around it.
-      beginCaptures: {
-        1: { name: 'meta.function.signature.skeudo entity.name.function.skeudo', patterns: ACCESSORS },
-        2: { name: 'meta.function.signature.skeudo punctuation.definition.parameters.begin.skeudo' },
-        3: { name: 'meta.function.signature.skeudo meta.parameters.skeudo', patterns: [{ include: '#parameters' }] },
-        5: { name: 'meta.function.signature.skeudo punctuation.definition.parameters.end.skeudo' },
-      },
-      end: NEVER,
-      patterns: [{ include: '#line' }],
+// The first line is either a signature or the start of a signature-less sketch. Both rules run to the
+// end of the sketch, so the signature can only be found on the first line.
+export const codePatterns: Rule[] = [
+  {
+    begin: String.raw`${LINE_START}(${CHAIN})(\()((?:[^()]|(${PARENS}))*)(\))(?=\s*(?::|$))`,
+    // Each capture names the signature, since one with its own patterns loses the scopes of those around it.
+    beginCaptures: {
+      1: { name: 'meta.function.signature.skeudo entity.name.function.skeudo', patterns: ACCESSORS },
+      2: { name: 'meta.function.signature.skeudo punctuation.definition.parameters.begin.skeudo' },
+      3: { name: 'meta.function.signature.skeudo meta.parameters.skeudo', patterns: [{ include: '#parameters' }] },
+      5: { name: 'meta.function.signature.skeudo punctuation.definition.parameters.end.skeudo' },
     },
-    { begin: String.raw`(?=\S)`, end: NEVER, patterns: [{ include: '#line' }] },
-  ],
-  repository: grammarRepository,
-};
-
-/**
- * Embeds `source.skeudo` in Markdown's ```skeudo and ```sketch fences. It copies the shape of the fence rules in VS Code's
- * Markdown grammar: the `while` rule ends the sketch at the closing fence, even though the sketch's own
- * rules never end. Its fence languages must match FENCE_LANGS in @skeudo/core, which a test checks.
- */
-export const markdownInjection = {
-  scopeName: 'markdown.skeudo.codeblock',
-  // L: puts it ahead of Markdown's own rules. It stays out of code, where a ```skeudo line is just text.
-  injectionSelector: 'L:text.html.markdown -markup.fenced_code -markup.raw -meta.embedded',
-  patterns: [{ include: '#sketch-fence' }],
-  repository: {
-    'sketch-fence': {
-      begin: String.raw`(^|\G)(\s*)(\`{3,}|~{3,})\s*(skeudo|sketch)(\s+[^\`]*)?$`,
-      beginCaptures: {
-        3: { name: 'punctuation.definition.markdown' },
-        4: { name: 'fenced_code.block.language.markdown' },
-        5: { name: 'fenced_code.block.language.attributes.markdown' },
-      },
-      end: String.raw`(^|\G)(\2|\s{0,3})(\3)\s*$`,
-      endCaptures: { 3: { name: 'punctuation.definition.markdown' } },
-      name: 'markup.fenced_code.block.markdown',
-      patterns: [
-        {
-          begin: String.raw`(^|\G)(\s*)(.*)`,
-          while: String.raw`(^|\G)(?!\s*([\`~]{3,})\s*$)`,
-          contentName: 'meta.embedded.block.skeudo',
-          patterns: [{ include: 'source.skeudo' }],
-        },
-      ],
-    },
+    end: NEVER,
+    patterns: [{ include: '#line' }],
   },
-};
+  { begin: String.raw`(?=\S)`, end: NEVER, patterns: [{ include: '#line' }] },
+];

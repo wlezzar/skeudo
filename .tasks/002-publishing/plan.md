@@ -52,7 +52,7 @@ The five npm packages share one version, as `.tasks/001-design` decided. JSR ver
 ### 2. Make the packages publishable (Claude)
 
 - Add a LICENSE at the root and copy it into each published package. npm only includes a LICENSE from the package's own folder.
-- Add a build step for the four libraries: compile to `dist/` (`.js` and `.d.ts`) and copy `sketch.css`. Keep `exports` pointing at `src/` for development, and use pnpm's `publishConfig` to point the published `exports` at `dist/`.
+- Add a build step for the four libraries: compile to `dist/` (`.js` and `.d.ts`) and copy `skeudo.css` with the per-view stylesheets it imports. Keep `exports` pointing at `src/` for development, and use pnpm's `publishConfig` to point the published `exports` at `dist/`.
 - Fill in the metadata: description, license, repository (with `directory`), homepage, keywords (`remark-plugin`, `unified`, `markdown-it-plugin`, and so on), `engines` and `files`.
 - Write READMEs for core, html and markdown-it (remark and the CLI already have one). Mark them "experimental, 0.x" at the top.
 - Remove `private: true` from the five published packages only.
@@ -82,7 +82,7 @@ The five npm packages share one version, as `.tasks/001-design` decided. JSR ver
 
 - Whether npm still needs a package to exist before trusted publishing can be set up for it. It did in 2025, which is why step 5 publishes the first version by hand.
 - Whether npm provenance works from a private repo.
-- Whether JSR can serve `sketch.css` as an export, and whether JSR's npm compatibility layer supports `bin`. The second answer decides whether the CLI goes on JSR.
+- Whether JSR can serve `skeudo.css` as an export, and whether JSR's npm compatibility layer supports `bin`. The second answer decides whether the CLI goes on JSR.
 - Whether the Changesets version step can update jsr.json directly, or the script is needed.
 
 ## Related, separate tracks

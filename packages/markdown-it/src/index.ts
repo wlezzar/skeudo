@@ -1,5 +1,5 @@
 import type { MarkdownIt } from 'markdown-it';
-import { FENCE_LANGS, parseTagsOnly, type ResolvedSrc, type Sketch } from '@skeudo/core';
+import { FENCE_LANGS, parseTagsOnly, type CodeSketch, type ResolvedSrc } from '@skeudo/core';
 import { tagHtml, toHtml, type HtmlOptions, type SrcLink } from '@skeudo/html';
 
 export { FENCE_LANGS };
@@ -9,7 +9,7 @@ export interface SkeudoPluginOptions extends Omit<HtmlOptions, 'srcHref'> {
    * Builds a link for a source location, as in HtmlOptions. It also gets the env given to markdown-it's
    * render, such as the `currentDocument` VS Code's preview passes.
    */
-  srcHref?: (loc: ResolvedSrc, sketch: Sketch, env: Record<string, unknown>) => string | SrcLink | undefined;
+  srcHref?: (loc: ResolvedSrc, sketch: CodeSketch, env: Record<string, unknown>) => string | SrcLink | undefined;
   /** Fence languages rendered as sketches. Defaults to FENCE_LANGS. */
   langs?: string[];
   /** Render inline code made only of tags, such as `::read:postgres`, as pills. Defaults to true. */

@@ -2,7 +2,7 @@ import { existsSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { dirname, isAbsolute, join, relative, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { repoId, type ResolvedSrc, type Sketch } from '@skeudo/core';
+import { repoId, type CodeSketch, type ResolvedSrc } from '@skeudo/core';
 import { repoHref, srcBaseHref, type GitHost, type SrcLink } from '@skeudo/html';
 import type { Git } from './git';
 
@@ -81,7 +81,7 @@ function revisionNote(ctx: LinkContext, folder: string, rev: string, loc: Resolv
  * sketch's revision. Without a local copy, it links to the file on the repository's host.
  */
 export function createSrcHref(ctx: LinkContext) {
-  return (loc: ResolvedSrc, sketch: Sketch, env: Record<string, unknown>): string | SrcLink | undefined => {
+  return (loc: ResolvedSrc, sketch: CodeSketch, env: Record<string, unknown>): string | SrcLink | undefined => {
     if (!loc.path) return undefined;
     const { repo } = sketch;
     if (!repo) return workspaceHref(loc);

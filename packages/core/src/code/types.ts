@@ -1,3 +1,5 @@
+import type { Diagnostic } from '../diagnostic';
+
 /** A note attached to a tag: `::write:redis[5 min ttl]`. */
 export interface Note {
   /** Note text without the brackets or the leading `!`. */
@@ -122,19 +124,15 @@ export interface Variable {
   labels: string[];
 }
 
-export interface Diagnostic {
-  line: number;
-  severity: 'warning' | 'error';
-  message: string;
-}
-
 export interface Signature {
   name: string;
   params: string[];
   line: number;
 }
 
-export interface Sketch {
+/** A parsed block of the code view: pseudocode with its outside effects tagged. */
+export interface CodeSketch {
+  view: 'code';
   source: string;
   signature?: Signature;
   /** File named by the `::src` tag on the signature. */

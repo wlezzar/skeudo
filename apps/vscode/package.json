@@ -30,7 +30,7 @@
   "files": [
     "dist/extension.js",
     "dist/preview.js",
-    "dist/sketch.css",
+    "dist/skeudo.css",
     "dist/skeudo.tmLanguage.json",
     "dist/markdown-skeudo.tmLanguage.json",
     "language-configuration.json",
@@ -39,7 +39,7 @@
   "contributes": {
     "markdown.markdownItPlugins": true,
     "markdown.previewStyles": [
-      "./dist/sketch.css"
+      "./dist/skeudo.css"
     ],
     "markdown.previewScripts": [
       "./dist/preview.js"
