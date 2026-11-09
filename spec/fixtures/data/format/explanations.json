@@ -1,6 +1,7 @@
 {
   "tables": [
     {
+      "kind": "table",
       "name": "media",
       "columns": [{ "name": "role" }, { "name": "type" }],
       "doc": ["Metadata for one stored file. Sources point here.", "A second paragraph."],

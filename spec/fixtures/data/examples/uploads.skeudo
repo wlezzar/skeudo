@@ -1,0 +1,16 @@
+data
+table media(owner, state, file -> uploads)
+
+folder uploads(type, size)
+  The bucket the browser uploads to. Keys are owner/media/name.
+
+Ana uploads a video
+  + uploads ana/m1/raw.mp4   type: video/mp4 | size: 120 MB
+  + media m1                 owner: ana | state: uploaded | file: ana/m1/raw.mp4
+
+The transcoder writes a smaller copy
+  + uploads ana/m1/720p.mp4  type: video/mp4 | size: 18 MB
+  ~ media m1                 state: ready | file: ana/m1/720p.mp4
+
+The raw file is deleted after a week
+  - uploads ana/m1/raw.mp4

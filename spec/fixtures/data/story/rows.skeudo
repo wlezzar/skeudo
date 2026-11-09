@@ -1,6 +1,6 @@
 data
-media(role)
-source(input -> media)
+table media(role)
+table source(input -> media)
 
 Upload two files
   + media m1   role: upload

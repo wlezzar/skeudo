@@ -1,12 +1,12 @@
 data
-user(name, email)
-order.line(
+table user(name, email)
+table order.line(
   order -> shop-order,
   product → product,
   quantity,
 )
-shop-order(user -> user, state)
-product(title,
+table shop-order(user -> user, state)
+table product(title,
         price)
 
 Login (Google)

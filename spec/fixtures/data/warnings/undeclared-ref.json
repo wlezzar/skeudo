@@ -1,6 +1,7 @@
 {
   "tables": [
     {
+      "kind": "table",
       "name": "media",
       "columns": [{ "name": "role" }, { "name": "owner", "ref": "user" }],
       "line": 2

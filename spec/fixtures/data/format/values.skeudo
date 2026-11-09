@@ -1,5 +1,5 @@
 data
-event(kind, at, note, payload)
+table event(kind, at, note, payload)
 
 Values
   + event e1  kind: login | at: 10:14 | note: null

@@ -49,9 +49,11 @@ In a data sketch:
 | Element | Scope |
 | --- | --- |
 | The `data` or `code` line that names the view | `keyword.control.view.skeudo` |
-| Table name, in a declaration or a change | `entity.name.type.table.skeudo` |
+| `table` or `folder`, the word that starts a declaration | `storage.type.kind.skeudo` |
+| Table or folder name, in a declaration or a change | `entity.name.type.table.skeudo` |
 | Column | `variable.other.property.column.skeudo` |
 | `->` in a reference | `keyword.operator.reference.skeudo` |
+| Group label, in `[label]` | `entity.name.namespace.group.skeudo` |
 | Step title | `markup.heading.step.skeudo` |
 | `+`, `~`, `-` | `markup.inserted.skeudo`, `markup.changed.skeudo`, `markup.deleted.skeudo` |
 | Row id | `variable.other.constant.id.skeudo` |
@@ -68,7 +70,7 @@ Open a Markdown file and run **Markdown: Open Preview to the Side** (`Ctrl+K V`)
 - Hovering over a call or a line explained with `::doc`, or moving to it with Tab, shows the explanation. Lines with one have a small ⓘ after their code.
 - Clicking a `::src` location opens the file with those lines selected. See Source links below.
 - Inline code made only of tags, such as `` `::read:postgres` ``, renders as pills.
-- A data sketch starts at its first step. Click a step, or use the arrow keys after clicking the sketch, to see the rows change. Hovering over a reference highlights the row it points at. Resting on a step or a table's name shows its explanation, and clicking its ⓘ keeps it open.
+- A data sketch starts at its first step. Click a step, or use the arrow keys after clicking the sketch, to see the rows change. Hovering over a reference highlights the row it points at. Resting on a step, a table's name or a group's label shows its explanation, and clicking its ⓘ keeps it open.
 
 Colors follow VS Code's light or dark theme, and sketches use the editor's font.
 

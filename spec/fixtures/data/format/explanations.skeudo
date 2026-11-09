@@ -1,5 +1,5 @@
 data
-media(role, type)
+table media(role, type)
   Metadata for one stored file.
   Sources point here.
 

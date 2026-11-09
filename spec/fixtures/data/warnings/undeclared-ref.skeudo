@@ -1,2 +1,2 @@
 data
-media(role, owner -> user)
+table media(role, owner -> user)

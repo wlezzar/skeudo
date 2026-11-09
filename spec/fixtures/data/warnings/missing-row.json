@@ -1,5 +1,5 @@
 {
-  "tables": [{ "name": "media", "columns": [{ "name": "role" }], "line": 2 }],
+  "tables": [{ "kind": "table", "name": "media", "columns": [{ "name": "role" }], "line": 2 }],
   "diagnostics": [
     { "line": 5, "severity": "warning", "message": "media m9 doesn't exist at this step." },
     { "line": 6, "severity": "warning", "message": "media m9 doesn't exist at this step." }

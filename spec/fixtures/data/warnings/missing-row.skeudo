@@ -1,5 +1,5 @@
 data
-media(role)
+table media(role)
 
 Change a row that isn't there
   ~ media m9  role: audio

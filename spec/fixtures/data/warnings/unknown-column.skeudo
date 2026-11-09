@@ -1,5 +1,5 @@
 data
-exercise(practiced)
+table exercise(practiced)
 
 Practice
   + exercise x1  practised: true

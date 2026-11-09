@@ -1,4 +1,4 @@
 {
-  "tables": [{ "name": "media", "columns": [{ "name": "role" }], "line": 2 }],
+  "tables": [{ "kind": "table", "name": "media", "columns": [{ "name": "role" }], "line": 2 }],
   "diagnostics": [{ "line": 3, "severity": "warning", "message": "media is declared twice." }]
 }

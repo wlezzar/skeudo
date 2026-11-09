@@ -1,2 +1,2 @@
 data
-media(role, bad col, type)
+table media(role, bad col, type)

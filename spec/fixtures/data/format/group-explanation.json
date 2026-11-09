@@ -1,0 +1,42 @@
+{
+  "tables": [
+    {
+      "kind": "table",
+      "name": "order_doc",
+      "columns": [{ "name": "state" }, { "name": "total" }],
+      "doc": ["One document per order."],
+      "line": 7
+    }
+  ],
+  "groups": [
+    {
+      "label": "Search index",
+      "doc": [
+        "Rebuilt from orders by a job a few seconds after each write.",
+        "Never written by the app itself."
+      ],
+      "tables": ["order_doc"],
+      "line": 2
+    }
+  ],
+  "steps": [
+    {
+      "title": "The index catches up",
+      "changes": [
+        {
+          "op": "+",
+          "table": "order_doc",
+          "id": "o1",
+          "values": { "state": "paid", "total": "42.00" },
+          "line": 11
+        }
+      ],
+      "line": 10,
+      "rows": {
+        "order_doc": [
+          { "id": "o1", "values": { "state": "paid", "total": "42.00" }, "status": "new" }
+        ]
+      }
+    }
+  ]
+}

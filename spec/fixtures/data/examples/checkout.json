@@ -1,12 +1,14 @@
 {
   "tables": [
     {
+      "kind": "table",
       "name": "customer",
       "columns": [{ "name": "name" }, { "name": "email" }],
       "doc": ["One account. A guest gets a row too, with no email."],
       "line": 2
     },
     {
+      "kind": "table",
       "name": "order",
       "columns": [
         { "name": "customer", "ref": "customer" },
@@ -18,6 +20,7 @@
       "line": 5
     },
     {
+      "kind": "table",
       "name": "payment",
       "columns": [{ "name": "provider" }, { "name": "state" }, { "name": "amount" }],
       "doc": [
@@ -26,6 +29,7 @@
       "line": 8
     },
     {
+      "kind": "table",
       "name": "shipment",
       "columns": [
         { "name": "order", "ref": "order" },

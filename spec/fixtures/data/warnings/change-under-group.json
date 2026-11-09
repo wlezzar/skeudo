@@ -1,0 +1,17 @@
+{
+  "tables": [{ "kind": "table", "name": "media", "columns": [{ "name": "role" }], "line": 4 }],
+  "groups": [{ "label": "Media", "tables": ["media"], "line": 2 }],
+  "diagnostics": [
+    { "line": 3, "severity": "warning", "message": "Changes go under a step, not under a group." }
+  ],
+  "steps": [
+    {
+      "title": "Upload",
+      "changes": [
+        { "op": "+", "table": "media", "id": "m1", "values": { "role": "upload" }, "line": 7 }
+      ],
+      "line": 6,
+      "rows": { "media": [{ "id": "m1", "values": { "role": "upload" }, "status": "new" }] }
+    }
+  ]
+}

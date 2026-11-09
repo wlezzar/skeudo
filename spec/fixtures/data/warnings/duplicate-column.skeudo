@@ -1,2 +1,2 @@
 data
-media(role, type, role)
+table media(role, type, role)

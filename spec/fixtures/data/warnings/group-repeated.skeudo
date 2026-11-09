@@ -1,0 +1,10 @@
+data
+[Checkout]
+table order(state)
+
+[Checkout]
+table payment(state)
+
+Ana pays
+  + order o1    state: paid
+  + payment p1  state: captured

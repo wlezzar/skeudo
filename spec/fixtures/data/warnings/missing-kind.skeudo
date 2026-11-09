@@ -1,0 +1,6 @@
+data
+media(role, type)
+folder uploads(type)
+
+Upload
+  + media m1  role: upload

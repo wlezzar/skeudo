@@ -1,0 +1,127 @@
+{
+  "tables": [
+    {
+      "kind": "table",
+      "name": "media",
+      "columns": [{ "name": "owner" }, { "name": "state" }, { "name": "file", "ref": "uploads" }],
+      "line": 2
+    },
+    {
+      "kind": "folder",
+      "name": "uploads",
+      "columns": [{ "name": "type" }, { "name": "size" }],
+      "line": 3
+    },
+    { "kind": "folder", "name": "tmp", "line": 4 }
+  ],
+  "steps": [
+    {
+      "title": "Ana uploads a video",
+      "changes": [
+        {
+          "op": "+",
+          "table": "uploads",
+          "id": "ana/m1/raw.mp4",
+          "values": { "type": "video/mp4", "size": "120 MB" },
+          "line": 7
+        },
+        {
+          "op": "+",
+          "table": "media",
+          "id": "m1",
+          "values": { "owner": "ana", "state": "uploaded", "file": "ana/m1/raw.mp4" },
+          "line": 8
+        },
+        { "op": "+", "table": "tmp", "id": "chunks/m1.part", "line": 9 }
+      ],
+      "line": 6,
+      "rows": {
+        "media": [
+          {
+            "id": "m1",
+            "values": { "owner": "ana", "state": "uploaded", "file": "ana/m1/raw.mp4" },
+            "status": "new"
+          }
+        ],
+        "uploads": [
+          {
+            "id": "ana/m1/raw.mp4",
+            "values": { "type": "video/mp4", "size": "120 MB" },
+            "status": "new"
+          }
+        ],
+        "tmp": [{ "id": "chunks/m1.part", "status": "new" }]
+      }
+    },
+    {
+      "title": "The transcoder writes a smaller copy",
+      "changes": [
+        {
+          "op": "+",
+          "table": "uploads",
+          "id": "ana/m1/720p.mp4",
+          "values": { "type": "video/mp4", "size": "18 MB" },
+          "line": 12
+        },
+        {
+          "op": "~",
+          "table": "media",
+          "id": "m1",
+          "values": { "state": "ready", "file": "ana/m1/720p.mp4" },
+          "line": 13
+        },
+        { "op": "-", "table": "tmp", "id": "chunks/m1.part", "line": 14 }
+      ],
+      "line": 11,
+      "rows": {
+        "media": [
+          {
+            "id": "m1",
+            "values": { "owner": "ana", "state": "ready", "file": "ana/m1/720p.mp4" },
+            "was": { "state": "uploaded", "file": "ana/m1/raw.mp4" }
+          }
+        ],
+        "uploads": [
+          { "id": "ana/m1/raw.mp4", "values": { "type": "video/mp4", "size": "120 MB" } },
+          {
+            "id": "ana/m1/720p.mp4",
+            "values": { "type": "video/mp4", "size": "18 MB" },
+            "status": "new"
+          }
+        ],
+        "tmp": [{ "id": "chunks/m1.part", "status": "removed" }]
+      }
+    },
+    {
+      "title": "The copy is replaced by a better one",
+      "changes": [
+        {
+          "op": "~",
+          "table": "uploads",
+          "id": "ana/m1/720p.mp4",
+          "values": { "size": "16 MB" },
+          "line": 17
+        },
+        { "op": "-", "table": "uploads", "id": "ana/m1/raw.mp4", "line": 18 }
+      ],
+      "line": 16,
+      "rows": {
+        "media": [
+          { "id": "m1", "values": { "owner": "ana", "state": "ready", "file": "ana/m1/720p.mp4" } }
+        ],
+        "uploads": [
+          {
+            "id": "ana/m1/raw.mp4",
+            "values": { "type": "video/mp4", "size": "120 MB" },
+            "status": "removed"
+          },
+          {
+            "id": "ana/m1/720p.mp4",
+            "values": { "type": "video/mp4", "size": "16 MB" },
+            "was": { "size": "18 MB" }
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,334 @@
+{
+  "tables": [
+    {
+      "kind": "table",
+      "name": "customer",
+      "columns": [{ "name": "name" }, { "name": "email" }],
+      "line": 4
+    },
+    {
+      "kind": "table",
+      "name": "order",
+      "columns": [
+        { "name": "customer", "ref": "customer" },
+        { "name": "state" },
+        { "name": "total" },
+        { "name": "payment", "ref": "payment" }
+      ],
+      "line": 5
+    },
+    {
+      "kind": "table",
+      "name": "payment",
+      "columns": [{ "name": "provider" }, { "name": "state" }, { "name": "amount" }],
+      "line": 6
+    },
+    {
+      "kind": "folder",
+      "name": "exports",
+      "columns": [
+        { "name": "order", "ref": "order" },
+        { "name": "customer.email" },
+        { "name": "total" }
+      ],
+      "doc": ["One JSON file per paid order. Only the fields the tool reads are shown."],
+      "line": 10
+    },
+    {
+      "kind": "table",
+      "name": "shipment",
+      "columns": [
+        { "name": "order", "ref": "order" },
+        { "name": "carrier" },
+        { "name": "label", "ref": "labels" }
+      ],
+      "line": 14
+    },
+    {
+      "kind": "folder",
+      "name": "labels",
+      "columns": [{ "name": "size" }],
+      "doc": [
+        "The PDFs the carrier returns, in the S3 bucket shipping-docs. Keys are carrier/shipment/name."
+      ],
+      "line": 15
+    }
+  ],
+  "groups": [
+    {
+      "label": "Checkout",
+      "doc": ["What a purchase writes, in one transaction."],
+      "tables": ["customer", "order", "payment"],
+      "line": 2
+    },
+    {
+      "label": "Accounting",
+      "doc": ["Read by the accounting tool each night."],
+      "tables": ["exports"],
+      "line": 8
+    },
+    { "label": "Shipping", "tables": ["shipment", "labels"], "line": 13 }
+  ],
+  "steps": [
+    {
+      "title": "Ana checks out",
+      "changes": [
+        {
+          "op": "+",
+          "table": "customer",
+          "id": "c1",
+          "values": { "name": "Ana", "email": "ana@example.com" },
+          "line": 20
+        },
+        {
+          "op": "+",
+          "table": "order",
+          "id": "o1",
+          "values": { "customer": "c1", "state": "pending", "total": "42.00" },
+          "line": 21
+        }
+      ],
+      "line": 19,
+      "rows": {
+        "customer": [
+          { "id": "c1", "values": { "name": "Ana", "email": "ana@example.com" }, "status": "new" }
+        ],
+        "order": [
+          {
+            "id": "o1",
+            "values": { "customer": "c1", "state": "pending", "total": "42.00" },
+            "status": "new"
+          }
+        ]
+      }
+    },
+    {
+      "title": "Her payment is captured",
+      "changes": [
+        {
+          "op": "+",
+          "table": "payment",
+          "id": "p1",
+          "values": { "provider": "stripe", "state": "captured", "amount": "42.00" },
+          "line": 24
+        },
+        {
+          "op": "~",
+          "table": "order",
+          "id": "o1",
+          "values": { "state": "paid", "payment": "p1" },
+          "line": 25
+        }
+      ],
+      "line": 23,
+      "rows": {
+        "customer": [{ "id": "c1", "values": { "name": "Ana", "email": "ana@example.com" } }],
+        "order": [
+          {
+            "id": "o1",
+            "values": { "customer": "c1", "state": "paid", "total": "42.00", "payment": "p1" },
+            "was": { "state": "pending", "payment": null }
+          }
+        ],
+        "payment": [
+          {
+            "id": "p1",
+            "values": { "provider": "stripe", "state": "captured", "amount": "42.00" },
+            "status": "new"
+          }
+        ]
+      }
+    },
+    {
+      "title": "The order is exported for accounting",
+      "doc": ["A job writes the file a few seconds after the payment."],
+      "changes": [
+        {
+          "op": "+",
+          "table": "exports",
+          "id": "2026-11/o1.json",
+          "values": { "order": "o1", "customer.email": "ana@example.com", "total": "42.00" },
+          "line": 29
+        }
+      ],
+      "line": 27,
+      "rows": {
+        "customer": [{ "id": "c1", "values": { "name": "Ana", "email": "ana@example.com" } }],
+        "order": [
+          {
+            "id": "o1",
+            "values": { "customer": "c1", "state": "paid", "total": "42.00", "payment": "p1" }
+          }
+        ],
+        "payment": [
+          { "id": "p1", "values": { "provider": "stripe", "state": "captured", "amount": "42.00" } }
+        ],
+        "exports": [
+          {
+            "id": "2026-11/o1.json",
+            "values": { "order": "o1", "customer.email": "ana@example.com", "total": "42.00" },
+            "status": "new"
+          }
+        ]
+      }
+    },
+    {
+      "title": "A shipping label is bought",
+      "changes": [
+        {
+          "op": "+",
+          "table": "labels",
+          "id": "ups/h1/label.pdf",
+          "values": { "size": "84 KB" },
+          "line": 32
+        },
+        {
+          "op": "+",
+          "table": "labels",
+          "id": "ups/h1/customs.pdf",
+          "values": { "size": "112 KB" },
+          "line": 33
+        },
+        {
+          "op": "+",
+          "table": "shipment",
+          "id": "h1",
+          "values": { "order": "o1", "carrier": "UPS", "label": "ups/h1/label.pdf" },
+          "line": 34
+        }
+      ],
+      "line": 31,
+      "rows": {
+        "customer": [{ "id": "c1", "values": { "name": "Ana", "email": "ana@example.com" } }],
+        "order": [
+          {
+            "id": "o1",
+            "values": { "customer": "c1", "state": "paid", "total": "42.00", "payment": "p1" }
+          }
+        ],
+        "payment": [
+          { "id": "p1", "values": { "provider": "stripe", "state": "captured", "amount": "42.00" } }
+        ],
+        "exports": [
+          {
+            "id": "2026-11/o1.json",
+            "values": { "order": "o1", "customer.email": "ana@example.com", "total": "42.00" }
+          }
+        ],
+        "shipment": [
+          {
+            "id": "h1",
+            "values": { "order": "o1", "carrier": "UPS", "label": "ups/h1/label.pdf" },
+            "status": "new"
+          }
+        ],
+        "labels": [
+          { "id": "ups/h1/label.pdf", "values": { "size": "84 KB" }, "status": "new" },
+          { "id": "ups/h1/customs.pdf", "values": { "size": "112 KB" }, "status": "new" }
+        ]
+      }
+    },
+    {
+      "title": "UPS sends a corrected label",
+      "doc": ["The file is overwritten under the same key, so the shipment still points at it."],
+      "changes": [
+        {
+          "op": "~",
+          "table": "labels",
+          "id": "ups/h1/label.pdf",
+          "values": { "size": "86 KB" },
+          "line": 38
+        }
+      ],
+      "line": 36,
+      "rows": {
+        "customer": [{ "id": "c1", "values": { "name": "Ana", "email": "ana@example.com" } }],
+        "order": [
+          {
+            "id": "o1",
+            "values": { "customer": "c1", "state": "paid", "total": "42.00", "payment": "p1" }
+          }
+        ],
+        "payment": [
+          { "id": "p1", "values": { "provider": "stripe", "state": "captured", "amount": "42.00" } }
+        ],
+        "exports": [
+          {
+            "id": "2026-11/o1.json",
+            "values": { "order": "o1", "customer.email": "ana@example.com", "total": "42.00" }
+          }
+        ],
+        "shipment": [
+          { "id": "h1", "values": { "order": "o1", "carrier": "UPS", "label": "ups/h1/label.pdf" } }
+        ],
+        "labels": [
+          { "id": "ups/h1/label.pdf", "values": { "size": "86 KB" }, "was": { "size": "84 KB" } },
+          { "id": "ups/h1/customs.pdf", "values": { "size": "112 KB" } }
+        ]
+      }
+    },
+    {
+      "title": "The order ships",
+      "changes": [
+        { "op": "~", "table": "order", "id": "o1", "values": { "state": "shipped" }, "line": 41 }
+      ],
+      "line": 40,
+      "rows": {
+        "customer": [{ "id": "c1", "values": { "name": "Ana", "email": "ana@example.com" } }],
+        "order": [
+          {
+            "id": "o1",
+            "values": { "customer": "c1", "state": "shipped", "total": "42.00", "payment": "p1" },
+            "was": { "state": "paid" }
+          }
+        ],
+        "payment": [
+          { "id": "p1", "values": { "provider": "stripe", "state": "captured", "amount": "42.00" } }
+        ],
+        "exports": [
+          {
+            "id": "2026-11/o1.json",
+            "values": { "order": "o1", "customer.email": "ana@example.com", "total": "42.00" }
+          }
+        ],
+        "shipment": [
+          { "id": "h1", "values": { "order": "o1", "carrier": "UPS", "label": "ups/h1/label.pdf" } }
+        ],
+        "labels": [
+          { "id": "ups/h1/label.pdf", "values": { "size": "86 KB" } },
+          { "id": "ups/h1/customs.pdf", "values": { "size": "112 KB" } }
+        ]
+      }
+    },
+    {
+      "title": "The customs form is deleted after delivery",
+      "changes": [{ "op": "-", "table": "labels", "id": "ups/h1/customs.pdf", "line": 44 }],
+      "line": 43,
+      "rows": {
+        "customer": [{ "id": "c1", "values": { "name": "Ana", "email": "ana@example.com" } }],
+        "order": [
+          {
+            "id": "o1",
+            "values": { "customer": "c1", "state": "shipped", "total": "42.00", "payment": "p1" }
+          }
+        ],
+        "payment": [
+          { "id": "p1", "values": { "provider": "stripe", "state": "captured", "amount": "42.00" } }
+        ],
+        "exports": [
+          {
+            "id": "2026-11/o1.json",
+            "values": { "order": "o1", "customer.email": "ana@example.com", "total": "42.00" }
+          }
+        ],
+        "shipment": [
+          { "id": "h1", "values": { "order": "o1", "carrier": "UPS", "label": "ups/h1/label.pdf" } }
+        ],
+        "labels": [
+          { "id": "ups/h1/label.pdf", "values": { "size": "86 KB" } },
+          { "id": "ups/h1/customs.pdf", "values": { "size": "112 KB" }, "status": "removed" }
+        ]
+      }
+    }
+  ]
+}

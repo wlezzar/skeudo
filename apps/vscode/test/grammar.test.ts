@@ -272,9 +272,9 @@ describe('scopes', () => {
 describe('the data view', () => {
   const SOURCE = [
     'data', // 1
-    'order(customer -> customer, state, total)',
+    'table order(customer -> customer, state, total)',
     '  What the customer buys.',
-    'customer(',
+    'table customer(',
     '  name,', // 5
     '  email → address,',
     ')',
@@ -285,6 +285,9 @@ describe('the data view', () => {
     '  - order o1',
     '  Explained after the changes.',
     'Login(Google) fails',
+    '[Billing / S3]', // 15
+    '  Explains the group.',
+    'folder invoices(order -> order)',
   ].join('\n');
   let lines: Token[][];
   beforeAll(() => {
@@ -299,7 +302,10 @@ describe('the data view', () => {
     expect(at(1, 'data')).toEqual(['source.skeudo', 'keyword.control.view.skeudo']);
   });
 
-  test('declarations name a table, its columns and the tables they point at', () => {
+  test('declarations start with their kind, and name a table, its columns and the tables they point at', () => {
+    expect(at(2, 'table')).toContain('storage.type.kind.skeudo');
+    expect(at(17, 'folder')).toContain('storage.type.kind.skeudo');
+    expect(at(17, 'invoices')).toContain('entity.name.type.table.skeudo');
     expect(at(2, 'order')).toContain('entity.name.type.table.skeudo');
     expect(at(2, 'customer ->')).toContain('variable.other.property.column.skeudo');
     expect(at(2, '->')).toContain('keyword.operator.reference.skeudo');
@@ -311,6 +317,14 @@ describe('the data view', () => {
     expect(at(5, 'name')).toEqual(expect.arrayContaining(['meta.declaration.table.skeudo', 'variable.other.property.column.skeudo']));
     expect(at(6, '→')).toContain('keyword.operator.reference.skeudo');
     expect(at(7, ')')).toContain('punctuation.definition.columns.end.skeudo');
+  });
+
+  test('a group line names its group, and the lines under it explain it', () => {
+    expect(at(15, '[')).toContain('punctuation.definition.group.begin.skeudo');
+    expect(at(15, 'Billing')).toEqual(expect.arrayContaining(['meta.group.skeudo', 'entity.name.namespace.group.skeudo']));
+    expect(at(15, 'S3')).toContain('entity.name.namespace.group.skeudo');
+    expect(at(15, ']')).toContain('punctuation.definition.group.end.skeudo');
+    expect(at(16, 'Explains')).toContain('comment.block.documentation.explanation.skeudo');
   });
 
   test('other lines that are not indented are step titles, and other indented lines are explanations', () => {
@@ -350,11 +364,11 @@ describe('the data view', () => {
   });
 
   test('in a Markdown fence', () => {
-    const doc = ['```skeudo', 'data', 'media(role)', '', 'Upload', '  + media m1  role: x', '```', 'After.'].join('\n');
+    const doc = ['```skeudo', 'data', 'table media(role)', '', 'Upload', '  + media m1  role: x', '```', 'After.'].join('\n');
     const tokens = tokenize(markdownTm, doc);
     const first = (line: number) => tokens[line - 1].find((t) => t.text.trim())!.scopes;
     expect(first(2)).toContain('keyword.control.view.skeudo');
-    expect(first(3)).toContain('entity.name.type.table.skeudo');
+    expect(first(3)).toContain('storage.type.kind.skeudo');
     expect(first(5)).toContain('markup.heading.step.skeudo');
     expect(tokens[5].map((t) => t.scopes).flat()).toContain('markup.inserted.skeudo');
     expect(first(7)).toContain('punctuation.definition.markdown');
@@ -362,7 +376,7 @@ describe('the data view', () => {
   });
 });
 
-/** What each line of a data sketch is, to the parser: the header, a declaration, a step, a change, or an explanation. */
+/** What each line of a data sketch is, to the parser: the header, a group, a declaration, a step, a change, or an explanation. */
 function dataKinds(source: string): string[] {
   const sketch = parseData(source);
   const raws = source.split('\n');
@@ -374,6 +388,7 @@ function dataKinds(source: string): string[] {
     kinds[i] = 'table';
     while (!raws[i].includes(')') && raws[i + 1]?.trim()) kinds[++i] = 'table';
   }
+  for (const g of sketch.groups) kinds[g.line - 1] = 'group';
   for (const s of sketch.steps) {
     kinds[s.line - 1] = 'step';
     for (const c of s.changes) kinds[c.line - 1] = 'change';
@@ -386,6 +401,7 @@ function grammarKinds(source: string): string[] {
   return tokenize(sketchTm, source).map((tokens) => {
     const scopes = tokens.find((t) => t.text.trim())?.scopes ?? [];
     if (has(scopes, 'keyword.control.view')) return 'header';
+    if (has(scopes, 'meta.group')) return 'group';
     if (has(scopes, 'meta.declaration.table')) return 'table';
     if (has(scopes, 'meta.change')) return 'change';
     if (has(scopes, 'markup.heading.step')) return 'step';

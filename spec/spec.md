@@ -19,7 +19,7 @@ Every view uses the same fence and extension. A sketch names its view on its fir
 
 ```skeudo
 data
-customer(name, email)
+table customer(name, email)
 
 Ana signs up
   + customer c1  name: Ana | email: ana@example.com

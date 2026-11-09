@@ -1,6 +1,6 @@
 data
-media(role)
-attempt(recording -> media)
+table media(role)
+table attempt(recording -> media)
 
 Record
   + media m3     role: upload

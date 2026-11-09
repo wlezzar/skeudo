@@ -1,7 +1,12 @@
 {
   "tables": [
-    { "name": "media", "columns": [{ "name": "role" }], "line": 2 },
-    { "name": "source", "columns": [{ "name": "input", "ref": "media" }], "line": 3 }
+    { "kind": "table", "name": "media", "columns": [{ "name": "role" }], "line": 2 },
+    {
+      "kind": "table",
+      "name": "source",
+      "columns": [{ "name": "input", "ref": "media" }],
+      "line": 3
+    }
   ],
   "steps": [
     {

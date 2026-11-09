@@ -1,9 +1,9 @@
 /**
  * TextMate rules for data sketches, which grammars/index.ts puts in `source.skeudo` after a `data` header.
  *
- * They follow the parser (packages/core/src/data/parse.ts) line by line: a declaration, a step title, a
- * change, or an explanation. One gap: in a fence inside a Markdown list item, every line is indented by
- * the list, so step titles are colored as explanations.
+ * They follow the parser (packages/core/src/data/parse.ts) line by line: a group line, a declaration, a
+ * step title, a change, or an explanation. One gap: in a fence inside a Markdown list item, every line is
+ * indented by the list, so step titles are colored as explanations.
  *
  * Repository names start with `data-`, since every view's rules share one grammar.
  */
@@ -16,11 +16,26 @@ const TABLE = 'entity.name.type.table.skeudo';
 const COLUMN = 'variable.other.property.column.skeudo';
 
 export const dataRepository: Record<string, Rule> = {
-  // `name(col, col -> table)`, over one line or several, up to the closing parenthesis or a blank line.
+  // `[label]`, which starts a group.
+  'data-group': {
+    match: String.raw`^(\[)(.*)(\])\s*$`,
+    captures: {
+      1: { name: 'punctuation.definition.group.begin.skeudo' },
+      2: { name: 'entity.name.namespace.group.skeudo' },
+      3: { name: 'punctuation.definition.group.end.skeudo' },
+    },
+    name: 'meta.group.skeudo',
+  },
+  // `table name(col, col -> table)` or `folder name(col)`, over one line or several, up to the closing
+  // parenthesis or a blank line. The parser reads a declaration without its kind word too, with a warning.
   // A title such as `Login(Google) fails` has a closing parenthesis that doesn't end the line, so it is a step.
   'data-declaration': {
-    begin: String.raw`^(${NAME})(\()(?=[^)]*$|.*\)\s*$)`,
-    beginCaptures: { 1: { name: TABLE }, 2: { name: 'punctuation.definition.columns.begin.skeudo' } },
+    begin: String.raw`^(?:(table|folder)\s+)?(${NAME})(\()(?=[^)]*$|.*\)\s*$)`,
+    beginCaptures: {
+      1: { name: 'storage.type.kind.skeudo' },
+      2: { name: TABLE },
+      3: { name: 'punctuation.definition.columns.begin.skeudo' },
+    },
     end: String.raw`\)|^(?=\s*$)`,
     endCaptures: { 0: { name: 'punctuation.definition.columns.end.skeudo' } },
     name: 'meta.declaration.table.skeudo',
@@ -72,6 +87,7 @@ export const dataRepository: Record<string, Rule> = {
 
 /** Everything after the header, line by line. Explanation and step come last, since they take any line. */
 export const dataPatterns: Rule[] = [
+  { include: '#data-group' },
   { include: '#data-declaration' },
   { include: '#data-change' },
   { include: '#data-explanation' },

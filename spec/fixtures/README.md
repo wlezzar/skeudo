@@ -24,7 +24,7 @@ The JSON is the parser's AST (`CodeSketch` in `packages/core/src/code/types.ts`)
 
 The fixtures in `data/` pin down the rules in [data.md](../data.md). Each starts with the `data` header.
 
-- `examples/` holds the spec's example, copied word for word.
+- `examples/` holds the spec's examples, copied word for word.
 - `format/` and `story/` hold edge cases of the format and of how steps play. `header/` checks that line numbers count the header.
 - `warnings/` holds one sketch per warning in the spec.
 

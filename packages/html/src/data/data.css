@@ -251,6 +251,79 @@
   border-color: var(--sk-red);
 }
 
+/* ---------- Folders ---------- */
+
+/* A folder is a card with a tab on top that holds its name, ending with a slash. */
+.skd-folder {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  max-width: 100%;
+}
+.skd-folder > .skd-name {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+  padding: 3px 10px 2px;
+  border: 1px solid var(--sk-border);
+  border-bottom-color: var(--sk-card);
+  border-radius: 7px 7px 0 0;
+  background: var(--sk-card);
+}
+.skd-slash {
+  color: var(--sk-muted);
+  font-weight: 400;
+}
+.skd-files {
+  max-width: 100%;
+  margin-top: -1px;
+  padding: 4px;
+  overflow-x: auto;
+  border: 1px solid var(--sk-border);
+  border-radius: 0 8px 8px 8px;
+  background: var(--sk-card);
+}
+/* The path is what a file is, so it reads as the row's main text, not as a faint id. The folders it
+   shares with the path above are dimmed. */
+.skd .skd-folder .skd-path { color: var(--sk-fg); }
+.skd-same { color: var(--sk-faint); }
+.skd .skd-folder tr.skd-removed .skd-path,
+.skd .skd-folder tr.skd-removed .skd-same { color: var(--sk-muted); }
+
+/* ---------- Groups ---------- */
+
+/* A light frame around some tables, with its label on top. Its tables wrap inside it. */
+.skd-group {
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: 100%;
+  padding: 6px 8px 8px;
+  border: 1px solid var(--sk-border);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--sk-fg) 2.5%, transparent);
+}
+.skd-group-name {
+  display: flex;
+  align-items: center;
+  margin: 0 4px 6px;
+  color: var(--sk-muted);
+  font-size: 12.5px;
+  font-weight: 600;
+}
+/* A label longer than the values' cap (MAX_WIDTH in render.ts) is cut off; its tooltip has all of it. */
+.skd-group-name > span:first-child {
+  max-width: 24ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.skd-group-body {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: flex-start;
+}
+
 /* What the current step changed. These are the colors every view uses for changes. */
 .skd .skd-grid tr.skd-new td { background: var(--skd-new-bg); }
 .skd .skd-grid tr.skd-removed td {

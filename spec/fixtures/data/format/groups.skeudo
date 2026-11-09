@@ -1,0 +1,18 @@
+data
+table customer(name)
+
+[Checkout]
+table order(customer -> customer, state)
+
+Ana checks out
+  + customer c1  name: Ana
+  + order o1     customer: c1 | state: pending
+
+table payment(order -> order, state)
+
+[Billing / S3]
+folder invoices(order -> order)
+
+Her payment is captured
+  + payment p1          order: o1 | state: captured
+  + invoices 2026/o1.pdf  order: o1

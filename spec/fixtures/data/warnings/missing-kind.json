@@ -1,0 +1,28 @@
+{
+  "tables": [
+    {
+      "kind": "table",
+      "name": "media",
+      "columns": [{ "name": "role" }, { "name": "type" }],
+      "line": 2
+    },
+    { "kind": "folder", "name": "uploads", "columns": [{ "name": "type" }], "line": 3 }
+  ],
+  "diagnostics": [
+    {
+      "line": 2,
+      "severity": "warning",
+      "message": "The declaration of media should start with table or folder, as in table media(…)."
+    }
+  ],
+  "steps": [
+    {
+      "title": "Upload",
+      "changes": [
+        { "op": "+", "table": "media", "id": "m1", "values": { "role": "upload" }, "line": 6 }
+      ],
+      "line": 5,
+      "rows": { "media": [{ "id": "m1", "values": { "role": "upload" }, "status": "new" }] }
+    }
+  ]
+}

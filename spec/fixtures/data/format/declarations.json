@@ -1,7 +1,13 @@
 {
   "tables": [
-    { "name": "user", "columns": [{ "name": "name" }, { "name": "email" }], "line": 2 },
     {
+      "kind": "table",
+      "name": "user",
+      "columns": [{ "name": "name" }, { "name": "email" }],
+      "line": 2
+    },
+    {
+      "kind": "table",
       "name": "order.line",
       "columns": [
         { "name": "order", "ref": "shop-order" },
@@ -11,11 +17,17 @@
       "line": 3
     },
     {
+      "kind": "table",
       "name": "shop-order",
       "columns": [{ "name": "user", "ref": "user" }, { "name": "state" }],
       "line": 8
     },
-    { "name": "product", "columns": [{ "name": "title" }, { "name": "price" }], "line": 9 }
+    {
+      "kind": "table",
+      "name": "product",
+      "columns": [{ "name": "title" }, { "name": "price" }],
+      "line": 9
+    }
   ],
   "steps": [
     {

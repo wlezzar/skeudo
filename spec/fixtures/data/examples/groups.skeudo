@@ -1,0 +1,44 @@
+data
+[Checkout]
+  What a purchase writes, in one transaction.
+table customer(name, email)
+table order(customer -> customer, state, total, payment -> payment)
+table payment(provider, state, amount)
+
+[Accounting]
+  Read by the accounting tool each night.
+folder exports(order -> order, customer.email, total)
+  One JSON file per paid order. Only the fields the tool reads are shown.
+
+[Shipping]
+table shipment(order -> order, carrier, label -> labels)
+folder labels(size)
+  The PDFs the carrier returns, in the S3 bucket shipping-docs.
+  Keys are carrier/shipment/name.
+
+Ana checks out
+  + customer c1  name: Ana | email: ana@example.com
+  + order o1     customer: c1 | state: pending | total: 42.00
+
+Her payment is captured
+  + payment p1   provider: stripe | state: captured | amount: 42.00
+  ~ order o1     state: paid | payment: p1
+
+The order is exported for accounting
+  A job writes the file a few seconds after the payment.
+  + exports 2026-11/o1.json  order: o1 | customer.email: ana@example.com | total: 42.00
+
+A shipping label is bought
+  + labels ups/h1/label.pdf    size: 84 KB
+  + labels ups/h1/customs.pdf  size: 112 KB
+  + shipment h1  order: o1 | carrier: UPS | label: ups/h1/label.pdf
+
+UPS sends a corrected label
+  The file is overwritten under the same key, so the shipment still points at it.
+  ~ labels ups/h1/label.pdf  size: 86 KB
+
+The order ships
+  ~ order o1  state: shipped
+
+The customs form is deleted after delivery
+  - labels ups/h1/customs.pdf

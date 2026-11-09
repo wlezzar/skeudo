@@ -1,5 +1,5 @@
 {
-  "tables": [{ "name": "media", "columns": [{ "name": "role" }], "line": 3 }],
+  "tables": [{ "kind": "table", "name": "media", "columns": [{ "name": "role" }], "line": 3 }],
   "diagnostics": [{ "line": 6, "severity": "warning", "message": "No table named medai." }],
   "steps": [
     {

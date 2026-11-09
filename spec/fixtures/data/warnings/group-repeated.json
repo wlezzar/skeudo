@@ -1,0 +1,27 @@
+{
+  "tables": [
+    { "kind": "table", "name": "order", "columns": [{ "name": "state" }], "line": 3 },
+    { "kind": "table", "name": "payment", "columns": [{ "name": "state" }], "line": 6 }
+  ],
+  "groups": [
+    { "label": "Checkout", "tables": ["order"], "line": 2 },
+    { "label": "Checkout", "tables": ["payment"], "line": 5 }
+  ],
+  "diagnostics": [
+    { "line": 5, "severity": "warning", "message": "There is already a group named Checkout." }
+  ],
+  "steps": [
+    {
+      "title": "Ana pays",
+      "changes": [
+        { "op": "+", "table": "order", "id": "o1", "values": { "state": "paid" }, "line": 9 },
+        { "op": "+", "table": "payment", "id": "p1", "values": { "state": "captured" }, "line": 10 }
+      ],
+      "line": 8,
+      "rows": {
+        "order": [{ "id": "o1", "values": { "state": "paid" }, "status": "new" }],
+        "payment": [{ "id": "p1", "values": { "state": "captured" }, "status": "new" }]
+      }
+    }
+  ]
+}

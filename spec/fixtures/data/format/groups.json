@@ -1,0 +1,77 @@
+{
+  "tables": [
+    { "kind": "table", "name": "customer", "columns": [{ "name": "name" }], "line": 2 },
+    {
+      "kind": "table",
+      "name": "order",
+      "columns": [{ "name": "customer", "ref": "customer" }, { "name": "state" }],
+      "line": 5
+    },
+    {
+      "kind": "table",
+      "name": "payment",
+      "columns": [{ "name": "order", "ref": "order" }, { "name": "state" }],
+      "line": 11
+    },
+    {
+      "kind": "folder",
+      "name": "invoices",
+      "columns": [{ "name": "order", "ref": "order" }],
+      "line": 14
+    }
+  ],
+  "groups": [
+    { "label": "Checkout", "tables": ["order", "payment"], "line": 4 },
+    { "label": "Billing / S3", "tables": ["invoices"], "line": 13 }
+  ],
+  "steps": [
+    {
+      "title": "Ana checks out",
+      "changes": [
+        { "op": "+", "table": "customer", "id": "c1", "values": { "name": "Ana" }, "line": 8 },
+        {
+          "op": "+",
+          "table": "order",
+          "id": "o1",
+          "values": { "customer": "c1", "state": "pending" },
+          "line": 9
+        }
+      ],
+      "line": 7,
+      "rows": {
+        "customer": [{ "id": "c1", "values": { "name": "Ana" }, "status": "new" }],
+        "order": [
+          { "id": "o1", "values": { "customer": "c1", "state": "pending" }, "status": "new" }
+        ]
+      }
+    },
+    {
+      "title": "Her payment is captured",
+      "changes": [
+        {
+          "op": "+",
+          "table": "payment",
+          "id": "p1",
+          "values": { "order": "o1", "state": "captured" },
+          "line": 17
+        },
+        {
+          "op": "+",
+          "table": "invoices",
+          "id": "2026/o1.pdf",
+          "values": { "order": "o1" },
+          "line": 18
+        }
+      ],
+      "line": 16,
+      "rows": {
+        "customer": [{ "id": "c1", "values": { "name": "Ana" } }],
+        "order": [{ "id": "o1", "values": { "customer": "c1", "state": "pending" } }],
+        "payment": [
+          { "id": "p1", "values": { "order": "o1", "state": "captured" }, "status": "new" }
+        ],
+        "invoices": [{ "id": "2026/o1.pdf", "values": { "order": "o1" }, "status": "new" }]
+      }
+    }
+  ]
+}

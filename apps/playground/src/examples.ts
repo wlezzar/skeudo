@@ -2,6 +2,7 @@ import { frontMatter } from 'markdown-it-skeudo';
 import spec from '../../../spec/code.md?raw';
 import dataSpec from '../../../spec/data.md?raw';
 import checkout from '../../../spec/fixtures/data/examples/checkout.skeudo?raw';
+import groups from '../../../spec/fixtures/data/examples/groups.skeudo?raw';
 
 export interface Example {
   id: string;
@@ -196,6 +197,7 @@ export const examples: Example[] = [
   { id: 'cancel-order', title: 'A change (cancel_order)', source: cancelOrder },
   { id: 'real-code', title: 'Real code stays plain (load_config)', source: realCode },
   { id: 'checkout', title: 'A data model and its story (checkout)', source: checkout },
+  { id: 'groups', title: 'Groups and folders (checkout, shipping)', source: groups },
   { id: 'pr-comment', title: 'Markdown: a review comment', source: prComment },
   { id: 'spec', title: 'Markdown: the code view spec', source: spec },
   { id: 'data-spec', title: 'Markdown: the data view spec', source: dataSpec },

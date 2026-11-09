@@ -1,0 +1,11 @@
+data
+[Search index]
+  Rebuilt from orders by a job
+  a few seconds after each write.
+
+  Never written by the app itself.
+table order_doc(state, total)
+  One document per order.
+
+The index catches up
+  + order_doc o1  state: paid | total: 42.00

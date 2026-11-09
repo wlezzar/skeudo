@@ -1,6 +1,7 @@
 {
   "tables": [
     {
+      "kind": "table",
       "name": "event",
       "columns": [{ "name": "kind" }, { "name": "at" }, { "name": "note" }, { "name": "payload" }],
       "line": 2

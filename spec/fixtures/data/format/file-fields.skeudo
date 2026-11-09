@@ -1,0 +1,10 @@
+data
+table order(customer, state, total)
+folder exports(order -> order, customer.email, lines.count, total)
+
+Ana checks out
+  + order o1  customer: ana | state: pending | total: 42.00
+
+Her payment is captured
+  ~ order o1                 state: paid
+  + exports 2026-11/o1.json  order: o1 | customer.email: ana@example.com | lines.count: 2 | total: 42.00

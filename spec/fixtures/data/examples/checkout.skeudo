@@ -1,15 +1,15 @@
 data
-customer(name, email)
+table customer(name, email)
   One account. A guest gets a row too, with no email.
 
-order(customer -> customer, state, total, payment -> payment)
+table order(customer -> customer, state, total, payment -> payment)
   What the customer buys. The order lines aren't shown.
 
-payment(provider, state, amount)
+table payment(provider, state, amount)
   One attempt to charge a card. A declined payment is kept,
   and a retry adds a new row.
 
-shipment(order -> order, carrier, tracking)
+table shipment(order -> order, carrier, tracking)
 
 Ana checks out as a guest
   + customer c1  name: Ana | email: null

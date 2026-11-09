@@ -1,0 +1,85 @@
+{
+  "tables": [
+    {
+      "kind": "table",
+      "name": "order",
+      "columns": [{ "name": "customer" }, { "name": "state" }, { "name": "total" }],
+      "line": 2
+    },
+    {
+      "kind": "folder",
+      "name": "exports",
+      "columns": [
+        { "name": "order", "ref": "order" },
+        { "name": "customer.email" },
+        { "name": "lines.count" },
+        { "name": "total" }
+      ],
+      "line": 3
+    }
+  ],
+  "steps": [
+    {
+      "title": "Ana checks out",
+      "changes": [
+        {
+          "op": "+",
+          "table": "order",
+          "id": "o1",
+          "values": { "customer": "ana", "state": "pending", "total": "42.00" },
+          "line": 6
+        }
+      ],
+      "line": 5,
+      "rows": {
+        "order": [
+          {
+            "id": "o1",
+            "values": { "customer": "ana", "state": "pending", "total": "42.00" },
+            "status": "new"
+          }
+        ]
+      }
+    },
+    {
+      "title": "Her payment is captured",
+      "changes": [
+        { "op": "~", "table": "order", "id": "o1", "values": { "state": "paid" }, "line": 9 },
+        {
+          "op": "+",
+          "table": "exports",
+          "id": "2026-11/o1.json",
+          "values": {
+            "order": "o1",
+            "customer.email": "ana@example.com",
+            "lines.count": "2",
+            "total": "42.00"
+          },
+          "line": 10
+        }
+      ],
+      "line": 8,
+      "rows": {
+        "order": [
+          {
+            "id": "o1",
+            "values": { "customer": "ana", "state": "paid", "total": "42.00" },
+            "was": { "state": "pending" }
+          }
+        ],
+        "exports": [
+          {
+            "id": "2026-11/o1.json",
+            "values": {
+              "order": "o1",
+              "customer.email": "ana@example.com",
+              "lines.count": "2",
+              "total": "42.00"
+            },
+            "status": "new"
+          }
+        ]
+      }
+    }
+  ]
+}

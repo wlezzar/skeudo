@@ -4,13 +4,19 @@
 import type { Diagnostic } from '../diagnostic';
 import { firstLine, splitLines } from '../header';
 import { checkData } from './replay';
-import type { DataChange, DataColumn, DataSketch, DataStep, DataTable, DataValues } from './types';
+import { DATA_KINDS, type DataChange, type DataColumn, type DataGroup, type DataKind, type DataSketch, type DataStep, type DataTable, type DataValues } from './types';
 
 const NAME = String.raw`[\p{L}\p{N}_.-]+`;
-/** `name(`, the start of a declaration. No space is allowed before the parenthesis, so `Login (Google)` is a step. */
-const DECLARATION = new RegExp(String.raw`^(${NAME})\(`, 'u');
-/** A whole declaration: `name(…)`. */
-const TABLE = new RegExp(String.raw`^(${NAME})\((.*)\)$`, 'u');
+const KIND = DATA_KINDS.join('|');
+/**
+ * `table name(` or `folder name(`, the start of a declaration. No space is allowed before the parenthesis,
+ * so `Login (Google)` is a step. A declaration without its kind word is still read, as a table, with a warning.
+ */
+const DECLARATION = new RegExp(String.raw`^(?:(${KIND})\s+)?(${NAME})\(`, 'u');
+/** A whole declaration: `table name(…)`. */
+const TABLE = new RegExp(String.raw`^(?:(?:${KIND})\s+)?${NAME}\(.*\)$`, 'u');
+/** `[label]`, which starts a group. */
+const GROUP = /^\[(.*)\]$/;
 /** `name`, or `name -> table` (`→` works too). */
 const COLUMN = new RegExp(String.raw`^(${NAME})(?:\s*(?:->|→)\s*(${NAME}))?$`, 'u');
 /** `+ table id  values`. */
@@ -18,25 +24,31 @@ const CHANGE = /^([+~-])\s+(\S+)\s+(\S+)\s*(.*)$/;
 /** `column: value`, split at the first colon, so `expires: 10:14` works. */
 const VALUE = new RegExp(String.raw`^(${NAME})\s*:\s*(.*)$`, 'u');
 
-/** What indented lines belong to: the table or step above them. Only a step has changes. */
+/** What indented lines belong to: the table, group or step above them. Only a step has changes. */
 interface Owner {
   doc: string[];
   changes?: DataChange[];
 }
 
 /**
- * Parses a data block. Lines that aren't indented declare a table, as `name(col, col -> table)`, or start
- * a step. Indented lines under either are its explanation, except under a step, where lines starting with
- * `+`, `~` or `-` and a space are its changes. A blank line splits an explanation into paragraphs. A `data`
- * header on the first line is skipped. The diagnostics include what playing the story finds (checkData).
+ * Parses a data block. Lines that aren't indented start a group, as `[label]`, declare a table, as
+ * `table name(col, col -> table)` or `folder name(col)`, or start a step. Indented lines under any of them
+ * are its explanation, except under a step, where lines starting with `+`, `~` or `-` and a space are its
+ * changes. A blank line splits an explanation into paragraphs. A `data` header on the first line is
+ * skipped. The diagnostics include what playing the story finds (checkData).
  */
 export function parseData(source: string): DataSketch {
   const lines = splitLines(source);
   const diagnostics: Diagnostic[] = [];
   const warn = (line: number, message: string) => diagnostics.push({ line, severity: 'warning', message });
   const tables: DataTable[] = [];
+  const groups: DataGroup[] = [];
   const steps: DataStep[] = [];
   let owner: Owner | undefined;
+  /** What `owner` is, for the warning about a change under it. */
+  let ownerIs: 'table' | 'group' | 'step' = 'step';
+  /** The group that tables declared now belong to. Steps don't end it, only the next group line does. */
+  let group: DataGroup | undefined;
   /** Whether the line before continues the same paragraph of explanation. */
   let paragraph = false;
 
@@ -54,25 +66,43 @@ export function parseData(source: string): DataSketch {
 
     if (!/^\s/.test(raw)) {
       paragraph = false;
-      const name = DECLARATION.exec(body)?.[1];
+      const label = GROUP.exec(body)?.[1].trim();
+      if (label !== undefined) {
+        if (!label) warn(line, 'A group needs a label, as in [Checkout].');
+        else if (groups.some((g) => g.label === label)) warn(line, `There is already a group named ${label}.`);
+        group = { label, doc: [], tables: [], line };
+        groups.push(group);
+        owner = group;
+        ownerIs = 'group';
+        continue;
+      }
+      const declaration = DECLARATION.exec(body);
       // A title such as `Login(Google) fails` has a closing parenthesis but doesn't end with it.
-      if (name && (TABLE.test(body) || !body.includes(')'))) {
+      if (declaration && (TABLE.test(body) || !body.includes(')'))) {
+        const [, word, name] = declaration;
         let text = body;
         if (!body.includes(')')) {
           // A declaration may run over several lines, up to its closing parenthesis.
           while (i + 1 < lines.length && lines[i + 1].trim() && !text.includes(')')) text += ' ' + lines[++i].trim();
-          if (!TABLE.test(text)) warn(line, `The declaration of ${name} should end with ), as in media(role, type).`);
+          if (!TABLE.test(text)) warn(line, `The declaration of ${name} should end with ), as in table media(role, type).`);
         }
-        const inside = text.slice(name.length + 1).replace(/\)[^)]*$/, '');
-        const table: DataTable = { name, columns: columns(inside, name, line, warn), doc: [], line };
+        if (!word) warn(line, `The declaration of ${name} should start with table or folder, as in table ${name}(…).`);
+        const inside = text.slice(text.indexOf('(') + 1).replace(/\)[^)]*$/, '');
+        const kind = (word ?? 'table') as DataKind;
+        const table: DataTable = { kind, name, columns: columns(inside, name, line, warn), doc: [], line };
         if (tables.some((t) => t.name === name)) warn(line, `${name} is declared twice.`);
-        else tables.push(table);
+        else {
+          tables.push(table);
+          group?.tables.push(name);
+        }
         owner = table;
+        ownerIs = 'table';
         continue;
       }
       const step: DataStep = { title: body, doc: [], changes: [], line };
       steps.push(step);
       owner = step;
+      ownerIs = 'step';
       continue;
     }
 
@@ -84,7 +114,7 @@ export function parseData(source: string): DataSketch {
     if (/^[+~-]\s/.test(body)) {
       paragraph = false;
       if (!owner.changes) {
-        warn(line, 'Changes go under a step, not under a table.');
+        warn(line, `Changes go under a step, not under a ${ownerIs}.`);
         continue;
       }
       const m = CHANGE.exec(body);
@@ -119,11 +149,13 @@ export function parseData(source: string): DataSketch {
       if (c.ref !== undefined && !names.has(c.ref)) warn(t.line, `${t.name}.${c.name} points at ${c.ref}, which isn't declared.`);
     }
   }
+  // A group with no label has had its warning.
+  for (const g of groups) if (g.label && !g.tables.length) warn(g.line, `The group ${g.label} has no tables.`);
   if (!tables.length) warn(header?.index === undefined ? 1 : header.index + 1, 'No tables are declared.');
   diagnostics.push(...checkData({ tables, steps }));
   diagnostics.sort((a, b) => a.line - b.line);
 
-  return { view: 'data', source, tables, steps, diagnostics };
+  return { view: 'data', source, tables, groups, steps, diagnostics };
 }
 
 /** The columns between a declaration's parentheses. */

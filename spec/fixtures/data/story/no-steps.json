@@ -1,6 +1,7 @@
 {
   "tables": [
     {
+      "kind": "table",
       "name": "user",
       "columns": [{ "name": "name" }],
       "doc": ["Only tables: the view draws them empty."],

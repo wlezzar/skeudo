@@ -1,6 +1,6 @@
 
   data
-media(role)
+table media(role)
 
 Upload
   + medai m1

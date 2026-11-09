@@ -1,0 +1,17 @@
+{
+  "tables": [{ "kind": "table", "name": "media", "columns": [{ "name": "role" }], "line": 3 }],
+  "groups": [{ "label": "", "tables": ["media"], "line": 2 }],
+  "diagnostics": [
+    { "line": 2, "severity": "warning", "message": "A group needs a label, as in [Checkout]." }
+  ],
+  "steps": [
+    {
+      "title": "Upload",
+      "changes": [
+        { "op": "+", "table": "media", "id": "m1", "values": { "role": "upload" }, "line": 6 }
+      ],
+      "line": 5,
+      "rows": { "media": [{ "id": "m1", "values": { "role": "upload" }, "status": "new" }] }
+    }
+  ]
+}

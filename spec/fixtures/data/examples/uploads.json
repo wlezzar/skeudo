@@ -1,0 +1,110 @@
+{
+  "tables": [
+    {
+      "kind": "table",
+      "name": "media",
+      "columns": [{ "name": "owner" }, { "name": "state" }, { "name": "file", "ref": "uploads" }],
+      "line": 2
+    },
+    {
+      "kind": "folder",
+      "name": "uploads",
+      "columns": [{ "name": "type" }, { "name": "size" }],
+      "doc": ["The bucket the browser uploads to. Keys are owner/media/name."],
+      "line": 4
+    }
+  ],
+  "steps": [
+    {
+      "title": "Ana uploads a video",
+      "changes": [
+        {
+          "op": "+",
+          "table": "uploads",
+          "id": "ana/m1/raw.mp4",
+          "values": { "type": "video/mp4", "size": "120 MB" },
+          "line": 8
+        },
+        {
+          "op": "+",
+          "table": "media",
+          "id": "m1",
+          "values": { "owner": "ana", "state": "uploaded", "file": "ana/m1/raw.mp4" },
+          "line": 9
+        }
+      ],
+      "line": 7,
+      "rows": {
+        "media": [
+          {
+            "id": "m1",
+            "values": { "owner": "ana", "state": "uploaded", "file": "ana/m1/raw.mp4" },
+            "status": "new"
+          }
+        ],
+        "uploads": [
+          {
+            "id": "ana/m1/raw.mp4",
+            "values": { "type": "video/mp4", "size": "120 MB" },
+            "status": "new"
+          }
+        ]
+      }
+    },
+    {
+      "title": "The transcoder writes a smaller copy",
+      "changes": [
+        {
+          "op": "+",
+          "table": "uploads",
+          "id": "ana/m1/720p.mp4",
+          "values": { "type": "video/mp4", "size": "18 MB" },
+          "line": 12
+        },
+        {
+          "op": "~",
+          "table": "media",
+          "id": "m1",
+          "values": { "state": "ready", "file": "ana/m1/720p.mp4" },
+          "line": 13
+        }
+      ],
+      "line": 11,
+      "rows": {
+        "media": [
+          {
+            "id": "m1",
+            "values": { "owner": "ana", "state": "ready", "file": "ana/m1/720p.mp4" },
+            "was": { "state": "uploaded", "file": "ana/m1/raw.mp4" }
+          }
+        ],
+        "uploads": [
+          { "id": "ana/m1/raw.mp4", "values": { "type": "video/mp4", "size": "120 MB" } },
+          {
+            "id": "ana/m1/720p.mp4",
+            "values": { "type": "video/mp4", "size": "18 MB" },
+            "status": "new"
+          }
+        ]
+      }
+    },
+    {
+      "title": "The raw file is deleted after a week",
+      "changes": [{ "op": "-", "table": "uploads", "id": "ana/m1/raw.mp4", "line": 16 }],
+      "line": 15,
+      "rows": {
+        "media": [
+          { "id": "m1", "values": { "owner": "ana", "state": "ready", "file": "ana/m1/720p.mp4" } }
+        ],
+        "uploads": [
+          {
+            "id": "ana/m1/raw.mp4",
+            "values": { "type": "video/mp4", "size": "120 MB" },
+            "status": "removed"
+          },
+          { "id": "ana/m1/720p.mp4", "values": { "type": "video/mp4", "size": "18 MB" } }
+        ]
+      }
+    }
+  ]
+}

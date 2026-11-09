@@ -1,7 +1,12 @@
 {
   "tables": [
-    { "name": "media", "columns": [{ "name": "role" }], "line": 2 },
-    { "name": "attempt", "columns": [{ "name": "recording", "ref": "media" }], "line": 3 }
+    { "kind": "table", "name": "media", "columns": [{ "name": "role" }], "line": 2 },
+    {
+      "kind": "table",
+      "name": "attempt",
+      "columns": [{ "name": "recording", "ref": "media" }],
+      "line": 3
+    }
   ],
   "diagnostics": [
     {

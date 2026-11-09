@@ -1,6 +1,6 @@
 # Data sketches
 
-A data sketch shows how a system stores its data: a few tables with example rows, and a short story of how those rows appear, change and go away as someone uses the system. Rendered, the tables sit beside the list of steps, and selecting a step shows the rows after it, with that step's changes in color. Explanations show only on hover.
+A data sketch shows how a system stores its data: a few tables (and folders of files) with example rows, and a short story of how those rows appear, change and go away as someone uses the system. Rendered, the tables sit beside the list of steps, and selecting a step shows the rows after it, with that step's changes in color. Explanations show only on hover.
 
 Write one when someone asks how data is stored, what a table holds, how records point at each other, or what happens to the data during a flow such as an upload, a checkout or a sync. For what code does, write a code sketch (SKILL.md). The two work well together: a data sketch of the model, and code sketches of the flows that write it.
 
@@ -10,20 +10,50 @@ A data sketch is a `skeudo` fence whose first line is `data`.
 
 | Element | Form | Notes |
 | --- | --- | --- |
-| Table | `name(col, col -> table)`, not indented | Columns in display order. `col -> table` holds ids of that table's rows. No space before `(`. May run over several lines up to `)`. |
+| Table | `table name(col, col -> table)`, not indented | Columns in display order. `col -> table` holds ids of that table's rows. No space before `(`. May run over several lines up to `)`. |
+| Folder | `folder name(col)`, not indented | Files keyed by path, such as an S3 bucket. Works like a table: the row id is the path, the columns are metadata or content fields. |
+| Group | `[label]`, alone on a line | Frames the tables and folders declared after it, up to the next group line. |
 | Step | Any other line that isn't indented | Its title, in free words. |
 | Add a row | `+ table id  col: value \| col: value`, indented under a step | Columns left out are empty. |
 | Change a row | `~ table id  col: value`, indented under a step | Only the listed columns change. |
 | Delete a row | `- table id`, indented under a step | No values. |
-| Explanation | Any other indented line | Explains the table or step above it. A blank line starts a new paragraph. |
+| Explanation | Any other indented line | Explains the group, table or step above it. A blank line starts a new paragraph. |
 
 - **Ids** are words without spaces, unique among a table's rows: `m1`, `s1`. A deleted id may be added again.
 - **Values** are split from their column at the first `:`, so `at: 10:14` works. `null` is empty. Double quotes keep a `|` or edge spaces: `note: "a | b"`. Values have no types.
 - **Order.** Tables are drawn in the order they are declared, so declare the main ones first. Steps play in order.
 
+### Folders
+
+Use a folder when the data is files keyed by path: uploads, exports, generated documents. `+` uploads a file, `~` overwrites it or changes its metadata, `-` deletes it. Use the real key layout as the path, since it is often the point: `+ uploads ana/m1/raw.mp4  type: video/mp4 | size: 120 MB`. A reference to a folder holds a path: `table media(file -> uploads)`.
+
+When a file's content matters, such as a JSON export, its columns are the fields that matter. Nested fields are dotted names, and a field holding an id can be a reference: `folder exports(order -> order, customer.email, total)`. Don't try to show the whole document.
+
+### Groups
+
+Add groups only when the tables fall into two or more parts a reader looks at separately. A sketch of three or four tables needs none. Pick one reason for the groups before writing (a feature, a store, a role in the data, or a lifecycle), keep to it, and use two to four groups with labels of a word or two:
+
+```skeudo
+data
+[Postgres]
+table order(state, total)
+
+[Elasticsearch]
+  Rebuilt from orders by a job a few seconds after each write.
+table order_doc(state, total)
+
+Ana pays
+  + order o1  state: paid | total: 42.00
+
+The index catches up
+  + order_doc o1  state: paid | total: 42.00
+```
+
+A group runs to the next group line, and steps don't end it. Groups don't nest: write a hierarchy in the label, as in `[Billing / Postgres]`. Don't start a step title with `[`.
+
 ## Workflow
 
-1. **Find the model** at the revision you're sketching: migrations, schema files, ORM models. Note which columns hold ids of other tables.
+1. **Find the model** at the revision you're sketching: migrations, schema files, ORM models, and the code that writes files to storage. Note which columns hold ids of other tables or paths of files.
 2. **Pick what to show.** 3 to 6 tables, the ones the question is about, and in each the 2 to 5 columns that carry meaning. The row id is always shown, so leave out the id column. Leave out owner and timestamp columns unless they are the point. Say what you left out in one sentence after the sketch.
 3. **Pick one real path** through the code, the one the user asked about or the main one, and follow it: each insert, update and delete, in the order the code makes them. Leave failure paths for another sketch.
 4. **Write 5 to 10 steps.** A title says what happened, in the reader's words: "Ana uploads a video", not "POST /uploads". Writes made in one transaction or one request usually make one step. A step may have no changes when it explains a moment worth seeing, but keep that rare.
@@ -39,17 +69,17 @@ As for code sketches, a Markdown document: a sentence or two on what the model i
 
 ```skeudo
 data
-customer(name, email)
+table customer(name, email)
   One account. A guest gets a row too, with no email.
 
-order(customer -> customer, state, total, payment -> payment)
+table order(customer -> customer, state, total, payment -> payment)
   What the customer buys. The order lines aren't shown.
 
-payment(provider, state, amount)
+table payment(provider, state, amount)
   One attempt to charge a card. A declined payment is kept,
   and a retry adds a new row.
 
-shipment(order -> order, carrier, tracking)
+table shipment(order -> order, carrier, tracking)
 
 Ana checks out as a guest
   + customer c1  name: Ana | email: null
