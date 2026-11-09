@@ -92,6 +92,7 @@ const legendHtml = () =>
   `<details class="legend"><summary>Legend</summary><dl>` +
   LEGEND.map(([src, label]) => `<dt>${(parseTagsOnly(src) ?? []).map((t) => tagHtml(t)).join(' ')}</dt><dd>${label}</dd>`).join('') +
   `<dt><span class="sk-word">if</span> <span class="sk-call">load_user</span>(<span class="sk-var">user_id</span>)</dt><dd>prose word · call · variable (hover or click it)</dd>` +
+  `<dt><span class="sk-word">if</span> past due:<span class="sk-doc-mark" aria-hidden="true"></span></dt><dd>a line explained with ::doc (hover the line, or a call, to read it)</dd>` +
   `</dl></details>`;
 
 // ---------- Review ----------

@@ -359,6 +359,67 @@ a.sk-file:hover { color: var(--sk-blue); text-decoration: underline; }
 .sk-file.sk-src-note { color: var(--sk-amber); }
 .sk-call.sk-src-note { text-decoration-color: var(--sk-amber); }
 
+/* ---------- Explanations ---------- */
+
+/* A line with a ::doc has a small circled "i" after its code, drawn here so copying the code leaves it out. */
+.sk-doc-mark {
+  display: inline-block;
+  width: 1.5em;
+  height: 1.5em;
+  margin-left: calc(1ch / 0.72);
+  font-size: 0.72em;
+  line-height: calc(1.5em - 2px);
+  text-align: center;
+  vertical-align: 0.15em;
+  border: 1px solid color-mix(in srgb, var(--sk-muted) 50%, transparent);
+  border-radius: 50%;
+  color: var(--sk-muted);
+  user-select: none;
+}
+.sk-doc-mark::before {
+  content: 'i';
+  font: italic 700 1em/1 Georgia, 'Times New Roman', serif;
+}
+.sk-row:hover .sk-doc-mark,
+.sk-code:focus .sk-doc-mark,
+.sk-doc-scope .sk-doc-mark {
+  color: var(--sk-blue);
+  border-color: color-mix(in srgb, var(--sk-blue) 60%, transparent);
+}
+.sk-call.sk-has-doc:not(.sk-linked) { cursor: help; }
+.sk-has-doc:focus { outline: none; }
+.sk-has-doc:focus-visible {
+  outline: 1.5px solid color-mix(in srgb, var(--sk-blue) 60%, transparent);
+  outline-offset: 1px;
+  border-radius: 3px;
+}
+/* The rows a block header's explanation covers, while it shows. */
+.sk-row.sk-doc-scope { background: var(--sk-row-hover); }
+
+/* The popover enhance() shows. It sits on the page's body, outside the sketch, so it sets its own font. */
+.sk-doc-pop {
+  position: fixed;
+  z-index: 1000;
+  max-width: min(34rem, calc(100vw - 16px));
+  padding: 0.45rem 0.7rem;
+  border: 1px solid var(--sk-border);
+  border-radius: 6px;
+  background: var(--sk-bg);
+  color: var(--sk-fg);
+  box-shadow: 0 6px 20px rgb(0 0 0 / 0.16);
+  font: 13px/1.45 system-ui, -apple-system, 'Segoe UI', sans-serif;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+  text-align: left;
+  pointer-events: none;
+}
+.sk-doc-pop[hidden] { display: none; }
+.sk-doc-info {
+  margin-top: 0.35rem;
+  color: var(--sk-muted);
+  font-size: 0.9em;
+}
+
 /* Inline code made only of tags, as rendered by markdown-it-skeudo.
    The doubled class outranks host rules such as `.markdown-body code`. */
 code.sk-inline.sk-inline {

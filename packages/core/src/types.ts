@@ -107,7 +107,9 @@ export interface SketchLine {
   src?: ResolvedSrc;
   /** Own or inherited change, in a sketch of a commit or pull request. */
   change?: LineChange;
-  /** True when the line holds nothing but `::src` and `::repo` tags, so a renderer drops it. */
+  /** Explanation of the line, from its `::doc[text]` tags, one per line of text. On a block header it explains the block. */
+  doc?: string;
+  /** True when the line holds nothing but `::src`, `::repo` and `::doc` tags, so a renderer drops it. */
   hidden: boolean;
 }
 
@@ -145,6 +147,8 @@ export interface Sketch {
   variables: Record<string, Variable>;
   /** Call name → definition location, from `::src:name[location]` tags. */
   callSources: Record<string, ResolvedSrc>;
+  /** Call name → what the call does, from `::doc:name[text]` tags, one per line of text. */
+  callDocs: Record<string, string>;
   diagnostics: Diagnostic[];
 }
 

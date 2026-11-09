@@ -1,0 +1,174 @@
+{
+  "signature": { "name": "settle_invoice", "params": ["invoice_id"], "line": 1 },
+  "indentUnit": 4,
+  "callDocs": {
+    "apply_credits": "spends the oldest credits first and returns what is left to pay",
+    "add_late_fee": "2% of the amount due, at most once per invoice"
+  },
+  "variables": {
+    "invoice_id": { "origin": "param", "line": 1 },
+    "invoice": { "origin": "binding", "line": 2 },
+    "remaining": { "origin": "binding", "line": 5 }
+  },
+  "lines": [
+    {
+      "number": 1,
+      "depth": 0,
+      "text": "settle_invoice(invoice_id):",
+      "signature": true,
+      "header": true,
+      "segments": [
+        { "type": "fn", "text": "settle_invoice" },
+        { "type": "text", "text": "(" },
+        { "type": "var", "text": "invoice_id", "name": "invoice_id", "definition": true },
+        { "type": "text", "text": "):" }
+      ]
+    },
+    {
+      "number": 2,
+      "depth": 1,
+      "text": "invoice = load_invoice(invoice_id)        ::read:postgres.invoices[lookup by key]",
+      "parent": 1,
+      "binding": "invoice",
+      "tags": [
+        {
+          "raw": "::read:postgres.invoices[lookup by key]",
+          "kind": "read",
+          "value": "postgres.invoices",
+          "note": { "text": "lookup by key" },
+          "trailing": true
+        }
+      ],
+      "segments": [
+        { "type": "var", "text": "invoice", "name": "invoice", "definition": true },
+        { "type": "text", "text": " = " },
+        { "type": "call", "text": "load_invoice", "name": "load_invoice" },
+        { "type": "text", "text": "(" },
+        { "type": "var", "text": "invoice_id", "name": "invoice_id" },
+        { "type": "text", "text": ")" }
+      ]
+    },
+    {
+      "number": 3,
+      "depth": 1,
+      "text": "if invoice is past due:                   ::doc[past the due date plus the account's grace period]",
+      "header": true,
+      "parent": 1,
+      "doc": "past the due date plus the account's grace period",
+      "tags": [
+        {
+          "raw": "::doc[past the due date plus the account's grace period]",
+          "kind": "doc",
+          "note": { "text": "past the due date plus the account's grace period" },
+          "trailing": true
+        }
+      ],
+      "segments": [
+        { "type": "word", "text": "if" },
+        { "type": "text", "text": " " },
+        { "type": "var", "text": "invoice", "name": "invoice" },
+        { "type": "text", "text": " is past due:" }
+      ]
+    },
+    {
+      "number": 4,
+      "depth": 2,
+      "text": "add_late_fee(invoice)                 ::write:postgres.invoices",
+      "parent": 3,
+      "tags": [
+        {
+          "raw": "::write:postgres.invoices",
+          "kind": "write",
+          "value": "postgres.invoices",
+          "trailing": true
+        }
+      ],
+      "segments": [
+        { "type": "call", "text": "add_late_fee", "name": "add_late_fee" },
+        { "type": "text", "text": "(" },
+        { "type": "var", "text": "invoice", "name": "invoice" },
+        { "type": "text", "text": ")" }
+      ]
+    },
+    {
+      "number": 5,
+      "depth": 1,
+      "text": "remaining = apply_credits(invoice)        ::write:postgres.credits",
+      "parent": 1,
+      "binding": "remaining",
+      "tags": [
+        {
+          "raw": "::write:postgres.credits",
+          "kind": "write",
+          "value": "postgres.credits",
+          "trailing": true
+        }
+      ],
+      "segments": [
+        { "type": "var", "text": "remaining", "name": "remaining", "definition": true },
+        { "type": "text", "text": " = " },
+        { "type": "call", "text": "apply_credits", "name": "apply_credits" },
+        { "type": "text", "text": "(" },
+        { "type": "var", "text": "invoice", "name": "invoice" },
+        { "type": "text", "text": ")" }
+      ]
+    },
+    {
+      "number": 6,
+      "depth": 1,
+      "text": "charge(invoice.card, remaining)           ::write:stripe",
+      "parent": 1,
+      "tags": [{ "raw": "::write:stripe", "kind": "write", "value": "stripe", "trailing": true }],
+      "segments": [
+        { "type": "call", "text": "charge", "name": "charge" },
+        { "type": "text", "text": "(" },
+        { "type": "var", "text": "invoice", "name": "invoice" },
+        { "type": "text", "text": ".card, " },
+        { "type": "var", "text": "remaining", "name": "remaining" },
+        { "type": "text", "text": ")" }
+      ]
+    },
+    {
+      "number": 7,
+      "depth": 1,
+      "text": "::doc:apply_credits[spends the oldest credits first and returns what is left to pay]",
+      "hidden": true,
+      "parent": 1,
+      "tags": [
+        {
+          "raw": "::doc:apply_credits[spends the oldest credits first and returns what is left to pay]",
+          "kind": "doc",
+          "value": "apply_credits",
+          "note": { "text": "spends the oldest credits first and returns what is left to pay" }
+        }
+      ],
+      "segments": [
+        {
+          "type": "tag",
+          "raw": "::doc:apply_credits[spends the oldest credits first and returns what is left to pay]"
+        }
+      ]
+    },
+    {
+      "number": 8,
+      "depth": 1,
+      "text": "::doc:add_late_fee[2% of the amount due, at most once per invoice]",
+      "hidden": true,
+      "parent": 1,
+      "tags": [
+        {
+          "raw": "::doc:add_late_fee[2% of the amount due, at most once per invoice]",
+          "kind": "doc",
+          "value": "add_late_fee",
+          "note": { "text": "2% of the amount due, at most once per invoice" }
+        }
+      ],
+      "segments": [
+        {
+          "type": "tag",
+          "raw": "::doc:add_late_fee[2% of the amount due, at most once per invoice]"
+        }
+      ]
+    }
+  ]
+}

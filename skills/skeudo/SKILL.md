@@ -34,6 +34,7 @@ Sketches go in fenced code blocks tagged `skeudo`. Lines nest by indentation, 4 
 | `::unsure[note]` | You aren't sure the line is accurate. |
 | `::src[location]`, `::src:call[location]` | Links a line to its source, or a call to its definition. |
 | `::repo[url]` | Names the repository and commit that `::src` paths and lines refer to. See step 5. |
+| `::doc[…]`, `::doc:call[…]` | Explains a line, or a call whose name doesn't say what it does. Renderers show it on hover. See step 4. |
 | `::new`, `::changed[was …]`, `::removed` | What a commit or pull request did to the line. See step 6. |
 | `::anything[note]` | Any other kind is valid and renders as a neutral pill. |
 
@@ -58,6 +59,8 @@ Sketches go in fenced code blocks tagged `skeudo`. Lines nest by indentation, 4 
    - One line per meaningful step, in prose or as real calls.
    - Collapse internal detail into prose, but give every effect its own tagged line, in execution order.
    - Name the failures the function raises or handles with `::fail`, inside an `if …:` block for their condition. Failures from callees that just propagate need no tag.
+   - Explain what a name doesn't say. When a reviewer couldn't guess what a call does from its name, add `::doc:name[…]` at the end of the sketch, before the `::src` tags, as in `::doc:hydrate[loads the user's teams and settings onto the row]`. Write the name as the call is written: `::doc:cache.set[…]` for `cache.set(…)`. When a line's code is hard to follow, put `::doc[…]` at the end of it, before its `::src`; on a block header it explains the block. Keep it to a phrase, and skip calls and lines that already say what they do.
+   - An explanation stays hidden until a reader hovers over it, so it never holds an effect or a danger. The call's line still carries its effect tags, and a danger is still `[!…]` or `::danger[…]`.
 5. **Link the source.**
    - Put `::src[path:start-end]` on the signature, with the path relative to the repo root.
    - Put `::src[start-end]` on blocks and key lines. A location without a path uses the signature's file.
@@ -107,6 +110,7 @@ Each item in the last section should be something the sketches make visible: an 
 - In a sketch of a change, every added, altered or removed behavior carries a change tag, and every `::changed` has a note.
 - Indentation is 4 spaces per level; calls close on the same line; notes contain no `]`.
 - Calls are real names a reviewer can open; everything else is prose.
+- Calls whose names don't say what they do have a `::doc:name[…]`, and no effect or danger appears only in a `::doc`.
 - Each sketch with `::src` links ends with `::repo`, naming the repository and the commit sketched.
 
 ## Example

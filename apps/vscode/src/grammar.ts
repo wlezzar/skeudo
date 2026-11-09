@@ -59,6 +59,8 @@ const FAMILIES: Record<string, Family> = {
   removed: { kinds: ['removed'], head: 'markup.deleted.removed.skeudo markup.strikethrough.removed.skeudo' },
   // Renderers hide ::src and ::repo tags, so they're muted, with the location or URL underlined like a link.
   src: { kinds: ['src', 'repo'], tag: 'comment.src.skeudo', note: 'location' },
+  // Renderers show ::doc on hover, so in the editor it reads as a comment.
+  doc: { kinds: ['doc'], tag: 'comment.doc.skeudo' },
   other: { head: 'entity.name.label.$kind.skeudo' },
 };
 

@@ -1,0 +1,10 @@
+settle(invoice):                           ::doc[runs nightly for every open invoice]
+    if invoice is past due:                ::doc[past the due date plus the grace period]
+        add_fee(invoice)                   ::write:postgres.invoices
+    ledger.post(invoice)                   ::write:ledger ::doc[one entry per line item] ::doc[in the invoice's currency]
+    left = apply_credits(invoice)          ::write:postgres.credits
+    charge(left) ::doc:charge[retried by the job queue] ::write:stripe
+    ::doc:apply_credits[spends the oldest credits first]
+    ::doc:apply_credits[returns what is left to pay]
+    ::doc:ledger.post[idempotent per invoice]
+    ::doc:add_fee[2% of the amount due] ::src:add_fee[billing/fees.py:10]

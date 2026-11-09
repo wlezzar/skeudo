@@ -81,7 +81,7 @@ export interface Review {
   diagnostics: Diagnostic[];
 }
 
-const KNOWN = new Set(['read', 'write', 'fail', 'src', 'repo', 'danger', 'unsure', 'untrusted', 'secret', ...CHANGE_KINDS]);
+const KNOWN = new Set(['read', 'write', 'fail', 'src', 'repo', 'doc', 'danger', 'unsure', 'untrusted', 'secret', ...CHANGE_KINDS]);
 
 /** The line's text without its tags. */
 export function lineContext(line: SketchLine): string {

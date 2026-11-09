@@ -58,6 +58,7 @@ Every marker is a tag: `::kind`, optionally followed by `:value` and an attached
 | `::unsure[note]` | The author isn't sure the line is accurate. |
 | `::src[location]` | Links the line to its source. With a call name as value, `::src:name[location]` links that call to its definition. |
 | `::repo[url]` | Names the repository that `::src` paths are relative to, and the revision they refer to. See Source links. |
+| `::doc[text]` | Explains the line it sits on to a reader who can't tell what it does. With a call name as value, `::doc:name[text]` explains that call. See Explanations. |
 | `::new` | The change being sketched adds this line. See Changes. |
 | `::changed[how]` | The change being sketched alters what this line does. See Changes. |
 | `::removed[what]` | The change being sketched takes this behavior away. See Changes. |
@@ -129,6 +130,29 @@ The revision follows the last `@` in the URL's path, so the user in `git+ssh://g
 Two remotes name the same repository when their host and path match, ignoring the protocol, the user, the port, letter case and a trailing `.git`. So `git+ssh://git@github.com/org/shop.git` and `git+https://github.com/org/shop` are the same repository, and a renderer can find a local copy however it was cloned.
 
 A sketch without `::repo` leaves the root to the renderer, such as the editor's workspace folder. A base the user gives for one rendering, such as a command-line option, takes precedence over `::repo`.
+
+### Explanations
+
+`::doc` explains something a reader can't tell from the sketch alone. Its note holds the explanation, in free words.
+
+With a call name as its value, `::doc:name[text]` explains what that call does. It applies to every call of that name in the sketch, wherever the tag sits, and names the call as the sketch writes it, as in `::doc:cache.set[…]`. By convention these tags go at the end of the sketch, before the `::src` tags.
+
+Without a value, `::doc[text]` explains the line it sits on. On a block header, it explains the whole block. By convention it follows the line's other tags, before `::src`.
+
+```skeudo
+settle_invoice(invoice_id):
+    invoice = load_invoice(invoice_id)        ::read:postgres.invoices[lookup by key]
+    if invoice is past due:                   ::doc[past the due date plus the account's grace period]
+        add_late_fee(invoice)                 ::write:postgres.invoices
+    remaining = apply_credits(invoice)        ::write:postgres.credits
+    charge(invoice.card, remaining)           ::write:stripe
+    ::doc:apply_credits[spends the oldest credits first and returns what is left to pay]
+    ::doc:add_late_fee[2% of the amount due, at most once per invoice]
+```
+
+Renderers hide `::doc` tags and show the explanation when the reader hovers over or focuses the call or the line. Unlike `::src`, they stay in plain text, where the `::doc:name` lines at the end read like a glossary.
+
+An explanation never carries an effect or a danger. A reviewer may never open it, so whatever the code reads or changes is still tagged on the line where it happens, and a danger is still a `[!…]` note or a `::danger` tag. `::doc:add_late_fee[also emails the customer]` doesn't replace `::write:sendgrid` on the call's line.
 
 ## Variables and labels
 
@@ -220,6 +244,7 @@ A sketch always renders. Problems are warnings attached to their line, never err
 - `::read` or `::write` has no system, `::fail` has no name, a label has no variable, or `::changed` has no note.
 - `::src` has no location, or its location has no file and the signature names none.
 - `::repo` has no URL, or a sketch has more than one `::repo`. The first one applies.
+- `::doc` has no note, has no value on a line with nothing else to explain, or names a call the sketch never makes.
 
 ## Authoring rules
 
@@ -231,6 +256,7 @@ These rules apply to anyone writing a sketch, human or AI. The first two carry t
 | Keep effects separate and in order | One tag per effect, in execution order. Never fold several effects into untagged words like "undo both". |
 | Name the failures the function raises or handles | Each one is `::fail:Name`, inside an `if …:` block for its condition. Failures from callees that simply propagate need no tag. A swallowed failure is noted on its effect, as in `::write:sendgrid[failure ignored]`. |
 | Anchor what a reviewer may open | Use real function names for calls worth jumping to. Write everything else as prose. When the source is known, link lines and calls with `::src`, and name the repository and revision with `::repo`. |
+| Explain what a name doesn't say | When a call's name doesn't say what it does, explain it with `::doc:name[…]`. When a line's words don't, use `::doc[…]`. Don't explain what the name already says, and never put an effect or a danger only in an explanation. |
 | Use prose for intent | Invariants, purposes and summaries go in plain words, such as "only one refresh at a time". |
 | Flag doubt instead of guessing | Add `~` or `::unsure[…]` when a claim isn't verified. When a detail like an access pattern is a guess, say "probably" in its note. |
 | Flag dangers | Start a note with `!` where a reviewer should stop, as in `::write:stripe[!no idempotency key]` or `::read:postgres.orders[!full scan]`. Use `::danger[…]` for a danger that belongs to the whole line. |
@@ -261,8 +287,9 @@ A highlighter works only from tags, the shape of calls and bindings, and positio
 | Binding or parameter | Bold; colored across all its uses on hover or click |
 | Labeled variable | Persistent underline in the label's color: wavy pink for untrusted, solid purple for secret |
 | Other kinds | Neutral pill, unless the renderer assigns a color |
-| `::src` tag | Hidden; the line links to its source, and calls link to their definitions. A line made only of `::src` and `::repo` tags is hidden entirely. The file named on the signature appears at the end of that line. |
+| `::src` tag | Hidden; the line links to its source, and calls link to their definitions. A line made only of `::src`, `::repo` and `::doc` tags is hidden entirely. The file named on the signature appears at the end of that line. |
 | `::repo` tag | Hidden. Links open a local copy of the repository when the renderer finds one, with a warning when the file has changed since the sketch's revision. Otherwise they go to the file on the repository's host at the sketch's revision, for hosts the renderer knows how to link to. |
+| `::doc` tag | Hidden. A line with one gets a small marker after its code. Hovering over or focusing the line shows its explanation, and on a block header the block is highlighted with it. Hovering over or focusing a call shows the explanation its `::doc:name` gives, with the call's source location under it. |
 | Trailing tags | Aligned into a right-hand tag column, with their notes. When a line's tags don't fit on one line of the column, a renderer may move them under the line. A note too long for the space wraps rather than being cut off. |
 | `::new` tag | Green pill. A green bar in the gutter beside the line, and beside every line of the block it covers |
 | `::changed` tag | Blue pill with its note. A blue bar in the gutter beside the line |
@@ -393,6 +420,7 @@ These changes make the format consistent with what was sketched in discussion, a
 | Changes | Not designed; sketches of commits used provisional `::new`, `::changed` and `::removed` tags | The three tags are defined. New and removed cover their block, and removed effects stay visible but don't count | Commits and pull requests are what gets sketched most, and tags need no grammar change |
 | Format name | "Sketch" was a working name, with `` ```sketch `` fences and `.sketch` files | Skeudo, with `` ```skeudo `` fences (`` ```sketch `` still accepted) and `.skeudo` files | `.sketch` belongs to the Sketch design app, and "sketch" alone is a common word other tools also use |
 | Source repository | `::src` paths had no stated root, so links resolved against wherever the sketch was opened, and the revision was left to the tool that generated the sketch | `::repo[git+<remote>@<revision>]` names the repository and revision; `::src` paths are relative to its root | A sketch saved or read outside its repository, or read after the code moved on, still links to the right lines. The URL form is the one pip uses for git dependencies |
+| Explanations | A free kind such as `::explain[…]` showed its text inline, as a neutral pill | `::doc[…]` explains a line or block, and `::doc:name[…]` a call. Renderers show them on hover | A reviewer can look up a call they don't recognize without the sketch getting longer, and the tag needs no grammar change |
 
 | Open question | Current default |
 | --- | --- |

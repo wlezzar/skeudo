@@ -33,6 +33,8 @@ const DEFAULT_LABEL_KINDS = ['untrusted', 'secret'];
 export const FENCE_LANGS: readonly string[] = ['skeudo', 'sketch'];
 /** Tag kinds that mark what a commit or pull request did to a line. */
 export const CHANGE_KINDS: ReadonlySet<string> = new Set<ChangeKind>(['new', 'changed', 'removed']);
+/** Tag kinds that renderers hide: `::src` and `::repo` become links, and `::doc` shows on hover. */
+export const HIDDEN_KINDS: ReadonlySet<string> = new Set(['src', 'repo', 'doc']);
 
 /**
  * Finds every tag in a line. A tag starts at the beginning of the text or after whitespace,
@@ -294,7 +296,10 @@ export function parse(source: string, options: ParseOptions = {}): Sketch {
     }
   }
 
-  // --- Tags, bindings, hidden lines -------------------------------------------
+  // --- Tags, bindings, hidden lines, explanations -------------------------------
+  const callDocs: Record<string, string> = Object.create(null);
+  /** Line of the first `::doc` for each call name, for the warning when the sketch never makes that call. */
+  const docLines: Record<string, number> = Object.create(null);
   for (const line of body) {
     line.tags = scanTags(line.text, (msg) => warn(line.number, msg));
     const { tags, text } = line;
@@ -316,12 +321,27 @@ export function parse(source: string, options: ParseOptions = {}): Sketch {
       if (m) line.binding = m[1];
     }
 
-    const linkTags = tags.filter((t) => t.kind === 'src' || t.kind === 'repo');
-    if (linkTags.length && !line.header) {
-      let rest = text;
-      for (const t of [...linkTags].reverse()) rest = rest.slice(0, t.start) + rest.slice(t.end);
-      line.hidden = rest.trim() === '';
+    // A line made only of tags that renderers hide has nothing left to show.
+    const hiddenTags = tags.filter((t) => HIDDEN_KINDS.has(t.kind));
+    let rest = text;
+    for (const t of [...hiddenTags].reverse()) rest = rest.slice(0, t.start) + rest.slice(t.end);
+    line.hidden = hiddenTags.length > 0 && rest.trim() === '' && !line.header;
+
+    const docs: string[] = [];
+    for (const t of tags) {
+      if (t.kind !== 'doc') continue;
+      if (!t.note?.text) {
+        warn(line.number, `::doc needs an explanation in its note, as in ::doc[what the line does].`);
+      } else if (t.value) {
+        callDocs[t.value] = callDocs[t.value] ? `${callDocs[t.value]}\n${t.note.text}` : t.note.text;
+        docLines[t.value] ??= line.number;
+      } else if (line.hidden) {
+        warn(line.number, `This ::doc has no line to explain. Put it on the line it explains, or name a call, as in ::doc:name[…].`);
+      } else {
+        docs.push(t.note.text);
+      }
     }
+    if (docs.length) line.doc = docs.join('\n');
 
     for (const t of tags) {
       if ((t.kind === 'read' || t.kind === 'write') && !t.value) {
@@ -414,7 +434,14 @@ export function parse(source: string, options: ParseOptions = {}): Sketch {
   const varNames = new Set(Object.keys(variables));
   for (const line of body) line.segments = tokenize(line, varNames);
 
-  return { source, signature, file, repo, indentUnit, lines, variables, callSources, diagnostics };
+  const called = new Set(body.flatMap((l) => l.segments.flatMap((s) => (s.type === 'call' ? [s.name] : []))));
+  for (const [name, line] of Object.entries(docLines)) {
+    if (!called.has(name)) {
+      warn(line, `The sketch never calls ${name}, so this ::doc explains nothing. Write the name as the call is written, as in ::doc:cache.set[…].`);
+    }
+  }
+
+  return { source, signature, file, repo, indentUnit, lines, variables, callSources, callDocs, diagnostics };
 }
 
 /** Splits the content part of a line (everything before the tag column) into segments. */

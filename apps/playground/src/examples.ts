@@ -69,6 +69,16 @@ const getProfile = `get_profile(user_id):                    ::src[app/profile.p
     ::src:cache.set[lib/cache.py:31]
 `;
 
+const settleInvoice = `settle_invoice(invoice_id):
+    invoice = load_invoice(invoice_id)        ::read:postgres.invoices[lookup by key]
+    if invoice is past due:                   ::doc[past the due date plus the account's grace period]
+        add_late_fee(invoice)                 ::write:postgres.invoices
+    remaining = apply_credits(invoice)        ::write:postgres.credits
+    charge(invoice.card, remaining)           ::write:stripe
+    ::doc:apply_credits[spends the oldest credits first and returns what is left to pay]
+    ::doc:add_late_fee[2% of the amount due, at most once per invoice]
+`;
+
 const signup = `signup(request):
     body = request.json()                 ::untrusted:body
     if body.email is malformed:
@@ -176,6 +186,7 @@ Suggested shape:
 export const examples: Example[] = [
   { id: 'refresh-token', title: 'Every marker (refresh_token)', source: refreshToken },
   { id: 'get-profile', title: 'Source links (get_profile)', source: getProfile },
+  { id: 'settle-invoice', title: 'Explanations on hover (settle_invoice)', source: settleInvoice },
   { id: 'signup', title: 'Labels and conditional writes (signup)', source: signup },
   { id: 'search-orders', title: 'Access patterns (search_orders)', source: searchOrders },
   { id: 'book-trip', title: 'Failure blocks (book_trip)', source: bookTrip },

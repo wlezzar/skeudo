@@ -1,0 +1,131 @@
+{
+  "signature": { "name": "f", "line": 1 },
+  "indentUnit": 4,
+  "callDocs": { "missing": "no call by this name", "x.helper": "the call is written helper" },
+  "diagnostics": [
+    {
+      "line": 3,
+      "severity": "warning",
+      "message": "::doc needs an explanation in its note, as in ::doc[what the line does]."
+    },
+    {
+      "line": 4,
+      "severity": "warning",
+      "message": "::doc needs an explanation in its note, as in ::doc[what the line does]."
+    },
+    {
+      "line": 5,
+      "severity": "warning",
+      "message": "::doc needs an explanation in its note, as in ::doc[what the line does]."
+    },
+    {
+      "line": 6,
+      "severity": "warning",
+      "message": "This ::doc has no line to explain. Put it on the line it explains, or name a call, as in ::doc:name[…]."
+    },
+    {
+      "line": 7,
+      "severity": "warning",
+      "message": "The sketch never calls missing, so this ::doc explains nothing. Write the name as the call is written, as in ::doc:cache.set[…]."
+    },
+    {
+      "line": 8,
+      "severity": "warning",
+      "message": "The sketch never calls x.helper, so this ::doc explains nothing. Write the name as the call is written, as in ::doc:cache.set[…]."
+    }
+  ],
+  "lines": [
+    {
+      "number": 1,
+      "depth": 0,
+      "text": "f():",
+      "signature": true,
+      "header": true,
+      "segments": [{ "type": "fn", "text": "f" }, { "type": "text", "text": "():" }]
+    },
+    {
+      "number": 2,
+      "depth": 1,
+      "text": "helper(x)",
+      "parent": 1,
+      "segments": [
+        { "type": "call", "text": "helper", "name": "helper" },
+        { "type": "text", "text": "(x)" }
+      ]
+    },
+    {
+      "number": 3,
+      "depth": 1,
+      "text": "::doc",
+      "hidden": true,
+      "parent": 1,
+      "tags": [{ "raw": "::doc", "kind": "doc" }],
+      "segments": [{ "type": "tag", "raw": "::doc" }]
+    },
+    {
+      "number": 4,
+      "depth": 1,
+      "text": "::doc[]",
+      "hidden": true,
+      "parent": 1,
+      "tags": [{ "raw": "::doc[]", "kind": "doc", "note": { "text": "" } }],
+      "segments": [{ "type": "tag", "raw": "::doc[]" }]
+    },
+    {
+      "number": 5,
+      "depth": 1,
+      "text": "::doc:helper",
+      "hidden": true,
+      "parent": 1,
+      "tags": [{ "raw": "::doc:helper", "kind": "doc", "value": "helper" }],
+      "segments": [{ "type": "tag", "raw": "::doc:helper" }]
+    },
+    {
+      "number": 6,
+      "depth": 1,
+      "text": "::doc[a line of its own]",
+      "hidden": true,
+      "parent": 1,
+      "tags": [
+        {
+          "raw": "::doc[a line of its own]",
+          "kind": "doc",
+          "note": { "text": "a line of its own" }
+        }
+      ],
+      "segments": [{ "type": "tag", "raw": "::doc[a line of its own]" }]
+    },
+    {
+      "number": 7,
+      "depth": 1,
+      "text": "::doc:missing[no call by this name]",
+      "hidden": true,
+      "parent": 1,
+      "tags": [
+        {
+          "raw": "::doc:missing[no call by this name]",
+          "kind": "doc",
+          "value": "missing",
+          "note": { "text": "no call by this name" }
+        }
+      ],
+      "segments": [{ "type": "tag", "raw": "::doc:missing[no call by this name]" }]
+    },
+    {
+      "number": 8,
+      "depth": 1,
+      "text": "::doc:x.helper[the call is written helper]",
+      "hidden": true,
+      "parent": 1,
+      "tags": [
+        {
+          "raw": "::doc:x.helper[the call is written helper]",
+          "kind": "doc",
+          "value": "x.helper",
+          "note": { "text": "the call is written helper" }
+        }
+      ],
+      "segments": [{ "type": "tag", "raw": "::doc:x.helper[the call is written helper]" }]
+    }
+  ]
+}

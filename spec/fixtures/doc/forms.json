@@ -1,0 +1,228 @@
+{
+  "signature": { "name": "settle", "params": ["invoice"], "line": 1 },
+  "indentUnit": 4,
+  "callSources": { "add_fee": { "path": "billing/fees.py", "start": 10, "end": 10 } },
+  "callDocs": {
+    "charge": "retried by the job queue",
+    "apply_credits": "spends the oldest credits first\nreturns what is left to pay",
+    "ledger.post": "idempotent per invoice",
+    "add_fee": "2% of the amount due"
+  },
+  "variables": {
+    "invoice": { "origin": "param", "line": 1 },
+    "left": { "origin": "binding", "line": 5 }
+  },
+  "lines": [
+    {
+      "number": 1,
+      "depth": 0,
+      "text": "settle(invoice):                           ::doc[runs nightly for every open invoice]",
+      "signature": true,
+      "header": true,
+      "doc": "runs nightly for every open invoice",
+      "tags": [
+        {
+          "raw": "::doc[runs nightly for every open invoice]",
+          "kind": "doc",
+          "note": { "text": "runs nightly for every open invoice" },
+          "trailing": true
+        }
+      ],
+      "segments": [
+        { "type": "fn", "text": "settle" },
+        { "type": "text", "text": "(" },
+        { "type": "var", "text": "invoice", "name": "invoice", "definition": true },
+        { "type": "text", "text": "):" }
+      ]
+    },
+    {
+      "number": 2,
+      "depth": 1,
+      "text": "if invoice is past due:                ::doc[past the due date plus the grace period]",
+      "header": true,
+      "parent": 1,
+      "doc": "past the due date plus the grace period",
+      "tags": [
+        {
+          "raw": "::doc[past the due date plus the grace period]",
+          "kind": "doc",
+          "note": { "text": "past the due date plus the grace period" },
+          "trailing": true
+        }
+      ],
+      "segments": [
+        { "type": "word", "text": "if" },
+        { "type": "text", "text": " " },
+        { "type": "var", "text": "invoice", "name": "invoice" },
+        { "type": "text", "text": " is past due:" }
+      ]
+    },
+    {
+      "number": 3,
+      "depth": 2,
+      "text": "add_fee(invoice)                   ::write:postgres.invoices",
+      "parent": 2,
+      "tags": [
+        {
+          "raw": "::write:postgres.invoices",
+          "kind": "write",
+          "value": "postgres.invoices",
+          "trailing": true
+        }
+      ],
+      "segments": [
+        { "type": "call", "text": "add_fee", "name": "add_fee" },
+        { "type": "text", "text": "(" },
+        { "type": "var", "text": "invoice", "name": "invoice" },
+        { "type": "text", "text": ")" }
+      ]
+    },
+    {
+      "number": 4,
+      "depth": 1,
+      "text": "ledger.post(invoice)                   ::write:ledger ::doc[one entry per line item] ::doc[in the invoice's currency]",
+      "parent": 1,
+      "doc": "one entry per line item\nin the invoice's currency",
+      "tags": [
+        { "raw": "::write:ledger", "kind": "write", "value": "ledger", "trailing": true },
+        {
+          "raw": "::doc[one entry per line item]",
+          "kind": "doc",
+          "note": { "text": "one entry per line item" },
+          "trailing": true
+        },
+        {
+          "raw": "::doc[in the invoice's currency]",
+          "kind": "doc",
+          "note": { "text": "in the invoice's currency" },
+          "trailing": true
+        }
+      ],
+      "segments": [
+        { "type": "call", "text": "ledger.post", "name": "ledger.post" },
+        { "type": "text", "text": "(" },
+        { "type": "var", "text": "invoice", "name": "invoice" },
+        { "type": "text", "text": ")" }
+      ]
+    },
+    {
+      "number": 5,
+      "depth": 1,
+      "text": "left = apply_credits(invoice)          ::write:postgres.credits",
+      "parent": 1,
+      "binding": "left",
+      "tags": [
+        {
+          "raw": "::write:postgres.credits",
+          "kind": "write",
+          "value": "postgres.credits",
+          "trailing": true
+        }
+      ],
+      "segments": [
+        { "type": "var", "text": "left", "name": "left", "definition": true },
+        { "type": "text", "text": " = " },
+        { "type": "call", "text": "apply_credits", "name": "apply_credits" },
+        { "type": "text", "text": "(" },
+        { "type": "var", "text": "invoice", "name": "invoice" },
+        { "type": "text", "text": ")" }
+      ]
+    },
+    {
+      "number": 6,
+      "depth": 1,
+      "text": "charge(left) ::doc:charge[retried by the job queue] ::write:stripe",
+      "parent": 1,
+      "tags": [
+        {
+          "raw": "::doc:charge[retried by the job queue]",
+          "kind": "doc",
+          "value": "charge",
+          "note": { "text": "retried by the job queue" },
+          "trailing": true
+        },
+        { "raw": "::write:stripe", "kind": "write", "value": "stripe", "trailing": true }
+      ],
+      "segments": [
+        { "type": "call", "text": "charge", "name": "charge" },
+        { "type": "text", "text": "(" },
+        { "type": "var", "text": "left", "name": "left" },
+        { "type": "text", "text": ")" }
+      ]
+    },
+    {
+      "number": 7,
+      "depth": 1,
+      "text": "::doc:apply_credits[spends the oldest credits first]",
+      "hidden": true,
+      "parent": 1,
+      "tags": [
+        {
+          "raw": "::doc:apply_credits[spends the oldest credits first]",
+          "kind": "doc",
+          "value": "apply_credits",
+          "note": { "text": "spends the oldest credits first" }
+        }
+      ],
+      "segments": [{ "type": "tag", "raw": "::doc:apply_credits[spends the oldest credits first]" }]
+    },
+    {
+      "number": 8,
+      "depth": 1,
+      "text": "::doc:apply_credits[returns what is left to pay]",
+      "hidden": true,
+      "parent": 1,
+      "tags": [
+        {
+          "raw": "::doc:apply_credits[returns what is left to pay]",
+          "kind": "doc",
+          "value": "apply_credits",
+          "note": { "text": "returns what is left to pay" }
+        }
+      ],
+      "segments": [{ "type": "tag", "raw": "::doc:apply_credits[returns what is left to pay]" }]
+    },
+    {
+      "number": 9,
+      "depth": 1,
+      "text": "::doc:ledger.post[idempotent per invoice]",
+      "hidden": true,
+      "parent": 1,
+      "tags": [
+        {
+          "raw": "::doc:ledger.post[idempotent per invoice]",
+          "kind": "doc",
+          "value": "ledger.post",
+          "note": { "text": "idempotent per invoice" }
+        }
+      ],
+      "segments": [{ "type": "tag", "raw": "::doc:ledger.post[idempotent per invoice]" }]
+    },
+    {
+      "number": 10,
+      "depth": 1,
+      "text": "::doc:add_fee[2% of the amount due] ::src:add_fee[billing/fees.py:10]",
+      "hidden": true,
+      "parent": 1,
+      "tags": [
+        {
+          "raw": "::doc:add_fee[2% of the amount due]",
+          "kind": "doc",
+          "value": "add_fee",
+          "note": { "text": "2% of the amount due" }
+        },
+        {
+          "raw": "::src:add_fee[billing/fees.py:10]",
+          "kind": "src",
+          "value": "add_fee",
+          "note": { "text": "billing/fees.py:10" }
+        }
+      ],
+      "segments": [
+        { "type": "tag", "raw": "::doc:add_fee[2% of the amount due]" },
+        { "type": "text", "text": " " },
+        { "type": "tag", "raw": "::src:add_fee[billing/fees.py:10]" }
+      ]
+    }
+  ]
+}

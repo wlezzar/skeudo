@@ -1,0 +1,8 @@
+settle_invoice(invoice_id):
+    invoice = load_invoice(invoice_id)        ::read:postgres.invoices[lookup by key]
+    if invoice is past due:                   ::doc[past the due date plus the account's grace period]
+        add_late_fee(invoice)                 ::write:postgres.invoices
+    remaining = apply_credits(invoice)        ::write:postgres.credits
+    charge(invoice.card, remaining)           ::write:stripe
+    ::doc:apply_credits[spends the oldest credits first and returns what is left to pay]
+    ::doc:add_late_fee[2% of the amount due, at most once per invoice]

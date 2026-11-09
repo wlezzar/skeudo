@@ -1,6 +1,7 @@
 import {
   CHANGE_KINDS,
   formatLocation,
+  HIDDEN_KINDS,
   parse,
   type ParseOptions,
   type Repo,
@@ -33,9 +34,9 @@ export interface HtmlOptions extends ParseOptions {
   kindColors?: Record<string, string>;
 }
 
-const KNOWN_KINDS = new Set(['read', 'write', 'fail', 'src', 'repo', 'danger', 'unsure', 'untrusted', 'secret', ...CHANGE_KINDS]);
-/** Tags a renderer hides, turning them into links. */
-const isLinkTag = (tag: Tag) => tag.kind === 'src' || tag.kind === 'repo';
+const KNOWN_KINDS = new Set(['read', 'write', 'fail', 'src', 'repo', 'doc', 'danger', 'unsure', 'untrusted', 'secret', ...CHANGE_KINDS]);
+/** Tags a renderer hides: `::src` and `::repo` become links, and `::doc` shows on hover. */
+const isHiddenTag = (tag: Tag) => HIDDEN_KINDS.has(tag.kind);
 const DEFAULT_LABEL_KINDS = ['untrusted', 'secret'];
 
 const ESC: Record<string, string> = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
@@ -59,7 +60,9 @@ const VOID_ELEMENTS = new Set(['wbr']);
 
 function attributeName(property: string): string {
   if (property === 'className') return 'class';
-  if (/^data[A-Z]/.test(property)) return `data${property.slice(4).replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`)}`;
+  if (property === 'tabIndex') return 'tabindex';
+  const prefix = /^(data|aria)[A-Z]/.exec(property)?.[1];
+  if (prefix) return `${prefix}${property.slice(prefix.length).replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`)}`;
   return property;
 }
 
@@ -93,6 +96,21 @@ function srcLink(cls: string[], loc: ResolvedSrc, sketch: Sketch, opts: HtmlOpti
   const found = (opts.srcHref ?? ((l, s) => (s.repo ? repoHref(s.repo, l, opts.gitHosts) : undefined)))(loc, sketch);
   const { href, note } = typeof found === 'string' ? { href: found, note: undefined } : (found ?? {});
   return link(note ? [...cls, 'sk-src-note'] : cls, href, note ? `${title}\n${note}` : title, children);
+}
+
+/**
+ * Gives a call or a line's code an explanation, from `::doc`. enhance() shows it in a popover on hover
+ * or focus; without enhance() it is the element's tooltip, before what the tooltip already said.
+ */
+function withDoc(el: HastElement, doc: string | undefined): HastElement {
+  if (!doc) return el;
+  const { title } = el.properties;
+  (el.properties.className as string[]).push('sk-has-doc');
+  el.properties.title = title ? `${doc}\n\n${title}` : doc;
+  el.properties.dataDoc = doc;
+  // A link already takes focus. Anything else needs to, so the explanation can be reached with the keyboard.
+  if (el.tagName !== 'a') el.properties.tabIndex = 0;
+  return el;
 }
 
 /** The `?` and `~` modifiers as written. */
@@ -156,14 +174,15 @@ function segmentHast(seg: Segment, sketch: Sketch, opts: HtmlOptions): ElementCo
       return [varHast(sketch, seg.name, seg.text, seg.definition)];
     case 'call': {
       const loc = sketch.callSources[seg.name];
+      const doc = sketch.callDocs[seg.name];
       const children = seg.head
         ? [varHast(sketch, seg.head, seg.head, false), ...text(seg.text.slice(seg.head.length))]
         : text(seg.text);
-      if (!loc) return [link(['sk-call'], undefined, '', children)];
-      return [srcLink(['sk-call', 'sk-linked'], loc, sketch, opts, `Defined at ${formatLocation(loc)}`, children)];
+      if (!loc) return [withDoc(link(['sk-call'], undefined, '', children), doc)];
+      return [withDoc(srcLink(['sk-call', 'sk-linked'], loc, sketch, opts, `Defined at ${formatLocation(loc)}`, children), doc)];
     }
     case 'tag':
-      return isLinkTag(seg.tag) ? [] : [tagHast(seg.tag, opts)];
+      return isHiddenTag(seg.tag) ? [] : [tagHast(seg.tag, opts)];
   }
 }
 
@@ -258,12 +277,16 @@ function tagWidth(tag: Tag): number {
   return w * TAG_SCALE + 0.25; // plus the pill's border
 }
 
+/** The marker after the code of a line with a `::doc`: 1ch of margin, then a circle 1.5em across at 0.72em. */
+const DOC_MARK_WIDTH = 1 + 1.5 * 0.72 * EM;
+
 function codeWidth(line: SketchLine, unit: number): number {
   let w = line.depth * unit;
   for (const seg of line.segments) {
     if (seg.type !== 'tag') w += textWidth(seg.text);
-    else if (!isLinkTag(seg.tag)) w += tagWidth(seg.tag);
+    else if (!isHiddenTag(seg.tag)) w += tagWidth(seg.tag);
   }
+  if (line.doc) w += DOC_MARK_WIDTH;
   return w;
 }
 
@@ -303,7 +326,7 @@ function lineHast(line: SketchLine, sketch: Sketch, opts: HtmlOptions, gutter: b
   let code = line.segments.flatMap((s) => segmentHast(s, sketch, opts));
   // Wrapped so the strike-through of a removed line skips its indentation.
   if (code.length && line.change?.kind === 'removed') code = [h('span', { className: ['sk-struck'] }, code)];
-  const trailing = line.tags.filter((t) => t.trailing && !isLinkTag(t));
+  const trailing = line.tags.filter((t) => t.trailing && !isHiddenTag(t));
   const tags = trailing.map((t) => tagHast(t, opts));
   const widths = trailing.map(tagWidth);
   if (line.signature && line.src && sketch.file) {
@@ -315,9 +338,11 @@ function lineHast(line: SketchLine, sketch: Sketch, opts: HtmlOptions, gutter: b
   if (fit) cls.push(fit);
 
   const title = diags.length ? { title: diags.map((d) => d.message).join('\n') } : {};
+  // A line with an explanation gets a marker after its code. Its circle is drawn by sketch.css, so it isn't copied.
+  const mark = line.doc ? [h('span', { className: ['sk-doc-mark'], ariaHidden: 'true' })] : [];
   return h('div', { className: cls, style: `--d:${line.depth}`, dataLine: line.number, ...title }, [
     h('span', { className: ['sk-gut'] }, gutter ? gutterHast(line.src, sketch, opts) : []),
-    h('span', { className: ['sk-code'] }, [...text(indent), ...(code.length ? code : text('​'))]),
+    withDoc(h('span', { className: ['sk-code'] }, [...text(indent), ...(code.length ? code : text('​')), ...mark]), line.doc),
     h('span', { className: ['sk-tags'] }, tags),
   ]);
 }
@@ -346,11 +371,19 @@ export function toHtml(input: string | Sketch, opts: HtmlOptions = {}): string {
 }
 
 /**
- * Adds hover and click highlighting of variables: hovering a binding, parameter or labeled name
- * highlights all its uses within the same sketch; clicking pins the highlight.
+ * Makes rendered sketches interactive:
+ * - Hovering a binding, parameter or labeled name highlights all its uses within the same sketch;
+ *   clicking pins the highlight.
+ * - Hovering or focusing a call or a line with a `::doc` shows its explanation in a popover. On a
+ *   block header, the block is highlighted with it.
  * Returns a function that removes the listeners.
  */
 export function enhance(root: HTMLElement | Document = document): () => void {
+  const off = [highlightVariables(root), showDocs(root)];
+  return () => off.forEach((remove) => remove());
+}
+
+function highlightVariables(root: HTMLElement | Document): () => void {
   const target = (e: Event) => (e.target as Element | null)?.closest?.('[data-var]') ?? null;
   const mark = (el: Element, cls: string, on: boolean) => {
     const name = el.getAttribute('data-var')!;
@@ -376,5 +409,160 @@ export function enhance(root: HTMLElement | Document = document): () => void {
     root.removeEventListener('mouseover', over);
     root.removeEventListener('mouseout', out);
     root.removeEventListener('click', click);
+  };
+}
+
+/** How long the pointer rests on a call or a line before its explanation shows, in milliseconds. */
+const DOC_DELAY = 200;
+/** Space between the popover and the line, and between the popover and the edge of the window, in pixels. */
+const DOC_GAP = 4;
+const DOC_MARGIN = 8;
+let docPopovers = 0;
+
+/** A sketch row's depth, from the `--d` its style sets. */
+const rowDepth = (row: Element) => Number((row as HTMLElement).style.getPropertyValue('--d')) || 0;
+
+/**
+ * Shows the explanation of a call or a line in a popover. The popover sits on the page's body with a
+ * fixed position, since the sketch's box scrolls and would cut it off. It stands in for the element's
+ * tooltip, which is removed while the pointer or focus is on the element and put back after.
+ */
+function showDocs(root: HTMLElement | Document): () => void {
+  const doc = root instanceof Document ? root : root.ownerDocument;
+  const win = doc.defaultView;
+  const id = `sk-doc-pop-${++docPopovers}`;
+  let pop: HTMLElement | undefined;
+  /** The element whose explanation is shown, or is about to be. */
+  let anchor: HTMLElement | undefined;
+  /** The anchor's tooltip, while it is removed. */
+  let title: string | null = null;
+  let timer: ReturnType<typeof setTimeout> | undefined;
+
+  const target = (e: Event) => ((e.target as Element | null)?.closest?.('[data-doc]') as HTMLElement | null) ?? null;
+
+  /** The rows a line's explanation covers: the line, and the lines of its block when it is a header. */
+  function scope(el: HTMLElement): Element[] {
+    const row = el.classList.contains('sk-code') ? el.closest('.sk-row') : null;
+    if (!row?.classList.contains('sk-header')) return [];
+    const rows = [row];
+    const depth = rowDepth(row);
+    for (let r = row.nextElementSibling; r && rowDepth(r) > depth; r = r.nextElementSibling) rows.push(r);
+    return rows;
+  }
+
+  function place(p: HTMLElement, el: HTMLElement) {
+    // Under the line, so it doesn't cover it. A call's explanation starts at the call, a line's where its text starts.
+    const row = (el.closest('.sk-row') ?? el).getBoundingClientRect();
+    const start = el.classList.contains('sk-code')
+      ? ([...el.children].find((c) => !c.classList.contains('sk-x') && !c.classList.contains('sk-doc-mark')) ?? el)
+      : el;
+    p.style.left = '0px';
+    p.style.top = '0px';
+    const { width, height } = p.getBoundingClientRect();
+    const vw = doc.documentElement.clientWidth;
+    const vh = doc.documentElement.clientHeight;
+    const below = row.bottom + DOC_GAP;
+    const above = row.top - DOC_GAP - height;
+    const top = below + height <= vh - DOC_MARGIN || above < DOC_MARGIN ? below : above;
+    const left = Math.max(DOC_MARGIN, Math.min(start.getBoundingClientRect().left, vw - width - DOC_MARGIN));
+    p.style.left = `${left}px`;
+    p.style.top = `${top}px`;
+  }
+
+  function show() {
+    clearTimeout(timer);
+    timer = undefined;
+    if (!anchor) return;
+    if (!pop?.isConnected) {
+      pop = doc.createElement('div');
+      pop.className = 'sk-doc-pop';
+      pop.id = id;
+      pop.setAttribute('role', 'tooltip');
+      doc.body.append(pop);
+    }
+    const text = anchor.getAttribute('data-doc') ?? '';
+    // The rest of the tooltip, such as where a call is defined, goes under the explanation.
+    const rest = title?.startsWith(text) ? title.slice(text.length).trim() : '';
+    const main = doc.createElement('div');
+    main.className = 'sk-doc-text';
+    main.textContent = text;
+    pop.replaceChildren(main);
+    if (rest) {
+      const info = doc.createElement('div');
+      info.className = 'sk-doc-info';
+      info.textContent = rest;
+      pop.append(info);
+    }
+    pop.hidden = false;
+    place(pop, anchor);
+    anchor.setAttribute('aria-describedby', id);
+    for (const row of scope(anchor)) row.classList.add('sk-doc-scope');
+  }
+
+  function hide() {
+    clearTimeout(timer);
+    timer = undefined;
+    if (anchor) {
+      if (title !== null) anchor.setAttribute('title', title);
+      anchor.removeAttribute('aria-describedby');
+      for (const row of scope(anchor)) row.classList.remove('sk-doc-scope');
+    }
+    anchor = undefined;
+    title = null;
+    if (pop) pop.hidden = true;
+  }
+
+  function start(el: HTMLElement, delay: number) {
+    if (el === anchor) {
+      // Focus on an element the pointer is resting on shows its explanation without waiting.
+      if (timer !== undefined && !delay) show();
+      return;
+    }
+    hide();
+    anchor = el;
+    // Removed now, so the browser never shows the tooltip as well.
+    title = el.getAttribute('title');
+    el.removeAttribute('title');
+    if (delay) timer = setTimeout(show, delay);
+    else show();
+  }
+
+  const over = (e: Event) => {
+    const el = target(e);
+    if (el) start(el, DOC_DELAY);
+    // The sketch was rendered again under the pointer, as VS Code's preview does on each edit.
+    else if (anchor && !anchor.isConnected) hide();
+  };
+  const out = (e: Event) => {
+    if (anchor && !anchor.contains((e as MouseEvent).relatedTarget as Node | null)) hide();
+  };
+  const focusIn = (e: Event) => {
+    const el = target(e);
+    if (el) start(el, 0);
+  };
+  const focusOut = (e: Event) => {
+    if (anchor && anchor.contains(e.target as Node)) hide();
+  };
+  const key = (e: Event) => {
+    if ((e as KeyboardEvent).key === 'Escape') hide();
+  };
+  root.addEventListener('mouseover', over);
+  root.addEventListener('mouseout', out);
+  root.addEventListener('focusin', focusIn);
+  root.addEventListener('focusout', focusOut);
+  root.addEventListener('keydown', key);
+  // The popover doesn't move with the page, so it goes away when anything scrolls.
+  win?.addEventListener('scroll', hide, true);
+  win?.addEventListener('resize', hide);
+  return () => {
+    hide();
+    pop?.remove();
+    root.removeEventListener('mouseover', over);
+    root.removeEventListener('mouseout', out);
+    root.removeEventListener('focusin', focusIn);
+    root.removeEventListener('focusout', focusOut);
+    root.removeEventListener('keydown', key);
+    win?.removeEventListener('scroll', hide, true);
+    win?.removeEventListener('resize', hide);
   };
 }

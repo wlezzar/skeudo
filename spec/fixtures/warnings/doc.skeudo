@@ -1,0 +1,8 @@
+f():
+    helper(x)
+    ::doc
+    ::doc[]
+    ::doc:helper
+    ::doc[a line of its own]
+    ::doc:missing[no call by this name]
+    ::doc:x.helper[the call is written helper]
