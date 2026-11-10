@@ -50,8 +50,9 @@ Her card is declined
 
 | To | Use |
 | --- | --- |
+| Try it in a browser | [The playground](https://skeudo.dev/playground/) on [skeudo.dev](https://skeudo.dev), with both views and a few examples. |
 | Have an agent write sketches | The agent skill: `npx skills add wlezzar/skeudo`. It works with Claude Code and the other agents the [skills CLI](https://github.com/vercel-labs/skills) supports. Then ask it to "sketch this pull request". |
-| Read sketches in VS Code | The extension in [apps/vscode](apps/vscode/README.md) highlights sketches and renders them in the Markdown preview. It isn't on the Marketplace yet. |
+| Read sketches in VS Code | [The extension](https://marketplace.visualstudio.com/items?itemName=wlezzar.skeudo-vscode) highlights sketches and renders them in the Markdown preview: `code --install-extension wlezzar.skeudo-vscode`. See [apps/vscode](apps/vscode/README.md). |
 | Check sketches and send them as pages | The CLI: `npm install -g skeudo`, then `skeudo check` and `skeudo render`. See [apps/cli](apps/cli/README.md). |
 | Show sketches on a docs site | [`markdown-it-skeudo`](packages/markdown-it/README.md) for VitePress and other markdown-it sites, [`remark-skeudo`](packages/remark/README.md) for Docusaurus, Astro and MDX. |
 | Build your own tools | [`@skeudo/core`](packages/core/README.md), the parser, and [`@skeudo/html`](packages/html/README.md), the renderer. |
@@ -95,7 +96,7 @@ pnpm build           # the static site in apps/playground/dist
 pnpm build:packages  # the libraries, in packages/*/dist
 pnpm build:cli       # CLI in apps/cli/dist/skeudo.js, see apps/cli/README.md
 pnpm package:cli     # CLI as apps/cli/skeudo.tgz, for npm install -g
-pnpm package:vscode  # VS Code extension in apps/vscode/skeudo-vscode-0.0.1.vsix, see apps/vscode/README.md
+pnpm package:vscode  # VS Code extension in apps/vscode/skeudo-vscode-<version>.vsix, see apps/vscode/README.md
 ```
 
 Markdown files in `apps/playground/local-examples/` (gitignored) appear in the playground's Example menu, so you can try sketches of private code. Optional front matter sets the menu title and the base URL for source links in sketches without `::repo`:

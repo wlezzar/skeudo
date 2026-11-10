@@ -56,8 +56,14 @@ On the `publishing` branch.
   - [x] `.github/workflows/site.yml` builds the playground from a fresh checkout and deploys it on each push to `main`. A local build would bundle the private `local-examples/`.
   - [x] Pages turned on with `gh api`, with GitHub Actions as the source and skeudo.dev as the domain. The first deploy passed, GitHub issued the certificate within minutes, and HTTPS is enforced. The live page lists only the committed examples (2026-11-10).
   - [x] A landing page at `/`, asked for by the user, with the playground moved to `/playground/` behind a tab. It renders spec fixtures with the real renderer: the signup sketch as text and rendered, the tags, the checkout story, and how to get each piece. The playground's header links home and to GitHub (2026-11-10).
-  - [ ] skeudo.dev in the root README.
-- **The VS Code extension**: the user tries it in a real VS Code first (`::repo` links into another repository, the amber warning on a changed file, `::doc` popovers). Then it goes to the Marketplace and Open VSX under the `skeudo` publisher, free on both on 2026-11-09, versioned on its own with tags like `vscode-v0.1.0`.
+  - [x] skeudo.dev in the root README, as the first way to get it.
+- **The VS Code extension**, versioned on its own with tags like `vscode-v0.1.0`.
+  - [x] The user tried it in a real VS Code, and made the `wlezzar` publisher on the Marketplace, so the extension is `wlezzar.skeudo-vscode` (2026-11-10).
+  - [x] Ready to publish: version 0.1.0, not private, MIT with the LICENSE packed, an icon, a Preview badge, its own changelog, and install steps in its README. The `.vsix` holds only the bundle, the grammars, the stylesheet and those files.
+  - [x] The user uploaded the `.vsix` to the Marketplace by hand, and 0.1.0 was live within minutes (2026-11-10). The uploaded files match the release commit.
+  - [x] The landing page and the root README point at the Marketplace. The extension's README already linked to it and to Open VSX.
+  - [x] Tagged `vscode-v0.1.0` on the release commit, f173952.
+  - [ ] The user publishes the same `.vsix` to Open VSX with `ovsx`, under a `wlezzar` namespace. Until then, the README's Open VSX link is a 404.
 - **An announcement**, once the site and the extension are out.
 
 ## Later

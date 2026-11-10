@@ -4,7 +4,7 @@ How the published packages are built, released, and checked the way a user insta
 
 ## What gets published
 
-Five npm packages share one version: `@skeudo/core`, `@skeudo/html`, `markdown-it-skeudo`, `remark-skeudo` and the `skeudo` CLI. Their `package.json` files say what goes in (`files`) and what the published `exports` are (`publishConfig`). The playground, the VS Code extension and the repository root are `"private": true`.
+Five npm packages share one version: `@skeudo/core`, `@skeudo/html`, `markdown-it-skeudo`, `remark-skeudo` and the `skeudo` CLI. Their `package.json` files say what goes in (`files`) and what the published `exports` are (`publishConfig`). The playground and the repository root are `"private": true`. The VS Code extension is published apart, with its own version: see [The VS Code extension](#the-vs-code-extension).
 
 ## The build
 
@@ -57,6 +57,14 @@ skeudo.dev serves `apps/playground` from GitHub Pages: a landing page at `/` and
 - **The settings**: `gh api repos/wlezzar/skeudo/pages` shows the source (GitHub Actions), the custom domain and whether HTTPS is enforced. The user verified skeudo.dev in their GitHub account's Pages settings, so no other account can serve a site on it.
 - **DNS is on Cloudflare**, in the user's account: A and AAAA records on `skeudo.dev` for GitHub's four addresses, and `www` as a CNAME to `wlezzar.github.io`. They must stay "DNS only" (grey cloud), or GitHub can't see that the domain points at it, and can't renew its certificate. `dig +short skeudo.dev` prints GitHub's `185.199.*` addresses when they are right.
 - **`.dev` is HTTPS only** in browsers, so the site shows an error until GitHub has issued its certificate.
+
+## The VS Code extension
+
+`apps/vscode` goes to the Visual Studio Marketplace and to Open VSX, which VSCodium, Cursor and other editors use, as `wlezzar.skeudo-vscode`: the user's `wlezzar` publisher and the package's `name`. That ID can't change once published. The extension has its own version and changelog (`apps/vscode/CHANGELOG.md`), and each entry says which format version it reads, since it bundles `@skeudo/core` and `@skeudo/html` from the commit it is built from, not from npm. Its tags look like `vscode-v0.1.0`.
+
+- **Package**: `pnpm package:vscode` builds and writes `apps/vscode/skeudo-vscode-<version>.vsix`. The build copies the root LICENSE in, as the libraries' build does. `unzip -l` on the `.vsix` lists what went in. `icon.png` is the favicon's shapes drawn at 256px.
+- **Publish**: the user uploads the `.vsix` on the Marketplace's publisher page (0.1.0 was live a few minutes after its upload on 2026-11-10, and `pnpm exec vsce show wlezzar.skeudo-vscode --json` from `apps/vscode` shows the version), which needs no token, since `vsce publish` needs an Azure DevOps token of a kind Microsoft is retiring. For Open VSX, the user runs `npx ovsx publish <file>.vsix` in their own terminal with their token in `OVSX_PAT`, so the token never reaches the agent.
+- **`"preview": true`** shows a Preview badge on the Marketplace, for as long as the format is 0.x.
 
 ## Docs sites
 
