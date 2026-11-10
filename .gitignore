@@ -6,3 +6,4 @@ apps/playground/local-examples/
 *.tgz
 packages/*/LICENSE
 apps/cli/LICENSE
+apps/vscode/LICENSE

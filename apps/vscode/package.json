@@ -2,9 +2,17 @@
   "name": "skeudo-vscode",
   "displayName": "Skeudo",
   "description": "Highlights sketches in .skeudo files and Markdown fences, and renders them in the Markdown preview: pseudocode for code review, with every outside effect tagged.",
-  "version": "0.0.1",
-  "private": true,
-  "publisher": "skeudo",
+  "version": "0.1.0",
+  "publisher": "wlezzar",
+  "license": "MIT",
+  "icon": "icon.png",
+  "galleryBanner": {
+    "color": "#1f2330",
+    "theme": "dark"
+  },
+  "preview": true,
+  "homepage": "https://skeudo.dev",
+  "bugs": "https://github.com/wlezzar/skeudo/issues",
   "repository": {
     "type": "git",
     "url": "https://github.com/wlezzar/skeudo",
@@ -19,9 +27,12 @@
     "Other"
   ],
   "keywords": [
+    "skeudo",
     "markdown",
     "pseudocode",
-    "code review"
+    "code review",
+    "data model",
+    "documentation"
   ],
   "main": "./dist/extension.js",
   "activationEvents": [
@@ -34,7 +45,10 @@
     "dist/skeudo.tmLanguage.json",
     "dist/markdown-skeudo.tmLanguage.json",
     "language-configuration.json",
-    "README.md"
+    "icon.png",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
   ],
   "contributes": {
     "markdown.markdownItPlugins": true,
@@ -122,7 +136,7 @@
   },
   "scripts": {
     "build": "node build.mts",
-    "package": "node build.mts && vsce package --no-dependencies --skip-license"
+    "package": "node build.mts && vsce package --no-dependencies"
   },
   "devDependencies": {
     "@skeudo/core": "workspace:*",

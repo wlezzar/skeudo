@@ -1,7 +1,7 @@
 /// <reference types="node" />
 // Bundles the extension into dist/. The workspace packages export TypeScript sources, which VS Code can't load.
 import { build as bundle } from 'esbuild';
-import { mkdir, writeFile } from 'node:fs/promises';
+import { copyFile, mkdir, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { readStylesheet } from '../../scripts/stylesheet.mts';
 import { markdownInjection, sketchGrammar } from './src/grammars/index.ts';
@@ -51,4 +51,8 @@ export async function build(outdir: string): Promise<void> {
   ]);
 }
 
-if (import.meta.main) await build(fileURLToPath(new URL('dist', import.meta.url)));
+if (import.meta.main) {
+  await build(fileURLToPath(new URL('dist', import.meta.url)));
+  // vsce packs a LICENSE only from the extension's own folder, as npm does.
+  await copyFile(new URL('../../LICENSE', import.meta.url), new URL('LICENSE', import.meta.url));
+}

@@ -1,5 +1,7 @@
 # Skeudo for VS Code
 
+> Experimental, 0.x: the format can change in any minor version. [CHANGELOG.md](https://github.com/wlezzar/skeudo/blob/main/CHANGELOG.md) lists the changes.
+
 Highlights sketches in the editor and renders them in VS Code's Markdown preview. A sketch is pseudocode for code review where every outside effect is tagged, or, when it starts with a `data` line, a data model drawn as tables and a story of how their rows change. The format is defined in [spec/spec.md](https://github.com/wlezzar/skeudo/blob/main/spec/spec.md).
 
 ````markdown
@@ -100,14 +102,22 @@ A sketch without `::repo` opens paths from the workspace folder, so open the rep
 | `skeudo.repositories` | `{}` | Local copies of repositories, for `::repo` links, such as `{ "github.com/org/shop": "~/code/shop" }`. A user setting, since the paths belong to one machine. |
 | `skeudo.gitHosts` | `{}` | Other GitHub, GitLab or Bitbucket servers, such as `{ "git.example.com": "gitlab" }`, for links to repositories with no local copy. |
 
-## Build and install
+## Install
+
+Install **Skeudo** from the [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=wlezzar.skeudo-vscode), or from [Open VSX](https://open-vsx.org/extension/wlezzar/skeudo-vscode) in VSCodium, Cursor and other editors that use it. From a terminal:
+
+```sh
+code --install-extension wlezzar.skeudo-vscode
+```
+
+## Build from source
 
 From the repository root:
 
 ```sh
 pnpm install
-pnpm package:vscode     # writes apps/vscode/skeudo-vscode-0.0.1.vsix
-code --install-extension apps/vscode/skeudo-vscode-0.0.1.vsix
+pnpm package:vscode     # writes apps/vscode/skeudo-vscode-0.1.0.vsix
+code --install-extension apps/vscode/skeudo-vscode-0.1.0.vsix
 ```
 
 Then reload VS Code. To try a change without installing it, run `pnpm --filter skeudo-vscode build` and start VS Code with `code --extensionDevelopmentPath="$PWD/apps/vscode"`.
