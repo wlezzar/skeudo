@@ -1,6 +1,6 @@
 # Building and releasing
 
-How the published packages are built, and how to check them the way a user installs them. The plan for the first release, with what is left and who does it, is `.tasks/002-publishing/plan.md`.
+How the published packages are built, released, and checked the way a user installs them. The publishing plan, with its later stages, is `.tasks/002-publishing/plan.md`.
 
 ## What gets published
 
@@ -14,6 +14,26 @@ Five npm packages share one version: `@skeudo/core`, `@skeudo/html`, `markdown-i
 - **`publishConfig`** replaces `exports` (and adds `types`) when pnpm packs, so the published package points at `dist/` while the repository points at `src/`. Only pnpm does this, and only pnpm turns `workspace:*` into the version, so always publish with `pnpm publish`, never `npm publish`.
 - **Declarations keep `.ts` in their imports** (`export … from './code/render.ts'`), since tsc rewrites extensions only in JavaScript. TypeScript 5.6 and 7 both resolve them, under `nodenext`, `node16` and `bundler`, with `skipLibCheck` off. (Checked 2026-11-10.)
 - **`@skeudo/html`'s types name `HTMLElement`** (in `enhance`), so a project with neither the `dom` lib nor `skipLibCheck` gets errors from them. The common tsconfig bases set `skipLibCheck`.
+
+## Releasing a version
+
+How 0.1.0 went out, on 2026-11-10. `CHANGELOG.md` says when a change needs a minor version and when a patch.
+
+1. Set the same `version` in the five published `package.json` files (`grep -n '"version"' packages/*/package.json apps/cli/package.json`), and add the version's entry to `CHANGELOG.md`.
+2. Commit, push `main`, and wait for CI to pass: `gh run list --limit 1`.
+3. Pack the packages and check them, as the next section says.
+4. Publish from `main`: `pnpm publish -r --access public --no-git-checks`. It builds and publishes each package whose version isn't on npm yet, in dependency order, and skips the private ones. `--dry-run` shows which it would publish.
+5. Tag the published commit `vX.Y.Z` and push the tag.
+6. Check `npm view <name> version` for each package, then install them from npm in a scratch project.
+
+Traps:
+
+- **The untracked `.tasks/` folders make pnpm refuse to publish** ("Unclean working tree"), hence `--no-git-checks`. Check first that `git status --porcelain --untracked-files=no` prints nothing.
+- **Claude Code's auto mode refuses `pnpm publish`**, since it makes something public. The user runs it by typing `! pnpm publish -r --access public --no-git-checks` in the prompt. (Seen 2026-11-10.)
+- **npm never takes the same version twice**, even after an unpublish, so a broken release is fixed with a patch version.
+- **A package's first publish adds a `0.0.0-stage` version**, npm's "temporary package placeholder for staged publishing", before the real one. For 0.1.0, the five placeholders came a minute before the real versions, and meanwhile `latest` pointed at them, which looks like a failed publish. Wait, then check that every package's `dist-tags` names the new version: `npm view <name> dist-tags`. (Seen 2026-11-10.)
+- **The registry caches a 404.** After looking up a name before its first publish, `npm view <name>` and `npm install` can still answer 404 for several minutes after it is published. `npm view <name>@<version>` answers sooner. (Seen 2026-11-10.)
+- **Publishing needs an npm account in the `skeudo` org, with two-factor authentication on**: `npm whoami`, then `npm org ls skeudo`. Without 2FA, npm answers "403 Forbidden … Two-factor authentication … is required to publish packages", and nothing is published. With it, add `--otp=<code>`. A code lasts about 30 seconds, and a rerun skips the versions already published, so a code that expires midway only needs a second run. (Seen 2026-11-10.)
 
 ## Checking the packed packages
 

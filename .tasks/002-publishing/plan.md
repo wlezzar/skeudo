@@ -42,12 +42,12 @@ On the `publishing` branch.
 
 ## Stage 2: go public (both)
 
-1. The user creates the free `skeudo` npm org at https://www.npmjs.com/org/create ("create a new org"), and runs `npm login` on this machine.
-2. Merge `publishing` into `main` and push. Delete the merged remote branches (`remark-skeudo`, `vscode-extension`) if they shouldn't show.
-3. The user makes `wlezzar/skeudo` public (Settings, Danger Zone, Change visibility). Check that CI ran and passed on GitHub.
-4. `AGENTS.md` no longer says nothing is published.
-5. Publish 0.1.0 with `pnpm publish -r --access public` (never `npm publish`, since pnpm rewrites `workspace:*`). Claude confirms with the user right before, since a version can't be published twice. Tag `v0.1.0` and push the tag.
-6. Check: `npm view` each name, install each in a scratch project, and `npx skills add wlezzar/skeudo` installs the skill.
+- [x] The user creates the free `skeudo` npm org at https://www.npmjs.com/org/create ("create a new org"), and runs `npm login` on this machine.
+- [x] Merge `publishing` into `main` and push. CI ran and passed on GitHub on its first push, on Node 22 and 24.
+- [x] The user makes `wlezzar/skeudo` public (Settings, Danger Zone, Change visibility). The merged remote branches `remark-skeudo` and `vscode-extension` are deleted.
+- [x] `AGENTS.md` no longer says nothing is published, and `.agents-docs/releasing.md` says how to release a version.
+- [x] Publish 0.1.0 with `pnpm publish -r --access public --no-git-checks` (never `npm publish`, since pnpm rewrites `workspace:*`). The dry run from `main` at f92d6be published the five in dependency order, and the packed tarballs held what stage 1 tested. Claude Code's auto mode refused the real publish until the user allowed that one command. Its first run got a 403 at `@skeudo/core`, with nothing published, since npm requires 2FA to publish and the account didn't have it on yet. The user turned 2FA on and published from f92d6be on 2026-11-10. Tagged `v0.1.0`.
+- [x] Check: all five have 0.1.0 as `latest`. A scratch project installed them from npm, rendered a sketch with each library, passed `tsc` under `nodenext` with `skipLibCheck` off, and ran `npx skeudo check` and `render`. `npx skills add wlezzar/skeudo --list` finds the skill.
 
 ## Stage 3: reach people
 
