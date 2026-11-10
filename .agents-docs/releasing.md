@@ -51,9 +51,9 @@ tar xzf "$S/tarballs/markdown-it-skeudo-0.1.0.tgz" -O package/package.json   # e
 
 ## The site
 
-skeudo.dev serves the playground from GitHub Pages. `.github/workflows/site.yml` builds `apps/playground` and deploys it on each push to `main`, and its runs are listed by `gh run list --workflow site.yml`.
+skeudo.dev serves `apps/playground` from GitHub Pages: a landing page at `/` and the playground at `/playground/`, two Vite pages listed in `apps/playground/vite.config.ts`. `.github/workflows/site.yml` builds it and deploys it on each push to `main`, and its runs are listed by `gh run list --workflow site.yml`.
 
-- **Never upload a local build.** `apps/playground/src/examples.ts` bundles every file in the gitignored `apps/playground/local-examples/`, which can hold private sketches. The workflow builds from a fresh checkout, which has none.
+- **Never upload a local build.** `apps/playground/src/examples.ts` bundles every file in the gitignored `apps/playground/local-examples/`, which can hold private sketches. The workflow builds from a fresh checkout, which has none. The landing page imports its two sketches from `spec/fixtures/` instead, so its script stays small.
 - **The settings**: `gh api repos/wlezzar/skeudo/pages` shows the source (GitHub Actions), the custom domain and whether HTTPS is enforced. The user verified skeudo.dev in their GitHub account's Pages settings, so no other account can serve a site on it.
 - **DNS is on Cloudflare**, in the user's account: A and AAAA records on `skeudo.dev` for GitHub's four addresses, and `www` as a CNAME to `wlezzar.github.io`. They must stay "DNS only" (grey cloud), or GitHub can't see that the domain points at it, and can't renew its certificate. `dig +short skeudo.dev` prints GitHub's `185.199.*` addresses when they are right.
 - **`.dev` is HTTPS only** in browsers, so the site shows an error until GitHub has issued its certificate.

@@ -27,7 +27,7 @@ The fixtures under `spec/fixtures/*/examples/` cover each view's main features. 
 
 ## The playground
 
-`pnpm dev` serves the playground at http://localhost:5173: an editor, the preview, a review panel and the AST. It keeps running, so start it in the background and stop it when you are done. Its examples are in `apps/playground/src/examples.ts`, plus any Markdown files in `apps/playground/local-examples/`, which is gitignored and may hold private code.
+`pnpm dev` serves the site at http://localhost:5173: the landing page (`apps/playground/index.html`, `apps/playground/src/landing.ts`) and, at http://localhost:5173/playground/, the playground: an editor, the preview, a review panel and the AST. `/playground/?example=<id>` opens one of its examples. It keeps running, so start it in the background and stop it when you are done. Its examples are in `apps/playground/src/examples.ts`, plus any Markdown files in `apps/playground/local-examples/`, which is gitignored and may hold private code.
 
 ## The VS Code preview
 

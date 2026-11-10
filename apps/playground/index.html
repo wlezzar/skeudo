@@ -3,50 +3,146 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Skeudo Playground</title>
+    <title>Skeudo: pseudocode for code review</title>
+    <meta
+      name="description"
+      content="Skeudo is a small text format for explaining code to a reviewer: pseudocode in plain words, with every read, write and failure tagged. It lives in Markdown, and your agent can write it."
+    />
+    <meta property="og:title" content="Skeudo: pseudocode for code review" />
+    <meta property="og:description" content="See what code touches before reading how it works." />
+    <meta property="og:url" content="https://skeudo.dev/" />
+    <meta property="og:type" content="website" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
   </head>
   <body>
-    <header class="bar">
-      <div class="brand"><span class="brand-mark">::</span>Skeudo <span class="brand-sub">playground</span></div>
-      <label class="field">
-        <span>Example</span>
-        <select id="example"></select>
-      </label>
-      <label class="field">
-        <span>Mode</span>
-        <select id="mode">
-          <option value="auto">Auto</option>
-          <option value="sketch">Sketch</option>
-          <option value="markdown">Markdown</option>
-        </select>
-      </label>
-      <label class="field grow">
-        <span>Source links</span>
-        <input id="src-base" type="url" placeholder="Base URL for sketches without ::repo, e.g. https://github.com/org/repo/blob/main/" />
-      </label>
-      <button id="theme" class="icon-btn" type="button" title="Toggle theme" aria-label="Toggle theme">◐</button>
+    <header class="nav">
+      <div class="wrap nav-in">
+        <a class="brand" href="/"><span class="brand-mark">::</span>Skeudo</a>
+        <nav class="nav-links" aria-label="Main">
+          <a class="nav-tab" href="/playground/">Playground</a>
+          <a class="nav-tab hide-sm" href="https://github.com/wlezzar/skeudo/blob/main/spec/spec.md">Spec</a>
+          <a class="icon-btn" href="https://github.com/wlezzar/skeudo" title="Skeudo on GitHub" aria-label="Skeudo on GitHub">
+            <svg viewBox="0 0 16 16" width="17" height="17" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+          </a>
+          <button id="theme" class="icon-btn" type="button" title="Toggle theme" aria-label="Toggle theme">◐</button>
+        </nav>
+      </div>
     </header>
-    <main class="split">
-      <section class="pane">
-        <div class="pane-head">
-          <span>Source</span>
-          <span id="status" class="status"></span>
+
+    <main>
+      <section class="hero wrap">
+        <p class="eyebrow"><span class="eyebrow-pill">0.1</span> Experimental: the format can still change</p>
+        <h1>See what code touches before reading how it works.</h1>
+        <p class="lede">
+          Skeudo is pseudocode for code review. Write the logic in plain words, and tag every read, write and failure.
+          The tags line up in a column, so a reviewer checks the effects first.
+        </p>
+        <div class="actions">
+          <a class="btn btn-primary" href="/playground/">Open the playground</a>
+          <a class="btn" href="#get-started">Get started</a>
         </div>
-        <textarea id="editor" spellcheck="false" autocapitalize="off" autocomplete="off"></textarea>
       </section>
-      <section class="pane">
-        <div class="pane-head tabs" role="tablist">
-          <button role="tab" data-tab="preview" aria-selected="true">Preview</button>
-          <button role="tab" data-tab="review">Review <span id="review-count" class="count"></span></button>
-          <button role="tab" data-tab="ast">AST</button>
+
+      <section class="wrap demo" aria-label="A sketch, as text and rendered">
+        <figure class="panel">
+          <figcaption><span class="panel-title">signup.skeudo</span><span class="panel-note">plain text</span></figcaption>
+          <pre class="source" data-source="signup"></pre>
+        </figure>
+        <figure class="panel">
+          <figcaption><span class="panel-title">Rendered</span><span class="panel-note">hover a name to see where it goes</span></figcaption>
+          <div class="rendered" data-render="signup"></div>
+        </figure>
+      </section>
+
+      <section class="wrap points">
+        <div class="point">
+          <h3>Plain text, in Markdown</h3>
+          <p>A sketch is a <code>```skeudo</code> fence in a pull request, a design doc or a README. It diffs in git and reads fine before it's rendered.</p>
         </div>
-        <div class="panels">
-          <div id="preview" class="panel" data-panel="preview"></div>
-          <div id="review" class="panel" data-panel="review" hidden></div>
-          <div id="ast" class="panel" data-panel="ast" hidden><pre></pre></div>
+        <div class="point">
+          <h3>Written by your agent</h3>
+          <p>The agent skill sketches a function, a commit or a pull request, so a review starts from what the change touches.</p>
         </div>
+        <div class="point">
+          <h3>Rendered where you read</h3>
+          <p>In VS Code's Markdown preview, on VitePress and Docusaurus sites, or as a page the CLI writes for you to send.</p>
+        </div>
+      </section>
+
+      <section class="wrap feature" id="code">
+        <div class="feature-text">
+          <p class="kicker"><span class="brand-mark">::</span>the code view</p>
+          <h2>Loose about logic, strict about effects.</h2>
+          <p>
+            Write each step in whatever words make it clear. Each read, write or failure gets a tag at the end of its line,
+            and a note can say how: a lookup by key, a full scan, a time to live.
+          </p>
+          <p>Names carry their labels, so untrusted input and secrets stay marked wherever they go.</p>
+          <a class="more" href="https://github.com/wlezzar/skeudo/blob/main/spec/code.md">Every tag, in the code view's spec →</a>
+        </div>
+        <dl class="tags" id="tags"></dl>
+      </section>
+
+      <section class="wrap feature feature-stacked" id="data">
+        <div class="feature-text">
+          <p class="kicker"><span class="brand-mark">::</span>the data view</p>
+          <h2>A data model, told as a story.</h2>
+          <p>
+            Declare a few tables, then say what happens. Each step adds, changes or removes rows, and the reader steps
+            through it: new rows in green, changed cells in blue.
+          </p>
+        </div>
+        <div class="rendered rendered-data" data-render="checkout"></div>
+        <p class="hint">Click a step, or click the sketch and use the arrow keys. <a href="/playground/?example=checkout">Edit it in the playground →</a></p>
+      </section>
+
+      <section class="wrap get" id="get-started">
+        <p class="kicker"><span class="brand-mark">::</span>get started</p>
+        <h2>Use it where you already work.</h2>
+        <div class="cards">
+          <article class="card">
+            <h3>Have your agent write sketches</h3>
+            <p>Install the skill, then ask your agent to “sketch this pull request”. It works with Claude Code and the other agents the <a href="https://github.com/vercel-labs/skills">skills CLI</a> supports.</p>
+            <div class="cmd"><code>npx skills add wlezzar/skeudo</code><button class="copy" type="button">Copy</button></div>
+          </article>
+          <article class="card">
+            <h3>Check and share from the terminal</h3>
+            <p><code>skeudo check</code> reports mistakes in a sketch, and <code>skeudo render</code> turns a Markdown file into a page you can send.</p>
+            <div class="cmd"><code>npm install -g skeudo</code><button class="copy" type="button">Copy</button></div>
+          </article>
+          <article class="card">
+            <h3>Show sketches on a docs site</h3>
+            <p>
+              <a href="https://github.com/wlezzar/skeudo/tree/main/packages/markdown-it#readme">markdown-it-skeudo</a> for VitePress and other markdown-it sites,
+              <a href="https://github.com/wlezzar/skeudo/tree/main/packages/remark#readme">remark-skeudo</a> for Docusaurus, Astro and MDX.
+            </p>
+            <div class="cmd"><code>npm install remark-skeudo</code><button class="copy" type="button">Copy</button></div>
+          </article>
+          <article class="card">
+            <h3>Read sketches in VS Code</h3>
+            <p>The extension highlights sketches and renders them in the Markdown preview. It isn't on the Marketplace yet, so for now you build it from the repository.</p>
+            <a class="more" href="https://github.com/wlezzar/skeudo/tree/main/apps/vscode#readme">The extension's README →</a>
+          </article>
+        </div>
+        <p class="own">
+          Building your own tool? <a href="https://www.npmjs.com/package/@skeudo/core">@skeudo/core</a> parses sketches, and
+          <a href="https://www.npmjs.com/package/@skeudo/html">@skeudo/html</a> renders them.
+        </p>
       </section>
     </main>
-    <script type="module" src="/src/main.ts"></script>
+
+    <footer class="foot">
+      <div class="wrap foot-in">
+        <span><span class="brand-mark">::</span>Skeudo, MIT license</span>
+        <nav class="foot-links" aria-label="Elsewhere">
+          <a href="https://github.com/wlezzar/skeudo">GitHub</a>
+          <a href="https://www.npmjs.com/package/skeudo">npm</a>
+          <a href="https://github.com/wlezzar/skeudo/blob/main/spec/spec.md">Spec</a>
+          <a href="https://github.com/wlezzar/skeudo/blob/main/CHANGELOG.md">Changelog</a>
+        </nav>
+      </div>
+    </footer>
+
+    <script type="module" src="/src/landing.ts"></script>
   </body>
 </html>

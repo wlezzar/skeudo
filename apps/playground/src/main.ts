@@ -3,8 +3,10 @@ import { analyze, formatLocation, parse, parseTagsOnly, type Review, type Sketch
 import { enhance, escapeHtml as esc, repoHref, srcBaseHref, tagHtml, toHtml, type HtmlOptions } from '@skeudo/html';
 import markdownItSkeudo, { FENCE_LANGS, sketchFences } from 'markdown-it-skeudo';
 import '@skeudo/html/skeudo.css';
+import './tokens.css';
 import './style.css';
 import { examples } from './examples';
+import { setUpTheme } from './theme';
 
 const $ = <T extends HTMLElement>(sel: string) => document.querySelector(sel) as T;
 const editor = $<HTMLTextAreaElement>('#editor');
@@ -36,19 +38,7 @@ const store = {
 };
 
 // ---------- Theme ----------
-const applyTheme = (theme: string | null) => {
-  if (theme === 'light' || theme === 'dark') document.documentElement.dataset.theme = theme;
-  else delete document.documentElement.dataset.theme;
-};
-applyTheme(store.get('theme'));
-$('#theme').addEventListener('click', () => {
-  const dark =
-    document.documentElement.dataset.theme === 'dark' ||
-    (!document.documentElement.dataset.theme && matchMedia('(prefers-color-scheme: dark)').matches);
-  const next = dark ? 'light' : 'dark';
-  applyTheme(next);
-  store.set('theme', next);
-});
+setUpTheme($('#theme'));
 
 // ---------- Rendering options ----------
 // The base comes from an example's front matter, so as in the CLI, it serves sketches that don't name their repository with ::repo.
@@ -347,9 +337,15 @@ enhance(preview);
 enhance(review);
 showTab(store.get('tab') ?? 'preview');
 
+// A link such as /playground/?example=checkout opens that example. The address then loses the
+// query, so reloading after an edit keeps the edit.
+const linked = new URLSearchParams(location.search).get('example');
 const savedExample = store.get('example');
 const savedSource = store.get('source');
-if (savedExample === 'custom' && savedSource) {
+if (linked && examples.some((x) => x.id === linked)) {
+  loadExample(linked);
+  history.replaceState(null, '', location.pathname);
+} else if (savedExample === 'custom' && savedSource) {
   exampleSelect.add(custom);
   exampleSelect.value = 'custom';
   editor.value = savedSource;

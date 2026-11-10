@@ -79,7 +79,7 @@ packages/
   remark/        # remark-skeudo: the same for remark and MDX, as a hast tree
 apps/
   cli/           # skeudo: checks sketches and renders them as standalone HTML pages
-  playground/    # live editor: preview, review panel, AST
+  playground/    # the skeudo.dev site: a landing page, and the live editor (preview, review panel, AST)
   vscode/        # VS Code extension: highlights sketches and renders them in the Markdown preview
 scripts/         # build helpers the packages and apps share
 ```
@@ -88,10 +88,10 @@ In the repository, packages export their TypeScript sources, so tests, the playg
 
 ```sh
 pnpm install
-pnpm dev             # the playground, at http://localhost:5173
+pnpm dev             # the site, at http://localhost:5173, with the playground at /playground/
 pnpm test            # every package; see spec/fixtures/README.md for the parser fixtures
 pnpm typecheck
-pnpm build           # static playground in apps/playground/dist
+pnpm build           # the static site in apps/playground/dist
 pnpm build:packages  # the libraries, in packages/*/dist
 pnpm build:cli       # CLI in apps/cli/dist/skeudo.js, see apps/cli/README.md
 pnpm package:cli     # CLI as apps/cli/skeudo.tgz, for npm install -g
