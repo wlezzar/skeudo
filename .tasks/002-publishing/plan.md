@@ -51,7 +51,11 @@ On the `publishing` branch.
 
 ## Stage 3: reach people
 
-- **skeudo.dev**: the playground on GitHub Pages, deployed by a workflow. The user adds the DNS records and verifies the domain in their GitHub account's Pages settings, so no other account can point a Pages site at it.
+- **skeudo.dev**: the playground on GitHub Pages, deployed by a workflow.
+  - [x] The user verified skeudo.dev in their GitHub account's Pages settings, so no other account can point a Pages site at it, and added the records in Cloudflare, "DNS only" (2026-11-10).
+  - [x] `.github/workflows/site.yml` builds the playground from a fresh checkout and deploys it on each push to `main`. A local build would bundle the private `local-examples/`.
+  - [ ] Pages turned on, with GitHub Actions as the source and skeudo.dev as the domain; the first deploy; HTTPS enforced once the certificate is issued.
+  - [ ] A link to GitHub in the playground's header, and skeudo.dev in the root README, once it is live.
 - **The VS Code extension**: the user tries it in a real VS Code first (`::repo` links into another repository, the amber warning on a changed file, `::doc` popovers). Then it goes to the Marketplace and Open VSX under the `skeudo` publisher, free on both on 2026-11-09, versioned on its own with tags like `vscode-v0.1.0`.
 - **An announcement**, once the site and the extension are out.
 

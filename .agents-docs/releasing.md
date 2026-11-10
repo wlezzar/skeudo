@@ -1,6 +1,6 @@
 # Building and releasing
 
-How the published packages are built, released, and checked the way a user installs them. The publishing plan, with its later stages, is `.tasks/002-publishing/plan.md`.
+How the published packages are built, released, and checked the way a user installs them, and how the site is deployed. The publishing plan, with its later stages, is `.tasks/002-publishing/plan.md`.
 
 ## What gets published
 
@@ -48,6 +48,15 @@ tar xzf "$S/tarballs/markdown-it-skeudo-0.1.0.tgz" -O package/package.json   # e
 - **npm** installs local tarballs together: `npm i $S/tarballs/*.tgz markdown-it unified remark-parse remark-rehype rehype-stringify`. npm finds `@skeudo/core@0.1.0` among them instead of fetching it.
 - **pnpm** needs `overrides` in the scratch project's `pnpm-workspace.yaml`, pointing `@skeudo/core` and `@skeudo/html` at their tarballs, or it looks for them on the registry. Its strict `node_modules` catches a missing dependency.
 - Check: an ESM script imports each package and renders a sketch, `require.resolve('@skeudo/html/skeudo.css')` finds the stylesheet, `npx skeudo check` runs, and a `.ts` file importing every package's types passes `tsc --noEmit` under `nodenext` and `bundler`.
+
+## The site
+
+skeudo.dev serves the playground from GitHub Pages. `.github/workflows/site.yml` builds `apps/playground` and deploys it on each push to `main`, and its runs are listed by `gh run list --workflow site.yml`.
+
+- **Never upload a local build.** `apps/playground/src/examples.ts` bundles every file in the gitignored `apps/playground/local-examples/`, which can hold private sketches. The workflow builds from a fresh checkout, which has none.
+- **The settings**: `gh api repos/wlezzar/skeudo/pages` shows the source (GitHub Actions), the custom domain and whether HTTPS is enforced. The user verified skeudo.dev in their GitHub account's Pages settings, so no other account can serve a site on it.
+- **DNS is on Cloudflare**, in the user's account: A and AAAA records on `skeudo.dev` for GitHub's four addresses, and `www` as a CNAME to `wlezzar.github.io`. They must stay "DNS only" (grey cloud), or GitHub can't see that the domain points at it, and can't renew its certificate. `dig +short skeudo.dev` prints GitHub's `185.199.*` addresses when they are right.
+- **`.dev` is HTTPS only** in browsers, so the site shows an error until GitHub has issued its certificate.
 
 ## Docs sites
 
