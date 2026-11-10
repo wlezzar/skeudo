@@ -9,6 +9,7 @@
     "package:vscode": "pnpm --filter skeudo-vscode package",
     "build:cli": "pnpm --filter skeudo build",
     "package:cli": "pnpm --filter skeudo package",
+    "release": "node scripts/release.mts",
     "test": "vitest run",
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },

@@ -1,6 +1,6 @@
 # Changelog
 
-Skeudo's packages share one version: `@skeudo/core`, `@skeudo/html`, `markdown-it-skeudo`, `remark-skeudo` and the `skeudo` CLI. Until 1.0, a minor version (0.1 to 0.2) can change the format in ways that break sketches, and a patch version doesn't. Each entry says first what changed in the format, then in the packages.
+Skeudo's packages share one version: `@skeudo/core`, `@skeudo/html`, `markdown-it-skeudo`, `remark-skeudo` and the `skeudo` CLI. Skeudo is in alpha, and its format will change in ways that break existing sketches. Until 1.0, those changes come in a minor version (0.1 to 0.2), never in a patch version. Each entry says first what changed in the format, then in the packages.
 
 ## 0.1.0
 

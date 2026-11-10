@@ -1,6 +1,6 @@
 # skeudo
 
-> Experimental, 0.x: the format and the commands can change in any minor version. [CHANGELOG.md](https://github.com/wlezzar/skeudo/blob/main/CHANGELOG.md) lists the changes.
+> **Alpha.** The format and the commands will change in ways that break existing sketches and scripts. Until 1.0, breaking changes come in minor versions (0.1 to 0.2), never in patches, and [CHANGELOG.md](https://github.com/wlezzar/skeudo/blob/main/CHANGELOG.md) lists each one.
 
 Checks [Skeudo](https://github.com/wlezzar/skeudo) sketches and renders them as standalone HTML pages. A sketch is pseudocode for code review where every outside effect is tagged, or, when it starts with a `data` line, a data model drawn as tables and a story of how their rows change. The format is defined in [spec/spec.md](https://github.com/wlezzar/skeudo/blob/main/spec/spec.md).
 

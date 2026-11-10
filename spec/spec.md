@@ -2,6 +2,8 @@
 
 Nov 9, 2026 · @Walid Lezzar
 
+> **Alpha.** This format will change in ways that break existing sketches. Until 1.0, breaking changes come in minor versions (0.1 to 0.2), never in patches, and [CHANGELOG.md](../CHANGELOG.md) lists each one.
+
 Skeudo is a set of small text formats for explaining code to a reader: a reviewer, a new teammate, or an agent's user. Each format is a **view**, like Mermaid's diagram types. A view has its own grammar and its own rendering, and every view goes through the same tools: the Markdown plugins, the VS Code extension, the CLI and the agent skill.
 
 ## Views

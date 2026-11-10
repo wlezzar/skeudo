@@ -3,6 +3,7 @@
   "displayName": "Skeudo",
   "description": "Highlights sketches in .skeudo files and Markdown fences, and renders them in the Markdown preview: pseudocode for code review, with every outside effect tagged.",
   "version": "0.1.0",
+  "private": true,
   "publisher": "wlezzar",
   "license": "MIT",
   "icon": "icon.png",
@@ -146,6 +147,7 @@
     "esbuild": "0.28.2",
     "markdown-it": "^15.0.3",
     "markdown-it-skeudo": "workspace:*",
+    "ovsx": "1.3.0",
     "vscode-oniguruma": "2.0.1",
     "vscode-textmate": "9.3.2"
   }

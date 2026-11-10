@@ -252,7 +252,18 @@ h2 {
 .hint a:hover { text-decoration: underline; }
 
 /* ---------- Get started ---------- */
-.get h2 { margin-bottom: 2rem; }
+.get h2 { margin-bottom: 1.4rem; }
+.alpha {
+  margin: 0 0 1.6rem;
+  padding: 12px 16px;
+  border: 1px solid color-mix(in srgb, var(--sk-orange) 40%, var(--border));
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--sk-orange) 7%, var(--surface));
+  color: var(--muted);
+  font-size: 15px;
+  text-wrap: pretty;
+}
+.alpha strong { color: var(--fg); font-weight: 650; }
 .cards {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

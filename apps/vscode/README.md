@@ -1,6 +1,6 @@
 # Skeudo for VS Code
 
-> Experimental, 0.x: the format can change in any minor version. [CHANGELOG.md](https://github.com/wlezzar/skeudo/blob/main/CHANGELOG.md) lists the changes.
+> **Alpha.** The format will change in ways that break existing sketches. Until 1.0, breaking changes come in the format's minor versions (0.1 to 0.2), and the extension's [changelog](https://github.com/wlezzar/skeudo/blob/main/apps/vscode/CHANGELOG.md) says which format each version reads.
 
 Highlights sketches in the editor and renders them in VS Code's Markdown preview. A sketch is pseudocode for code review where every outside effect is tagged, or, when it starts with a `data` line, a data model drawn as tables and a story of how their rows change. The format is defined in [spec/spec.md](https://github.com/wlezzar/skeudo/blob/main/spec/spec.md).
 

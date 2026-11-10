@@ -2,6 +2,8 @@
 
 Nov 9, 2026 · @Walid Lezzar
 
+> **Alpha.** This view will change in ways that break existing sketches. Until 1.0, breaking changes come in minor versions (0.1 to 0.2), never in patches, and [CHANGELOG.md](../CHANGELOG.md) lists each one.
+
 This is the data view of Skeudo. [spec.md](spec.md) covers what every view shares: the fence, the first line that names the view, and how warnings work.
 
 ## Purpose

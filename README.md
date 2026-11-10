@@ -1,6 +1,6 @@
 # Skeudo
 
-> Experimental, 0.x: the format can still change in any minor version. [CHANGELOG.md](CHANGELOG.md) lists the changes.
+> **Alpha.** Skeudo's format will change in ways that break existing sketches. Until 1.0, breaking changes come in minor versions (0.1 to 0.2), never in patches, and [CHANGELOG.md](CHANGELOG.md) lists each one.
 
 Small text formats for explaining code to a reader. Each format is a **view**:
 
@@ -97,6 +97,7 @@ pnpm build:packages  # the libraries, in packages/*/dist
 pnpm build:cli       # CLI in apps/cli/dist/skeudo.js, see apps/cli/README.md
 pnpm package:cli     # CLI as apps/cli/skeudo.tgz, for npm install -g
 pnpm package:vscode  # VS Code extension in apps/vscode/skeudo-vscode-<version>.vsix, see apps/vscode/README.md
+pnpm release         # publishes what the versions lack to npm, the Marketplace and Open VSX; --dry-run lists it
 ```
 
 Markdown files in `apps/playground/local-examples/` (gitignored) appear in the playground's Example menu, so you can try sketches of private code. Optional front matter sets the menu title and the base URL for source links in sketches without `::repo`:
