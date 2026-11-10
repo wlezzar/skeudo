@@ -3,9 +3,9 @@ description = "Build the skeudo CLI, pack it and install it globally, so `skeudo
 run = [
   "pnpm install",
   "pnpm package:cli",
-  "npm install -g apps/cli/skeudo-0.0.1.tgz",
+  "npm install -g apps/cli/skeudo.tgz",
 ]
 
 [tasks."install:skills"]
 description = "Install the skeudo agent skill globally: a copy in ~/.agents/skills, linked into Claude Code. Re-run after editing the skill"
-run = "npx skills add /home/wlezzar/projects/skeudo -g --symlink --yes"
+run = "npx skills add {{config_root}} -g --symlink --yes"

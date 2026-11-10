@@ -19,7 +19,7 @@ export interface Example {
  * Private examples: Markdown files in `apps/playground/local-examples/`, which is gitignored.
  * Optional front matter sets the menu title and the source link base:
  *   ---
- *   title: ovia 6b8da71
+ *   title: my-service a1b2c3d
  *   srcBase: https://github.com/org/repo/blob/<sha>/
  *   ---
  */

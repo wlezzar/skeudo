@@ -138,7 +138,7 @@ describe('render', () => {
     expect(stdout).toMatch(/^<!doctype html>\n/);
     expect(stdout).toContain('<title>Refunds</title>');
     expect(stdout).toContain('<div class="sketch sk-gutter"');
-    expect(stdout).toContain('<code class="sk-inline">');
+    expect(stdout).toContain('<span class="sk-inline">');
     expect(stdout).toContain('--sk-bg:'); // skeudo.css
     expect(stdout).toContain('main.bare'); // the page's own styles
     expect(stdout).toMatch(/<script>(?:(?!<\/script>)[\s\S])*mouseover/);

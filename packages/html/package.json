@@ -1,11 +1,34 @@
 {
   "name": "@skeudo/html",
-  "version": "0.0.0",
-  "private": true,
+  "version": "0.1.0",
+  "description": "Renders Skeudo sketches as HTML, with the stylesheet, and a browser script for hovering names and stepping through data stories.",
+  "keywords": ["skeudo", "pseudocode", "code-review", "data-model", "html", "hast"],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wlezzar/skeudo.git",
+    "directory": "packages/html"
+  },
+  "bugs": "https://github.com/wlezzar/skeudo/issues",
   "type": "module",
+  "sideEffects": ["*.css"],
   "exports": {
     ".": "./src/index.ts",
     "./skeudo.css": "./src/skeudo.css"
+  },
+  "publishConfig": {
+    "access": "public",
+    "exports": {
+      ".": { "types": "./dist/index.d.ts", "default": "./dist/index.js" },
+      "./skeudo.css": "./dist/skeudo.css"
+    },
+    "types": "./dist/index.d.ts"
+  },
+  "files": ["dist/**/*.js", "dist/**/*.d.ts", "dist/skeudo.css"],
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "build": "node ../../scripts/build-library.mts",
+    "prepack": "pnpm build"
   },
   "dependencies": {
     "@skeudo/core": "workspace:*",

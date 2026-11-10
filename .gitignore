@@ -4,3 +4,5 @@ dist/
 apps/playground/local-examples/
 *.vsix
 *.tgz
+packages/*/LICENSE
+apps/cli/LICENSE

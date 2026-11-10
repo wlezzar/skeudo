@@ -1,4 +1,4 @@
-import type { Diagnostic } from '../diagnostic';
+import type { Diagnostic } from '../diagnostic.ts';
 
 /** A note attached to a tag: `::write:redis[5 min ttl]`. */
 export interface Note {

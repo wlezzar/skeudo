@@ -4,11 +4,11 @@
  * first line (header.ts). Tools that host blocks, such as the Markdown plugins and the CLI, go through
  * this registry and never name a view, so adding a view means adding its folder and an entry here.
  */
-import { parseCode } from './code/parse';
-import type { CodeSketch, ParseOptions } from './code/types';
-import { parseData } from './data/parse';
-import type { DataSketch } from './data/types';
-import { firstLine, splitLines } from './header';
+import { parseCode } from './code/parse.ts';
+import type { CodeSketch, ParseOptions } from './code/types.ts';
+import { parseData } from './data/parse.ts';
+import type { DataSketch } from './data/types.ts';
+import { firstLine, splitLines } from './header.ts';
 
 /** A parsed block of any view, told apart by `view`. */
 export type Sketch = CodeSketch | DataSketch;

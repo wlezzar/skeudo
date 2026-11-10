@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import { parseRepo, type Repo } from '@skeudo/core';
-import { repoHref, srcBaseHref, toHtml } from '../src';
+import { repoHref, srcBaseHref, toHtml } from '../src/index.ts';
 
 const repo = (url: string) => parseRepo(url) as Repo;
 const RANGE = { path: 'app/profile.py', start: 12, end: 24 };

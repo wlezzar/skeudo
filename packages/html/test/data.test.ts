@@ -4,7 +4,7 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseData, replayData } from '@skeudo/core';
 import { describe, expect, test } from 'vitest';
-import { toHast, toHtml } from '../src';
+import { toHast, toHtml } from '../src/index.ts';
 
 const FIXTURES = fileURLToPath(new URL('../../../spec/fixtures/data/', import.meta.url));
 const CSS = readFileSync(new URL('../src/data/data.css', import.meta.url), 'utf8');

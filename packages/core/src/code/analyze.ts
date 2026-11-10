@@ -1,6 +1,6 @@
-import { CHANGE_KINDS } from './parse';
-import type { Diagnostic } from '../diagnostic';
-import type { ChangeKind, CodeSketch, Note, SketchLine, Tag, Variable } from './types';
+import { CHANGE_KINDS } from './parse.ts';
+import type { Diagnostic } from '../diagnostic.ts';
+import type { ChangeKind, CodeSketch, Note, SketchLine, Tag, Variable } from './types.ts';
 
 export interface Effect {
   line: number;

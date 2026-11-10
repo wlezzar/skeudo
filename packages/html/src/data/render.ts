@@ -27,8 +27,8 @@ import {
   type DataTable,
 } from '@skeudo/core';
 import type { Element as HastElement, ElementContent } from 'hast';
-import { h, text } from '../shared/hast';
-import { proportionalWidth, textWidth } from '../shared/width';
+import { h, text } from '../shared/hast.ts';
+import { proportionalWidth, textWidth } from '../shared/width.ts';
 
 /** The longest value shown whole, in `ch`. data.css cuts longer ones at the same width. */
 const MAX_WIDTH = 24;

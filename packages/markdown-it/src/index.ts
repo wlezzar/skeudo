@@ -38,7 +38,7 @@ export default function markdownItSkeudo(md: MarkdownIt, options: SkeudoPluginOp
       if (!tags) return inline(tokens, idx, opts, env, self);
       // Pills have no source links.
       const { srcHref: _srcHref, ...pillOptions } = options;
-      return `<code class="sk-inline">${tags.map((t) => tagHtml(t, pillOptions)).join(' ')}</code>`;
+      return `<span class="sk-inline">${tags.map((t) => tagHtml(t, pillOptions)).join(' ')}</span>`;
     };
   }
 }

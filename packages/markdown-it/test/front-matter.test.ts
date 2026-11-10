@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { frontMatter } from '../src/index';
+import { frontMatter } from '../src/index.ts';
 
 describe('frontMatter', () => {
   test('splits key: value lines from the document, and counts the lines they take', () => {

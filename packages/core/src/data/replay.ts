@@ -1,5 +1,5 @@
-import type { Diagnostic } from '../diagnostic';
-import type { DataChange, DataFound, DataFrame, DataRead, DataRow, DataSketch, DataState, DataValues } from './types';
+import type { Diagnostic } from '../diagnostic.ts';
+import type { DataChange, DataFound, DataFrame, DataRead, DataRow, DataSketch, DataState, DataValues } from './types.ts';
 
 /** A row while the story plays, with the line that set each of its values. */
 interface LiveRow extends DataRow {

@@ -36,3 +36,7 @@ VS Code can't run here ([environment.md](environment.md#known-limits)). What wor
 On 2026-11-09 a short CommonJS script in the scratchpad did this without Vitest: it replaced `Module._load` so that `require('vscode')` returns the stand-in, called `activate(...).extendMarkdownIt(md)` with the `markdown-it` from `apps/vscode`, and wrote the rendered Markdown into a page with `apps/vscode/dist/skeudo.css` and `apps/vscode/dist/preview.js` inlined. To mimic the preview rendering again on an edit, remove the sketches and insert their markup again: `enhance()` should start them at the frame they showed.
 
 That checks the bundle, the CSS and the theming, not VS Code itself. Tell the user what is left for them to check in the editor, such as links opening files and the highlighting.
+
+## Docs sites
+
+VitePress and Docusaurus sites built from the packed packages: see [releasing.md](releasing.md#docs-sites), which also lists what each site did to sketches.

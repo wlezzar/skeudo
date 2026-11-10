@@ -99,7 +99,7 @@ describe('Markdown preview', () => {
   test('renders sketch fences and inline tags, and leaves other code alone', () => {
     const html = preview().render(DOC);
     expect(html).toContain('data-sketch');
-    expect(html).toContain('<code class="sk-inline">');
+    expect(html).toContain('<span class="sk-inline">');
     expect(html).toContain('<pre><code data-line="11" class="code-line language-python">');
   });
 

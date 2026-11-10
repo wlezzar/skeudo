@@ -11,7 +11,7 @@
  * - Explanations: resting on a step, a substep or a table's name shows its explanation in the shared
  *   popover. Clicking its "i" mark keeps it open until Escape, a click elsewhere, or another mark.
  */
-import { Popover, POPOVER_DELAY } from '../shared/popover';
+import { Popover, POPOVER_DELAY } from '../shared/popover.ts';
 
 const SKETCH = '[data-skd]';
 const SVG = 'http://www.w3.org/2000/svg';
@@ -27,11 +27,15 @@ const current = (sketch: Element) => Number(sketch.getAttribute('data-skd-frame'
 function stepping(root: HTMLElement | Document): () => void {
   /**
    * The frame each sketch showed, by its position under root. A preview that renders the page again on
-   * each edit, as VS Code's does, then keeps the reader on their step.
+   * each edit, as VS Code's does, then keeps the reader on their step. It is forgotten when the page's
+   * address changes, since a site that swaps pages without reloading, as docs sites do, puts other
+   * sketches at the same positions.
    */
   const remembered = new Map<number, number>();
   const sketches = () => [...root.querySelectorAll<HTMLElement>(SKETCH)];
   const win = (root instanceof Document ? root : root.ownerDocument).defaultView;
+  const address = () => (win ? win.location.pathname + win.location.search : '');
+  let page = address();
   // The lines follow the rows when the sketch changes size, as when the page is resized or fonts load.
   const resized = win?.ResizeObserver ? new win.ResizeObserver((entries) => entries.forEach((e) => drawLines(e.target as HTMLElement))) : undefined;
   const watched = new Set<HTMLElement>();
@@ -71,6 +75,10 @@ function stepping(root: HTMLElement | Document): () => void {
 
   /** Starts each sketch not seen yet at its first frame, or the frame it showed before being rendered again. */
   function start() {
+    if (address() !== page) {
+      remembered.clear();
+      page = address();
+    }
     for (const sketch of watched) {
       if (sketch.isConnected) continue;
       resized?.unobserve(sketch);

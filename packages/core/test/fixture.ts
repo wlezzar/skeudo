@@ -1,4 +1,4 @@
-import { analyze, parseCode, parseData, replayData } from '../src';
+import { analyze, parseCode, parseData, replayData } from '../src/index.ts';
 
 /**
  * The expected output of a data fixture: the parsed tables and steps, with the rows each table holds

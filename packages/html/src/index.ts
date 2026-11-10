@@ -5,15 +5,15 @@
  */
 import { parse, type Sketch } from '@skeudo/core';
 import type { Element as HastElement } from 'hast';
-import { enhanceCode } from './code/enhance';
-import { codeToHast, type CodeHtmlOptions } from './code/render';
-import { enhanceData } from './data/enhance';
-import { dataToHast } from './data/render';
-import { serialize } from './shared/hast';
+import { enhanceCode } from './code/enhance.ts';
+import { codeToHast, type CodeHtmlOptions } from './code/render.ts';
+import { enhanceData } from './data/enhance.ts';
+import { dataToHast } from './data/render.ts';
+import { serialize } from './shared/hast.ts';
 
-export { escapeHtml } from './shared/hast';
-export { tagHast, tagHtml } from './code/render';
-export { repoHref, srcBaseHref, type GitHost, type SrcLink } from './code/links';
+export { escapeHtml } from './shared/hast.ts';
+export { tagHast, tagHtml } from './code/render.ts';
+export { repoHref, srcBaseHref, type GitHost, type SrcLink } from './code/links.ts';
 
 /** Options for rendering sketches. Each view reads the options it knows; the data view has none. */
 export interface HtmlOptions extends CodeHtmlOptions {}

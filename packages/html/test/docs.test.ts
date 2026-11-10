@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { toHtml } from '../src';
+import { toHtml } from '../src/index.ts';
 
 const SKETCH = [
   'settle(invoice):',

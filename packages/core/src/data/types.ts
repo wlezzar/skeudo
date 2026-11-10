@@ -1,4 +1,4 @@
-import type { Diagnostic } from '../diagnostic';
+import type { Diagnostic } from '../diagnostic.ts';
 
 /** A column of a table: `name`, or `name -> table` when it holds the ids of that table's rows. */
 export interface DataColumn {

@@ -1,11 +1,16 @@
 # skeudo
 
-Checks sketches and renders them as standalone HTML pages. A sketch is pseudocode for code review where every outside effect is tagged, or, when it starts with a `data` line, a data model drawn as tables and a story of how their rows change. The format, Skeudo, is defined in [spec/spec.md](https://github.com/wlezzar/skeudo/blob/main/spec/spec.md).
+> Experimental, 0.x: the format and the commands can change in any minor version. [CHANGELOG.md](https://github.com/wlezzar/skeudo/blob/main/CHANGELOG.md) lists the changes.
+
+Checks [Skeudo](https://github.com/wlezzar/skeudo) sketches and renders them as standalone HTML pages. A sketch is pseudocode for code review where every outside effect is tagged, or, when it starts with a `data` line, a data model drawn as tables and a story of how their rows change. The format is defined in [spec/spec.md](https://github.com/wlezzar/skeudo/blob/main/spec/spec.md).
 
 ```sh
+npm install -g skeudo               # or run it once with npx skeudo
 skeudo check docs/                  # warnings in every sketch under docs/
 skeudo render pr-123.md -o pr.html  # a page to send to someone
 ```
+
+It needs Node 22 or later.
 
 ## Input
 
@@ -56,15 +61,15 @@ srcBase: https://github.com/org/shop/blob/a1b2c3d/
 ---
 ```
 
-## Install
+## From the repository
 
-skeudo isn't on npm yet. Build it from the repository, with Node 20 or later:
+To try a change, build the CLI from the source:
 
 ```sh
 pnpm install
 pnpm build:cli                                   # apps/cli/dist/skeudo.js, one file with no dependencies
 node apps/cli/dist/skeudo.js check docs/
 
-pnpm package:cli                                 # apps/cli/skeudo-0.0.1.tgz
-npm install -g apps/cli/skeudo-0.0.1.tgz         # puts skeudo on your PATH
+pnpm package:cli                                 # apps/cli/skeudo.tgz
+npm install -g apps/cli/skeudo.tgz               # puts this build on your PATH
 ```

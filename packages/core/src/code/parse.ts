@@ -1,5 +1,5 @@
-import type { Diagnostic } from '../diagnostic';
-import { firstLine, splitLines } from '../header';
+import type { Diagnostic } from '../diagnostic.ts';
+import { firstLine, splitLines } from '../header.ts';
 import type {
   ChangeKind,
   CodeSketch,
@@ -12,7 +12,7 @@ import type {
   SrcLocation,
   Tag,
   Variable,
-} from './types';
+} from './types.ts';
 
 // Grammar pieces (see spec: Grammar).
 const NAME = String.raw`[\p{L}\p{N}_][\p{L}\p{N}_-]*`;

@@ -2,7 +2,7 @@
 // Bundles the CLI into dist/skeudo.js, one file with no dependencies. The workspace packages export
 // TypeScript sources, which Node can't load from a package.
 import { build as bundle } from 'esbuild';
-import { chmod, mkdir, readFile } from 'node:fs/promises';
+import { chmod, copyFile, mkdir, readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { readStylesheet } from '../../scripts/stylesheet.mts';
 
@@ -35,4 +35,8 @@ export async function build(outdir: string): Promise<string> {
   return outfile;
 }
 
-if (import.meta.main) await build(fileURLToPath(new URL('dist', import.meta.url)));
+if (import.meta.main) {
+  await build(fileURLToPath(new URL('dist', import.meta.url)));
+  // npm only packs a LICENSE from the package's own folder.
+  await copyFile(new URL('../../LICENSE', import.meta.url), new URL('LICENSE', import.meta.url));
+}

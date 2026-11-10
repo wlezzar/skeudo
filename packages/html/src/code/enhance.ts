@@ -1,7 +1,7 @@
 /*
  * Interaction for rendered code sketches, wired by enhance() in index.ts.
  */
-import { Popover, POPOVER_DELAY } from '../shared/popover';
+import { Popover, POPOVER_DELAY } from '../shared/popover.ts';
 
 /** Variable highlighting and explanations for the code sketches under `root`. */
 export function enhanceCode(root: HTMLElement | Document): () => void {

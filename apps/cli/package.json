@@ -1,14 +1,16 @@
 {
   "name": "skeudo",
-  "version": "0.0.1",
-  "description": "Checks sketches, pseudocode for code review with every outside effect tagged, and renders them as standalone HTML pages.",
-  "private": true,
-  "type": "module",
+  "version": "0.1.0",
+  "description": "Checks Skeudo sketches and renders them as standalone HTML pages: pseudocode for code review with every outside effect tagged, and data models drawn as tables with a story of how their rows change.",
+  "keywords": ["skeudo", "cli", "pseudocode", "code-review", "data-model", "markdown"],
+  "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/wlezzar/skeudo",
+    "url": "git+https://github.com/wlezzar/skeudo.git",
     "directory": "apps/cli"
   },
+  "bugs": "https://github.com/wlezzar/skeudo/issues",
+  "type": "module",
   "bin": {
     "skeudo": "./dist/skeudo.js"
   },
@@ -16,11 +18,12 @@
     "dist/skeudo.js"
   ],
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   },
   "scripts": {
     "build": "node build.mts",
-    "package": "node build.mts && pnpm pack"
+    "prepack": "node build.mts",
+    "package": "pnpm pack --out skeudo.tgz"
   },
   "devDependencies": {
     "@skeudo/core": "workspace:*",

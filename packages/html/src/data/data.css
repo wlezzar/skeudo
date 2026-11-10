@@ -246,6 +246,9 @@
   border-collapse: collapse;
   background: none;
 }
+/* Host table styles stay out, such as the striped head and rows of Docusaurus. */
+.skd .skd-grid thead,
+.skd .skd-grid tbody,
 .skd .skd-grid tr:nth-child(n) {
   border: 0;
   background: none;

@@ -80,9 +80,10 @@ export default function remarkSkeudo(options: Options = {}) {
       ...(i ? [{ type: 'text' as const, value: ' ' }] : []),
       tagHast(tag, options),
     ]);
-    // remark-rehype applies these to the `code` element it makes for inline code.
+    // remark-rehype applies these to the element it makes for inline code. It becomes a span, since site
+    // generators such as Docusaurus render every `code` element through their code block component.
     const data = code.data as (Data & { hProperties?: Properties }) | undefined;
-    code.data = Object.assign({}, data, { hProperties: { ...data?.hProperties, className: ['sk-inline'] }, hChildren: children });
+    code.data = Object.assign({}, data, { hName: 'span', hProperties: { ...data?.hProperties, className: ['sk-inline'] }, hChildren: children });
   }
 
   function visit(parent: Parent, file: MessageSink | undefined): void {

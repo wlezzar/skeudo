@@ -8,7 +8,7 @@ Vitest runs every `*.test.ts` in the repository from the root, with no per-packa
 | --- | --- |
 | `packages/core/test/fixtures.test.ts` | Each fixture parses into its `.json`. Every ```` ```skeudo ```` block in `spec/*.md` and `skills/skeudo/**/*.md` parses with no warnings. |
 | `packages/core/test/repo.test.ts` | `parseRepo` and `repoId`, the `::repo` URL forms. |
-| `packages/html/test/` | Rendered markup: data tables, steps, substeps, reads, folders and groups, `::doc`, `sk-fit-N` classes, source links. |
+| `packages/html/test/` | Rendered markup: data tables, steps, substeps, reads, folders and groups, `::doc`, code indentation, `sk-fit-N` classes, source links. |
 | `packages/markdown-it/test/`, `packages/remark/test/` | Fences, inline tag pills, front matter, MDX. |
 | `apps/cli/test/cli.test.ts` | Builds the CLI bundle into a temporary folder and runs it as an installed CLI would run. |
 | `apps/vscode/test/extension.test.ts` | The extension against a stand-in `vscode` module. Source links use real git repositories made in a temporary folder. |
@@ -25,7 +25,7 @@ Vitest runs every `*.test.ts` in the repository from the root, with no per-packa
 
 ## Running the packages from a script
 
-The packages export TypeScript with extensionless imports, so `node` can't import them, even with type stripping (`ERR_MODULE_NOT_FOUND`). Two ways that work:
+`node` strips types from `@skeudo/core`'s sources and imports them directly. It can't strip `@skeudo/html`'s, which use a parameter property (`ERR_UNSUPPORTED_TYPESCRIPT_SYNTAX`), and the Markdown plugins import html. Two ways that work for every package:
 
 - **Through the CLI**, for checking or rendering: `pnpm build:cli`, then `node apps/cli/dist/skeudo.js check -` reads a sketch from stdin. See [apps/cli/README.md](../apps/cli/README.md).
 - **Bundled with esbuild**, for anything else. Write the script in a scratch folder, outside the repository, and point esbuild at the CLI's dependencies, which link `@skeudo/core`, `@skeudo/html`, `markdown-it-skeudo` and `markdown-it`:

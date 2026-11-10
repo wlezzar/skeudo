@@ -1,10 +1,32 @@
 {
   "name": "markdown-it-skeudo",
-  "version": "0.0.0",
-  "private": true,
+  "version": "0.1.0",
+  "description": "A markdown-it plugin that renders Skeudo sketches: pseudocode with every outside effect tagged, and data models drawn as tables with a story of how their rows change.",
+  "keywords": ["skeudo", "markdown-it-plugin", "markdown-it", "markdown", "pseudocode", "code-review", "data-model"],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wlezzar/skeudo.git",
+    "directory": "packages/markdown-it"
+  },
+  "bugs": "https://github.com/wlezzar/skeudo/issues",
   "type": "module",
+  "sideEffects": false,
   "exports": {
     ".": "./src/index.ts"
+  },
+  "publishConfig": {
+    "access": "public",
+    "exports": {
+      ".": { "types": "./dist/index.d.ts", "default": "./dist/index.js" }
+    },
+    "types": "./dist/index.d.ts"
+  },
+  "files": ["dist/**/*.js", "dist/**/*.d.ts"],
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "build": "node ../../scripts/build-library.mts",
+    "prepack": "pnpm build"
   },
   "dependencies": {
     "@skeudo/core": "workspace:*",

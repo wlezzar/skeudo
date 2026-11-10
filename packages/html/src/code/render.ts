@@ -10,9 +10,9 @@ import {
   type Tag,
 } from '@skeudo/core';
 import type { Element as HastElement, ElementContent } from 'hast';
-import { classSafe, h, link, serialize, text } from '../shared/hast';
-import { textWidth } from '../shared/width';
-import { repoHref, type GitHost, type SrcLink } from './links';
+import { classSafe, h, link, serialize, text } from '../shared/hast.ts';
+import { textWidth } from '../shared/width.ts';
+import { repoHref, type GitHost, type SrcLink } from './links.ts';
 
 /** Options for rendering code sketches. */
 export interface CodeHtmlOptions extends ParseOptions {
@@ -231,9 +231,12 @@ function lineHast(line: SketchLine, sketch: CodeSketch, opts: CodeHtmlOptions, g
   const title = diags.length ? { title: diags.map((d) => d.message).join('\n') } : {};
   // A line with an explanation gets a marker after its code. Its circle is drawn by code.css, so it isn't copied.
   const mark = line.doc ? [h('span', { className: ['sk-doc-mark'], ariaHidden: 'true' })] : [];
+  // The indentation is an element with a width, not bare spaces, since some hosts drop whitespace-only
+  // text: VitePress compiles Markdown pages as Vue templates, and Vue does.
+  const ind = indent ? [h('span', { className: ['sk-ind'] }, text(indent))] : [];
   return h('div', { className: cls, style: `--d:${line.depth}`, dataLine: line.number, ...title }, [
     h('span', { className: ['sk-gut'] }, gutter ? gutterHast(line.src, sketch, opts) : []),
-    withDoc(h('span', { className: ['sk-code'] }, [...text(indent), ...(code.length ? code : text('​')), ...mark]), line.doc),
+    withDoc(h('span', { className: ['sk-code'] }, [...ind, ...(code.length ? code : text('​')), ...mark]), line.doc),
     h('span', { className: ['sk-tags'] }, tags),
   ]);
 }

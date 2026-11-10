@@ -67,6 +67,11 @@ a.sk-src:hover { color: var(--sk-blue); text-decoration: underline; }
   position: relative; /* holds the hidden text */
   white-space: pre;
 }
+/* A line's indentation: its spaces, and a width for hosts that drop them. */
+.sk-ind {
+  display: inline-block;
+  min-width: calc(var(--d, 0) * var(--sk-indent));
+}
 
 /* Tags wrap between each other, and a long note wraps beside its pill, so nothing is cut.
    The first line of tags stays centered on the code line. */
@@ -325,11 +330,8 @@ a.sk-file:hover { color: var(--sk-blue); text-decoration: underline; }
   font-size: 0.9em;
 }
 
-/* Inline code made only of tags, as rendered by markdown-it-skeudo.
-   The doubled class outranks host rules such as `.markdown-body code`. */
-code.sk-inline.sk-inline {
-  background: none;
-  padding: 0;
-  border: 0;
+/* Inline code made only of tags, as the Markdown plugins render it: a span, not a code element, so
+   host styles for inline code don't box the pills, and MDX sites don't turn them into code blocks. */
+.sk-inline {
   white-space: nowrap;
 }

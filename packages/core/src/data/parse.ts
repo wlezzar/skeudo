@@ -1,9 +1,9 @@
 /*
  * The data view's parser. See spec/data.md: Format.
  */
-import type { Diagnostic } from '../diagnostic';
-import { firstLine, splitLines } from '../header';
-import { checkData } from './replay';
+import type { Diagnostic } from '../diagnostic.ts';
+import { firstLine, splitLines } from '../header.ts';
+import { checkData } from './replay.ts';
 import {
   DATA_KINDS,
   type DataChange,
@@ -16,7 +16,7 @@ import {
   type DataSubstep,
   type DataTable,
   type DataValues,
-} from './types';
+} from './types.ts';
 
 const NAME = String.raw`[\p{L}\p{N}_.-]+`;
 const KIND = DATA_KINDS.join('|');

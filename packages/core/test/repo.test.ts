@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { parseRepo, repoId } from '../src';
+import { parseRepo, repoId } from '../src/index.ts';
 
 describe('parseRepo', () => {
   test('reads a remote and the revision after the last @ of its path', () => {

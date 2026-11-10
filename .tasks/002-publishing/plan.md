@@ -1,91 +1,95 @@
 # Publishing plan
 
-Written on 2026-11-01. Nothing is published yet. This is the plan to pick up later.
+Written on 2026-11-01 and rewritten on 2026-11-09 with the user's decisions. Skeudo goes public in three stages. Each stage lists its steps, and a step is checked off when it is done.
 
-## Goal
+## Decisions (2026-11-09)
 
-Publish every library to npm, under both scoped and unscoped names, and to JSR.
+- **License: MIT**, for the code and the spec. The copyright line reads "The Skeudo authors", which can change before the release.
+- **The move to the user's `skeudo` GitHub org is on hold** (2026-11-10). The repository goes public as `wlezzar/skeudo`, and the package links point there. If the move happens later, GitHub redirects the old links.
+- **The history goes public as it is** (2026-11-10). The user dropped the squash: an old commit names a private project and an old `mise.toml` held the user's home path, and both are fine to show. The commits carry the author's name and email, as any public repository's do.
+- **skeudo.dev** is registered (by the user) and will host the playground.
+- **Stages, not one big release.** 0.1 is npm only, published by hand. JSR, Changesets and publishing from CI come later.
+- **First readers are VS Code and docs sites.** So 0.1 checks the Markdown plugins in real docs sites, and rendering sketches in GitHub pull requests waits.
+- **The format promise until 1.0.** A minor version (0.1 to 0.2) may change the format in ways that break sketches. A patch version doesn't. Each format change is listed in `CHANGELOG.md`. There are still no aliases or migrations. A format change is released soon after it reaches `main`, since agents install the skill from `main` while renderers come from npm, and a skill ahead of the renderers writes sketches they can't draw.
 
-| Folder | npm | JSR |
+## Packages
+
+| Folder | npm | Later on JSR |
 |---|---|---|
 | `packages/core` | `@skeudo/core` | `@skeudo/core` |
 | `packages/html` | `@skeudo/html` | `@skeudo/html` |
 | `packages/markdown-it` | `markdown-it-skeudo` | `@skeudo/markdown-it` |
 | `packages/remark` | `remark-skeudo` | `@skeudo/remark` |
-| `apps/cli` | `skeudo` (installs the `skeudo` command) | `@skeudo/cli`, if JSR can run it (see "To check") |
+| `apps/cli` | `skeudo` (installs the `skeudo` command) | maybe `@skeudo/cli` |
 
-JSR only has scoped names, so the two plugins get `@skeudo/` names there. Not on npm: the VS Code extension (a separate track, below), the playground and the repo root.
+The five share one version, starting at 0.1.0. Not on npm: the VS Code extension (stage 3, versioned on its own), the playground (stage 3, on skeudo.dev) and the repository root.
 
-The five npm packages share one version, as `.tasks/001-design` decided. JSR versions match the npm ones.
+## Stage 1: prepare, in the private repository (Claude)
 
-## Where things stand (2026-11-01)
+On the `publishing` branch.
 
-- All five npm names were free, and so was `skeudo-vscode`. The `@skeudo` npm scope didn't exist.
-- The `skeudo` scope was free on JSR, and the `skeudo` name was free on GitHub.
-- Every package is `private: true` at 0.0.0 (the CLI at 0.0.1). There is no LICENSE and no CI. The GitHub repo is private.
-- The libraries export their TypeScript source (`./src/index.ts`) and have no build step. The CLI already bundles itself with esbuild into `dist/skeudo.js`.
-- This machine isn't logged in to npm.
+- [x] Remove what shouldn't go public: the private project's name in `apps/playground/src/examples.ts`, the home path in `mise.toml`. (Later the user decided that history may keep both.)
+- [x] `LICENSE` at the root. The build copies it into each published package, since npm only packs a LICENSE from the package's own folder.
+- [x] A build for the four libraries. Their sources import each other with `.ts` extensions, and `tsc -b` emits `dist/` with `.js` imports and declarations, through project references. `@skeudo/html` also gets one inlined `dist/skeudo.css`. The `exports` keep pointing at `src/` for development, and `publishConfig` points the published ones at `dist/`.
+- [x] Package details: description, license, repository with `directory`, homepage, bugs, keywords, `engines`, `files`, `sideEffects`. Version 0.1.0, and no `private` on the five published packages.
+- [x] READMEs for core, html and markdown-it, and the remark and CLI ones updated for npm. Each says "experimental, 0.x" at the top.
+- [x] The root README as the public front page: what Skeudo is, a picture of each view, and how to get each piece (the skill, VS Code, the CLI, docs sites). The layout and commands stay below for contributors.
+- [x] `CHANGELOG.md` with 0.1.0.
+- [x] Test the packed tarballs in scratch projects, with npm and pnpm: imports, types under `nodenext` and `bundler`, the CSS export, `npx skeudo check`.
+- [x] Docs sites: render a sketch in a VitePress site (markdown-it) and a Docusaurus site (remark and MDX), with the stylesheet and `enhance()`, and write the setup that worked into the plugin READMEs. Done, except dark mode in VitePress, now [issue #1](https://github.com/wlezzar/skeudo/issues/1).
+- [x] CI: a GitHub Actions workflow that installs, type-checks, tests and builds on every push and pull request. Its steps pass locally on Node 22 and 24; it hasn't run on GitHub yet.
+- [x] Update AGENTS.md (the format promise replaces "no backward compatibility") and `.agents-docs/` (the build, CI, releasing, traps found on this machine).
+
+## Stage 2: go public (both)
+
+1. The user creates the free `skeudo` npm org at https://www.npmjs.com/org/create ("create a new org"), and runs `npm login` on this machine.
+2. Merge `publishing` into `main` and push. Delete the merged remote branches (`remark-skeudo`, `vscode-extension`) if they shouldn't show.
+3. The user makes `wlezzar/skeudo` public (Settings, Danger Zone, Change visibility). Check that CI ran and passed on GitHub.
+4. `AGENTS.md` no longer says nothing is published.
+5. Publish 0.1.0 with `pnpm publish -r --access public` (never `npm publish`, since pnpm rewrites `workspace:*`). Claude confirms with the user right before, since a version can't be published twice. Tag `v0.1.0` and push the tag.
+6. Check: `npm view` each name, install each in a scratch project, and `npx skills add wlezzar/skeudo` installs the skill.
+
+## Stage 3: reach people
+
+- **skeudo.dev**: the playground on GitHub Pages, deployed by a workflow. The user adds the DNS records and verifies the domain in their GitHub account's Pages settings, so no other account can point a Pages site at it.
+- **The VS Code extension**: the user tries it in a real VS Code first (`::repo` links into another repository, the amber warning on a changed file, `::doc` popovers). Then it goes to the Marketplace and Open VSX under the `skeudo` publisher, free on both on 2026-11-09, versioned on its own with tags like `vscode-v0.1.0`.
+- **An announcement**, once the site and the extension are out.
+
+## Later
+
+- Changesets with a `fixed` group for the five packages, and a release workflow that publishes through npm trusted publishing (OIDC), with no stored token.
+- JSR. The `.ts` imports from stage 1 are what JSR needs. Each package gets a `jsr.json`, imports between Skeudo packages resolve to `jsr:@skeudo/...`, and exported functions need explicit types ("slow types").
+- Rendering sketches in GitHub pull requests, such as an Action that renders a PR's sketches and links them in a comment.
+- A React package.
 
 ## Rules that shaped this plan
 
-- npm forbids packages that exist only to reserve a name, so there will be no empty placeholders. A real 0.1.0 reserves the names.
-- Scoped names are protected once the npm org exists. But npm may treat a free org that hasn't published "within a reasonable time" as squatting (paid orgs never are), so create the org close to the first release.
-- Unscoped names (`skeudo`, `markdown-it-skeudo`, `remark-skeudo`) are only protected once published publicly. Until then anyone can take them.
-- Publishing makes the code public even if the repo stays private. npm packages contain the built JavaScript, and JSR serves the TypeScript source.
-- JSR can't host private packages. JSR versions generally can't be deleted after 24 hours.
-- Private npm packages need a paid plan and scoped names, so they don't fit this goal. We skip a private phase.
+- npm forbids packages that exist only to reserve a name, so a real 0.1.0 reserves the names.
+- Scoped names are protected once the npm org exists. Unscoped names (`skeudo`, `markdown-it-skeudo`, `remark-skeudo`) are only protected once published. All of them were still free on 2026-11-09.
+- npm may treat a free org that hasn't published "within a reasonable time" as squatting, so the org is created right before the release.
+- JSR versions generally can't be deleted after 24 hours, which is one more reason to wait until the format settles.
 
-## Decisions for wlezzar
+## To check later
 
-1. **License.** MIT is the usual choice for tools like these. Apache-2.0 if you want its patent grant. Nothing can be published until this is chosen.
-2. **Make the GitHub repo public at the first release?** The code is public once published anyway. A public repo makes the `repository` links, issues and JSR's source links work.
-3. **Publish the CLI on JSR** for Deno users, or keep it on npm only.
+- Whether npm still needs a package to exist before trusted publishing can be set up for it. It did in 2025.
+- Whether JSR can serve `skeudo.css` as an export, and whether JSR's npm compatibility layer supports `bin`, which decides whether the CLI goes on JSR.
 
-## Steps
+## What was built
 
-### 1. Reserve the scopes (wlezzar: needs your npm and GitHub accounts)
+Stage 1, on 2026-11-10:
 
-- Create the free `skeudo` org at https://www.npmjs.com/org/create. Pick "create a new org", not "convert my account".
-- Create the `skeudo` scope at https://jsr.io/new (sign in with GitHub).
-- Run `npm login` on this machine before the first publish.
+- **Build**: the libraries' relative imports end in `.ts`. Each has a `tsconfig.build.json` with project references, and `scripts/build-library.mts` runs `tsc -b`, inlines `skeudo.css` and copies the LICENSE. Declarations keep `.ts` in their imports, which TypeScript 5.6 and 7 resolve under `nodenext`, `node16` and `bundler`. `.agents-docs/releasing.md` has the details and how to check the tarballs.
+- **Node 22 or later** in `engines`, since Node 20 reached its end of life in April 2026. CI runs on 22 and 24.
+- **The copyright line** reads "The Skeudo authors". The CLI tarball is `apps/cli/skeudo.tgz`, without the version, so `mise.toml` doesn't change on each release.
+- **README pictures** are in `.github/readme/`, screenshots of the CLI's page.
+- **Fixes the docs-site checks found**, each through every layer it touches, with tests where the html package can test it:
+  - VitePress lost code indentation, since Vue drops whitespace-only text. The indentation is now a `span.sk-ind` with a width, and its spaces still copy.
+  - Docusaurus turned inline tag pills into code blocks, since it renders every `code` element through its code block. Pills are now a `span.sk-inline`, in both plugins.
+  - Docusaurus striped the data view's table heads. `data.css` resets `thead` and `tbody`.
+  - After moving to another page of a docs site, a data sketch started at the step of the sketch in the same position on the previous page. `enhance()` now forgets the remembered steps when the address changes, and still keeps them when VS Code renders the same page again.
 
-### 2. Make the packages publishable (Claude)
+## Open
 
-- Add a LICENSE at the root and copy it into each published package. npm only includes a LICENSE from the package's own folder.
-- Add a build step for the four libraries: compile to `dist/` (`.js` and `.d.ts`) and copy `skeudo.css` with the per-view stylesheets it imports. Keep `exports` pointing at `src/` for development, and use pnpm's `publishConfig` to point the published `exports` at `dist/`.
-- Fill in the metadata: description, license, repository (with `directory`), homepage, keywords (`remark-plugin`, `unified`, `markdown-it-plugin`, and so on), `engines` and `files`.
-- Write READMEs for core, html and markdown-it (remark and the CLI already have one). Mark them "experimental, 0.x" at the top.
-- Remove `private: true` from the five published packages only.
-- Always publish with `pnpm publish`, never `npm publish`. pnpm rewrites `workspace:*` to real version numbers.
-- Test the packed tarballs in a scratch project with both npm and pnpm: imports, types, the CSS export and `npx skeudo check`. Also do the outstanding Docusaurus check for remark-skeudo.
-
-### 3. Add JSR (Claude)
-
-- Add a `jsr.json` per package with its JSR name, version and exports. JSR takes TypeScript source, so no build is needed.
-- Make imports between Skeudo packages resolve to `jsr:@skeudo/...` when published to JSR, not to the npm packages.
-- Run `npx jsr publish --dry-run` and fix any "slow types" (exported functions need explicit types).
-
-### 4. CI and releases (Claude)
-
-- Add a GitHub Actions workflow that installs, type-checks, tests and builds on every push and pull request.
-- Set up Changesets with a `fixed` group for the five packages, so they share a version.
-- Add a release workflow. Changesets opens a "Version Packages" pull request, and merging it publishes to npm, then to JSR. A small script copies each package.json version into its jsr.json.
-- Publish without stored tokens: npm trusted publishing and JSR's GitHub Actions publishing, both through OIDC.
-
-### 5. First release, 0.1.0 (both)
-
-- Publish 0.1.0 to npm from this machine. Dependencies go first (core, html, then markdown-it, remark and the CLI), and `pnpm publish -r` handles that order. Then publish to JSR.
-- Set up trusted publishing for each package on npmjs.com, and link each JSR package to the GitHub repo. Later releases then go through CI.
-- Verify: `npm view` each name, install the packages in a scratch project, and check the JSR pages and scores.
-
-## To check when we start
-
-- Whether npm still needs a package to exist before trusted publishing can be set up for it. It did in 2025, which is why step 5 publishes the first version by hand.
-- Whether npm provenance works from a private repo.
-- Whether JSR can serve `skeudo.css` as an export, and whether JSR's npm compatibility layer supports `bin`. The second answer decides whether the CLI goes on JSR.
-- Whether the Changesets version step can update jsr.json directly, or the script is needed.
-
-## Related, separate tracks
-
-- **VS Code extension:** publish to the VS Code Marketplace and Open VSX, versioned separately (tags like `vscode-v0.1.0`). This needs a publisher ID and the license.
-- **React package:** after the first release.
+- **Dark mode in VitePress**, tracked in [issue #1](https://github.com/wlezzar/skeudo/issues/1). Sketches follow `data-theme` on `html` or else the system, and VitePress only adds a `dark` class, so they stay light in its dark mode, and dark when the system is dark and the reader picks light. Every site checked sets the CSS `color-scheme` (VitePress, Docusaurus, the CLI page), so the proposal is to define the colors with `light-dark()` and follow the page's `color-scheme`. The VS Code preview and the playground would set it too.
+- `@skeudo/html`'s declarations name `HTMLElement`, so a project with neither the `dom` lib nor `skipLibCheck` gets type errors from them. Left as it is.
+- The VS Code build warns that `apps/vscode/package.json` has no `"type"`. It did before this work; it belongs to the extension's stage.

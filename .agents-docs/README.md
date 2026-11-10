@@ -10,6 +10,7 @@ Notes for agents working on this repository: what the code and its docs don't sa
 | [visual-checks.md](visual-checks.md) | You change rendering, CSS or interaction, and need to see it. |
 | [environment.md](environment.md) | A tool fails, or you need to know what this machine has and what is installed globally. |
 | [project-state.md](project-state.md) | You need what is done, what is next, and where plans live. |
+| [releasing.md](releasing.md) | You change how packages are built or published, or check them as a user installs them, in a scratch project or a docs site. |
 
 ## Maintaining these docs
 

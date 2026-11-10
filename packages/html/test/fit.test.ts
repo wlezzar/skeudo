@@ -1,7 +1,7 @@
 /// <reference types="node" />
 import { readFileSync } from 'node:fs';
 import { describe, expect, test } from 'vitest';
-import { toHtml } from '../src';
+import { toHtml } from '../src/index.ts';
 
 const CSS = readFileSync(new URL('../src/code/code.css', import.meta.url), 'utf8');
 

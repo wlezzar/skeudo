@@ -3,8 +3,8 @@ import { globSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, test } from 'vitest';
-import { parse, VIEWS, type ViewName } from '../src';
-import { format, project, projectData } from './fixture';
+import { parse, VIEWS, type ViewName } from '../src/index.ts';
+import { format, project, projectData } from './fixture.ts';
 
 // Files are listed at run time rather than with import.meta.glob, which Vitest's module cache
 // would freeze, so a new fixture would not run until this file changed.

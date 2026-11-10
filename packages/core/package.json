@@ -1,7 +1,29 @@
 {
   "name": "@skeudo/core",
-  "version": "0.0.0",
-  "private": true,
+  "version": "0.1.0",
+  "description": "Parses Skeudo sketches, small text formats for explaining code: pseudocode with every outside effect tagged, and data models drawn as tables with a story of how their rows change.",
+  "keywords": ["skeudo", "pseudocode", "code-review", "data-model", "parser", "documentation"],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wlezzar/skeudo.git",
+    "directory": "packages/core"
+  },
+  "bugs": "https://github.com/wlezzar/skeudo/issues",
   "type": "module",
-  "exports": { ".": "./src/index.ts" }
+  "sideEffects": false,
+  "exports": { ".": "./src/index.ts" },
+  "publishConfig": {
+    "access": "public",
+    "exports": {
+      ".": { "types": "./dist/index.d.ts", "default": "./dist/index.js" }
+    },
+    "types": "./dist/index.d.ts"
+  },
+  "files": ["dist/**/*.js", "dist/**/*.d.ts"],
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "build": "node ../../scripts/build-library.mts",
+    "prepack": "pnpm build"
+  }
 }

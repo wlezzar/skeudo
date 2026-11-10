@@ -1,13 +1,17 @@
 # remark-skeudo
 
-A [remark](https://github.com/remarkjs/remark) plugin that renders sketches in Markdown and MDX. A sketch is pseudocode for code review where every outside effect is tagged, or, when it starts with a `data` line, a data model drawn as tables and a story of how their rows change. The format, Skeudo, is defined in [spec/spec.md](https://github.com/wlezzar/skeudo/blob/main/spec/spec.md).
+> Experimental, 0.x: the format and this API can change in any minor version. [CHANGELOG.md](https://github.com/wlezzar/skeudo/blob/main/CHANGELOG.md) lists the changes.
+
+A [remark](https://github.com/remarkjs/remark) plugin that renders [Skeudo](https://github.com/wlezzar/skeudo) sketches in Markdown and MDX. A sketch is pseudocode for code review where every outside effect is tagged, or, when it starts with a `data` line, a data model drawn as tables and a story of how their rows change. The format is defined in [spec/spec.md](https://github.com/wlezzar/skeudo/blob/main/spec/spec.md).
 
 - Every ` ```skeudo ` fence becomes a sketch (` ```sketch ` works too).
 - Inline code made only of tags, such as `` `::read:postgres.users` ``, becomes pills.
 
 The plugin builds the sketch as an HTML syntax tree (hast), not as an HTML string. MDX and the site generators built on remark use it as they would any other element, and plain unified pipelines need no `allowDangerousHtml` or rehype-raw.
 
-remark-skeudo isn't on npm yet. In this repository, packages use it as `"remark-skeudo": "workspace:*"`.
+```sh
+npm install remark-skeudo
+```
 
 ## Use
 
@@ -37,9 +41,34 @@ import remarkSkeudo from 'remark-skeudo';
 const js = await compile(mdx, { remarkPlugins: [remarkSkeudo] });
 ```
 
-Site generators built on remark take it in their list of remark plugins, such as `markdown.remarkPlugins` in Astro or `remarkPlugins` in a Docusaurus docs preset. To pass options, give the plugin and its options as a pair: `[remarkSkeudo, { inlineTags: false }]`.
+Site generators built on remark take it in their list of remark plugins, such as `markdown.remarkPlugins` in Astro. To pass options, give the plugin and its options as a pair: `[remarkSkeudo, { inlineTags: false }]`.
 
-The page needs the stylesheet, `@skeudo/html/skeudo.css`. For variable highlighting (hovering a name highlights its other uses, clicking pins the highlight), for showing explanations in a popover, and for stepping through data sketches, call `enhance()` from `@skeudo/html` in the browser once the page has loaded. Without it, code explanations are the browser's tooltips, and a data sketch shows its last step.
+The page needs the stylesheet, `@skeudo/html/skeudo.css`, and `enhance()` from `@skeudo/html`, called once in the browser for hovering names, explanations in a popover and stepping through data sketches. [`@skeudo/html`](https://www.npmjs.com/package/@skeudo/html) is installed with the plugin, and its README says what each one does.
+
+### Docusaurus
+
+Add the plugin to the docs preset, and a client module, in `docusaurus.config.mjs`:
+
+```js
+import remarkSkeudo from 'remark-skeudo';
+
+export default {
+  // ...
+  presets: [['classic', { docs: { remarkPlugins: [remarkSkeudo] } }]],
+  clientModules: ['./src/skeudo.js'],
+};
+```
+
+The client module, `src/skeudo.js`, loads the stylesheet and calls `enhance()`:
+
+```js
+import { enhance } from '@skeudo/html';
+import '@skeudo/html/skeudo.css';
+
+if (typeof document !== 'undefined') enhance(document);
+```
+
+Sketches follow the site's light and dark mode. Checked with Docusaurus 3.10, in `.md` and `.mdx` pages.
 
 ## Options
 

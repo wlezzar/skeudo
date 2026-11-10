@@ -1,12 +1,14 @@
 import markdownit from 'markdown-it';
 import { describe, expect, test } from 'vitest';
-import markdownItSkeudo, { sketchFences } from '../src/index';
+import { parseTagsOnly } from '@skeudo/core';
+import { tagHtml } from '@skeudo/html';
+import markdownItSkeudo, { sketchFences } from '../src/index.ts';
 
 const FENCE = '```';
 const fenced = (lang: string, body: string) => `${FENCE}${lang}\n${body}${FENCE}\n`;
 const SKETCH = 'get_user(id):\n    row = find(id)    ::read:postgres.users\n';
 
-const render = (source: string, options: { langs?: string[] } = {}) => markdownit().use(markdownItSkeudo, options).render(source);
+const render = (source: string, options: { langs?: string[]; inlineTags?: boolean } = {}) => markdownit().use(markdownItSkeudo, options).render(source);
 
 describe('sketch fences', () => {
   test('renders skeudo fences, and the sketch fences of documents written before the rename', () => {
@@ -37,5 +39,17 @@ describe('sketch fences', () => {
   test('finds the fences of both languages in a document', () => {
     const doc = `${fenced('skeudo', SKETCH)}\n${fenced('sketch', 'f(x):\n')}`;
     expect(sketchFences(markdownit(), doc).map((f) => f.content)).toEqual([SKETCH, 'f(x):\n']);
+  });
+});
+
+describe('inline tags', () => {
+  test('renders inline code made only of tags as pills, in a span', () => {
+    const [read, write] = parseTagsOnly('::read:postgres.users ::write?:redis')!;
+    expect(render('Reads `::read:postgres.users ::write?:redis`.')).toBe(`<p>Reads <span class="sk-inline">${tagHtml(read)} ${tagHtml(write)}</span>.</p>\n`);
+  });
+
+  test('leaves other inline code alone, and all inline code when inlineTags is false', () => {
+    expect(render('Set `x = 1`.')).toBe('<p>Set <code>x = 1</code>.</p>\n');
+    expect(render('Reads `::read:postgres`.', { inlineTags: false })).toBe('<p>Reads <code>::read:postgres</code>.</p>\n');
   });
 });

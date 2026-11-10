@@ -1,6 +1,6 @@
 # Agent guide
 
-Skeudo is a set of small text formats for explaining code to a reader. Each format is a **view**: `code` is pseudocode with every outside effect tagged, and `data` is a few tables with example rows and a story of how they change. The repository holds the spec, a parser, an HTML renderer, markdown-it and remark plugins, a CLI, a VS Code extension, a playground and an agent skill. Nothing is published yet.
+Skeudo is a set of small text formats for explaining code to a reader. Each format is a **view**: `code` is pseudocode with every outside effect tagged, and `data` is a few tables with example rows and a story of how they change. The repository holds the spec, a parser, an HTML renderer, markdown-it and remark plugins, a CLI, a VS Code extension, a playground and an agent skill. Nothing is published yet: the first release, 0.1.0, is being prepared in [.tasks/002-publishing/plan.md](.tasks/002-publishing/plan.md).
 
 Read only what your task needs:
 
@@ -20,7 +20,7 @@ Both must pass before you say a change works. A change to how sketches look also
 ## Rules
 
 - **The spec leads.** A format change starts in `spec/<view>.md` and goes through every layer. [changing-the-format.md](.agents-docs/changing-the-format.md) lists them.
-- **No backward compatibility yet.** Skeudo has no users. Change the format in place, with no aliases, migrations or deprecation warnings. Ask again once it is published.
+- **No backward compatibility until 1.0.** Change the format in place, with no aliases, migrations or deprecation warnings. Once 0.1.0 is out, a format change also needs a line in [CHANGELOG.md](CHANGELOG.md) and the next minor version (0.1 to 0.2), and is released soon after it reaches `main`, since agents install the skill from `main` while renderers come from npm.
 - **Read generated fixtures.** `pnpm test -u` rewrites `spec/fixtures/**/*.json`, and a new fixture gets its `.json` on its first run. Read each one against the spec before committing, since a wrong `.json` locks a bug in.
 - **Keep private code out of git.** `apps/playground/local-examples/` and untracked `.tasks/` folders can hold sketches of private repositories. Committed specs, fixtures and examples use invented models.
 - **Git.** Commit only when asked, and branch first if you are on `main`. "Push" means fast-forward `main` to the commit and push `origin main`. Don't open a pull request. A commit message is `type: What changed, so <why it matters>.`, then a body saying what changed in each package and how it was checked. See `git log -3`.

@@ -12,7 +12,7 @@ import { unified } from 'unified';
 import { describe, expect, test } from 'vitest';
 import { parseTagsOnly } from '@skeudo/core';
 import { srcBaseHref, tagHast, toHast } from '@skeudo/html';
-import remarkSkeudo, { type Options } from '../src/index';
+import remarkSkeudo, { type Options } from '../src/index.ts';
 
 const FENCE = '```';
 const fenced = (lang: string, body: string) => `${FENCE}${lang}\n${body}${FENCE}\n`;
@@ -96,10 +96,10 @@ describe('sketch fences', () => {
 
 describe('inline tags', () => {
   test('renders inline code made only of tags as pills', () => {
-    const [code] = find(hast('Reads `::read:postgres.users ::write?:redis`.'), 'sk-inline');
+    const [pill] = find(hast('Reads `::read:postgres.users ::write?:redis`.'), 'sk-inline');
     const tags = parseTagsOnly('::read:postgres.users ::write?:redis')!;
-    expect(code.tagName).toBe('code');
-    expect(bare(code.children)).toEqual(bare([tagHast(tags[0]), { type: 'text', value: ' ' }, tagHast(tags[1])]));
+    expect(pill.tagName).toBe('span');
+    expect(bare(pill.children)).toEqual(bare([tagHast(tags[0]), { type: 'text', value: ' ' }, tagHast(tags[1])]));
   });
 
   test('leaves other inline code alone, and all inline code when inlineTags is false', () => {
@@ -115,6 +115,6 @@ describe('MDX', () => {
     const out = renderToStaticMarkup(createElement(Content));
     expect(out).toContain('<div class="sketch" style="--sk-indent:4ch" data-sketch="true">');
     expect(out).toContain('<div class="sk-row" style="--d:1" data-line="2">');
-    expect(out).toContain('<code class="sk-inline"><span class="sk-tagw" title="::read:postgres.users">');
+    expect(out).toContain('<span class="sk-inline"><span class="sk-tagw" title="::read:postgres.users">');
   });
 });
