@@ -1,4 +1,4 @@
-data
+view: data
 [Media]
 table media(role)
 

@@ -1,2 +1,2 @@
-data
+view: data
 table media(role, type, role)

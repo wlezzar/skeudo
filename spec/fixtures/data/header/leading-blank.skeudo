@@ -1,5 +1,5 @@
 
-  data
+  view: data
 table media(role)
 
 Upload

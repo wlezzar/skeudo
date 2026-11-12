@@ -1,4 +1,4 @@
-data
+view: data
 [Checkout]
   What a purchase writes, in one transaction.
 table customer(name, email)

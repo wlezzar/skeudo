@@ -1,3 +1,4 @@
+view: code
 When a webhook arrives:
     event = parse(request.body)       ::untrusted:event
     if event.type is "invoice.paid":

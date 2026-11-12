@@ -1,18 +1,19 @@
 {
-  "signature": { "name": "settle_invoice", "params": ["invoice_id"], "line": 1 },
+  "signature": { "name": "settle_invoice", "params": ["invoice_id"], "line": 2 },
   "indentUnit": 4,
   "callDocs": {
     "apply_credits": "spends the oldest credits first and returns what is left to pay",
     "add_late_fee": "2% of the amount due, at most once per invoice"
   },
   "variables": {
-    "invoice_id": { "origin": "param", "line": 1 },
-    "invoice": { "origin": "binding", "line": 2 },
-    "remaining": { "origin": "binding", "line": 5 }
+    "invoice_id": { "origin": "param", "line": 2 },
+    "invoice": { "origin": "binding", "line": 3 },
+    "remaining": { "origin": "binding", "line": 6 }
   },
   "lines": [
+    { "number": 1, "depth": 0, "text": "", "blank": true },
     {
-      "number": 1,
+      "number": 2,
       "depth": 0,
       "text": "settle_invoice(invoice_id):",
       "signature": true,
@@ -25,10 +26,10 @@
       ]
     },
     {
-      "number": 2,
+      "number": 3,
       "depth": 1,
       "text": "invoice = load_invoice(invoice_id)        ::read:postgres.invoices[lookup by key]",
-      "parent": 1,
+      "parent": 2,
       "binding": "invoice",
       "tags": [
         {
@@ -49,11 +50,11 @@
       ]
     },
     {
-      "number": 3,
+      "number": 4,
       "depth": 1,
       "text": "if invoice is past due:                   ::doc[past the due date plus the account's grace period]",
       "header": true,
-      "parent": 1,
+      "parent": 2,
       "doc": "past the due date plus the account's grace period",
       "tags": [
         {
@@ -71,10 +72,10 @@
       ]
     },
     {
-      "number": 4,
+      "number": 5,
       "depth": 2,
       "text": "add_late_fee(invoice)                 ::write:postgres.invoices",
-      "parent": 3,
+      "parent": 4,
       "tags": [
         {
           "raw": "::write:postgres.invoices",
@@ -91,10 +92,10 @@
       ]
     },
     {
-      "number": 5,
+      "number": 6,
       "depth": 1,
       "text": "remaining = apply_credits(invoice)        ::write:postgres.credits",
-      "parent": 1,
+      "parent": 2,
       "binding": "remaining",
       "tags": [
         {
@@ -114,10 +115,10 @@
       ]
     },
     {
-      "number": 6,
+      "number": 7,
       "depth": 1,
       "text": "charge(invoice.card, remaining)           ::write:stripe",
-      "parent": 1,
+      "parent": 2,
       "tags": [{ "raw": "::write:stripe", "kind": "write", "value": "stripe", "trailing": true }],
       "segments": [
         { "type": "call", "text": "charge", "name": "charge" },
@@ -129,11 +130,11 @@
       ]
     },
     {
-      "number": 7,
+      "number": 8,
       "depth": 1,
       "text": "::doc:apply_credits[spends the oldest credits first and returns what is left to pay]",
       "hidden": true,
-      "parent": 1,
+      "parent": 2,
       "tags": [
         {
           "raw": "::doc:apply_credits[spends the oldest credits first and returns what is left to pay]",
@@ -150,11 +151,11 @@
       ]
     },
     {
-      "number": 8,
+      "number": 9,
       "depth": 1,
       "text": "::doc:add_late_fee[2% of the amount due, at most once per invoice]",
       "hidden": true,
-      "parent": 1,
+      "parent": 2,
       "tags": [
         {
           "raw": "::doc:add_late_fee[2% of the amount due, at most once per invoice]",

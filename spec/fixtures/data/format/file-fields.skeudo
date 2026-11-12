@@ -1,4 +1,4 @@
-data
+view: data
 table order(customer, state, total)
 folder exports(order -> order, customer.email, lines.count, total)
 

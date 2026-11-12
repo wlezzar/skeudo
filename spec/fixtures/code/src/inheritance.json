@@ -1,12 +1,13 @@
 {
-  "signature": { "name": "sync", "params": ["account"], "line": 1 },
+  "signature": { "name": "sync", "params": ["account"], "line": 2 },
   "file": "app/sync.py",
   "indentUnit": 4,
   "callSources": { "fetch": { "path": "lib/crm.py", "start": 5, "end": 5 } },
-  "variables": { "account": { "origin": "param", "line": 1 } },
+  "variables": { "account": { "origin": "param", "line": 2 } },
   "lines": [
+    { "number": 1, "depth": 0, "text": "", "blank": true },
     {
-      "number": 1,
+      "number": 2,
       "depth": 0,
       "text": "sync(account):                       ::src[app/sync.py:10-40]",
       "signature": true,
@@ -28,11 +29,11 @@
       ]
     },
     {
-      "number": 2,
+      "number": 3,
       "depth": 1,
       "text": "if account is stale:             ::src[12-30]",
       "header": true,
-      "parent": 1,
+      "parent": 2,
       "src": { "start": 12, "end": 30, "path": "app/sync.py" },
       "tags": [
         { "raw": "::src[12-30]", "kind": "src", "note": { "text": "12-30" }, "trailing": true }
@@ -45,19 +46,19 @@
       ]
     },
     {
-      "number": 3,
+      "number": 4,
       "depth": 2,
       "text": "for each page:",
       "header": true,
-      "parent": 2,
+      "parent": 3,
       "src": { "start": 12, "end": 30, "path": "app/sync.py", "inherited": true },
       "segments": [{ "type": "word", "text": "for" }, { "type": "text", "text": " each page:" }]
     },
     {
-      "number": 4,
+      "number": 5,
       "depth": 3,
       "text": "fetch(page)              ::read:crm",
-      "parent": 3,
+      "parent": 4,
       "src": { "start": 12, "end": 30, "path": "app/sync.py", "inherited": true },
       "tags": [{ "raw": "::read:crm", "kind": "read", "value": "crm", "trailing": true }],
       "segments": [
@@ -66,10 +67,10 @@
       ]
     },
     {
-      "number": 5,
+      "number": 6,
       "depth": 3,
       "text": "save(page)               ::write:postgres.pages ::src[20]",
-      "parent": 3,
+      "parent": 4,
       "src": { "start": 20, "end": 20, "path": "app/sync.py" },
       "tags": [
         {
@@ -86,19 +87,19 @@
       ]
     },
     {
-      "number": 6,
+      "number": 7,
       "depth": 1,
       "text": "done",
-      "parent": 1,
+      "parent": 2,
       "src": { "path": "app/sync.py", "start": 10, "end": 40, "inherited": true },
       "segments": [{ "type": "word", "text": "done" }]
     },
     {
-      "number": 7,
+      "number": 8,
       "depth": 1,
       "text": "::src:fetch[lib/crm.py:5]",
       "hidden": true,
-      "parent": 1,
+      "parent": 2,
       "src": { "path": "app/sync.py", "start": 10, "end": 40, "inherited": true },
       "tags": [
         {

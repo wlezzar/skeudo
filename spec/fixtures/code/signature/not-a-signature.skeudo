@@ -1,2 +1,3 @@
+view: code
 refresh(token) runs on a timer
 then the cache is warmed      ::write:redis

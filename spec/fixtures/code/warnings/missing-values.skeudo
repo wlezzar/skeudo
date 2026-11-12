@@ -1,3 +1,4 @@
+view: code
 f():
     ::read
     ::write[some note]

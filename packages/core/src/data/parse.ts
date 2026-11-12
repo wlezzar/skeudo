@@ -2,7 +2,7 @@
  * The data view's parser. See spec/data.md: Format.
  */
 import type { Diagnostic } from '../diagnostic.ts';
-import { firstLine, splitLines } from '../header.ts';
+import { readHeader, splitLines } from '../header.ts';
 import { checkData } from './replay.ts';
 import {
   DATA_KINDS,
@@ -52,8 +52,8 @@ type Warn = (line: number, message: string) => void;
  * `table name(col, col -> table)` or `folder name(col)`, or start a step. Indented lines under any of them
  * are its explanation, except under a step. There, a line starting with `>` starts a substep, and lines
  * starting with `+`, `~` or `-` and a space are changes and lines starting with `?` are reads, of the
- * substep or step above them. A blank line splits an explanation into paragraphs. A `data` header on the
- * first line is skipped. The diagnostics include what playing the story finds (checkData).
+ * substep or step above them. A blank line splits an explanation into paragraphs. The `view: data` header
+ * on the first line is skipped. The diagnostics include what playing the story finds (checkData).
  */
 export function parseData(source: string): DataSketch {
   const lines = splitLines(source);
@@ -72,8 +72,8 @@ export function parseData(source: string): DataSketch {
   /** Whether the line before continues the same paragraph of explanation. */
   let paragraph = false;
 
-  const header = firstLine(lines);
-  const start = header?.text === 'data' ? header.index + 1 : 0;
+  const header = readHeader(lines);
+  const start = header?.name === 'data' ? header.index + 1 : 0;
 
   for (let i = start; i < lines.length; i++) {
     const raw = lines[i];

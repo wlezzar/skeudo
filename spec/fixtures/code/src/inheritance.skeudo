@@ -1,3 +1,4 @@
+view: code
 sync(account):                       ::src[app/sync.py:10-40]
     if account is stale:             ::src[12-30]
         for each page:

@@ -1,3 +1,4 @@
+view: code
 ship(order):
     if order is paid:
         for each item in order

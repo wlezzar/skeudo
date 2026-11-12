@@ -1,0 +1,3 @@
+view:code
+get_user(id):
+  row = find(id) ::read:postgres.users

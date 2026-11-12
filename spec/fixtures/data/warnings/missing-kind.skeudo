@@ -1,4 +1,4 @@
-data
+view: data
 media(role, type)
 folder uploads(type)
 

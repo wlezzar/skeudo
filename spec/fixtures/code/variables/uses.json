@@ -1,15 +1,16 @@
 {
-  "signature": { "name": "rotate", "params": ["token", "user"], "line": 1 },
+  "signature": { "name": "rotate", "params": ["token", "user"], "line": 2 },
   "indentUnit": 4,
   "variables": {
-    "token": { "origin": "param", "line": 1 },
-    "user": { "origin": "param", "line": 1 },
-    "kind": { "origin": "binding", "line": 6 },
-    "result": { "origin": "binding", "line": 12 }
+    "token": { "origin": "param", "line": 2 },
+    "user": { "origin": "param", "line": 2 },
+    "kind": { "origin": "binding", "line": 7 },
+    "result": { "origin": "binding", "line": 13 }
   },
   "lines": [
+    { "number": 1, "depth": 0, "text": "", "blank": true },
     {
-      "number": 1,
+      "number": 2,
       "depth": 0,
       "text": "rotate(token, user):",
       "signature": true,
@@ -24,10 +25,10 @@
       ]
     },
     {
-      "number": 2,
+      "number": 3,
       "depth": 1,
       "text": "remember result for later",
-      "parent": 1,
+      "parent": 2,
       "segments": [
         { "type": "word", "text": "remember" },
         { "type": "text", "text": " " },
@@ -36,11 +37,11 @@
       ]
     },
     {
-      "number": 3,
+      "number": 4,
       "depth": 1,
       "text": "if token is expired:",
       "header": true,
-      "parent": 1,
+      "parent": 2,
       "segments": [
         { "type": "word", "text": "if" },
         { "type": "text", "text": " " },
@@ -49,30 +50,30 @@
       ]
     },
     {
-      "number": 4,
+      "number": 5,
       "depth": 2,
       "text": "token-rotated event fires",
-      "parent": 3,
+      "parent": 4,
       "segments": [
         { "type": "word", "text": "token-rotated" },
         { "type": "text", "text": " event fires" }
       ]
     },
     {
-      "number": 5,
+      "number": 6,
       "depth": 2,
       "text": "pre-token checks run",
-      "parent": 3,
+      "parent": 4,
       "segments": [
         { "type": "word", "text": "pre-token" },
         { "type": "text", "text": " checks run" }
       ]
     },
     {
-      "number": 6,
+      "number": 7,
       "depth": 2,
       "text": "kind = token::Kind::Fresh",
-      "parent": 3,
+      "parent": 4,
       "binding": "kind",
       "segments": [
         { "type": "var", "text": "kind", "name": "kind", "definition": true },
@@ -80,10 +81,10 @@
       ]
     },
     {
-      "number": 7,
+      "number": 8,
       "depth": 2,
       "text": "user.token = issue(user.id)       ::write:oauth",
-      "parent": 3,
+      "parent": 4,
       "tags": [{ "raw": "::write:oauth", "kind": "write", "value": "oauth", "trailing": true }],
       "segments": [
         { "type": "var", "text": "user", "name": "user" },
@@ -95,10 +96,10 @@
       ]
     },
     {
-      "number": 8,
+      "number": 9,
       "depth": 2,
       "text": "Token is not token",
-      "parent": 3,
+      "parent": 4,
       "segments": [
         { "type": "word", "text": "Token" },
         { "type": "text", "text": " is not " },
@@ -106,11 +107,11 @@
       ]
     },
     {
-      "number": 9,
+      "number": 10,
       "depth": 1,
       "text": "if kind is set:",
       "header": true,
-      "parent": 1,
+      "parent": 2,
       "segments": [
         { "type": "word", "text": "if" },
         { "type": "text", "text": " " },
@@ -119,10 +120,10 @@
       ]
     },
     {
-      "number": 10,
+      "number": 11,
       "depth": 2,
       "text": "tell user's team",
-      "parent": 9,
+      "parent": 10,
       "segments": [
         { "type": "word", "text": "tell" },
         { "type": "text", "text": " " },
@@ -131,20 +132,20 @@
       ]
     },
     {
-      "number": 11,
+      "number": 12,
       "depth": 2,
       "text": "user's session ends",
-      "parent": 9,
+      "parent": 10,
       "segments": [
         { "type": "var", "text": "user", "name": "user" },
         { "type": "text", "text": "'s session ends" }
       ]
     },
     {
-      "number": 12,
+      "number": 13,
       "depth": 1,
       "text": "result = done",
-      "parent": 1,
+      "parent": 2,
       "binding": "result",
       "segments": [
         { "type": "var", "text": "result", "name": "result", "definition": true },

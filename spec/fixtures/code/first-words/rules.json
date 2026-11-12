@@ -1,13 +1,14 @@
 {
-  "signature": { "name": "check", "params": ["cached"], "line": 1 },
+  "signature": { "name": "check", "params": ["cached"], "line": 2 },
   "indentUnit": 4,
   "variables": {
-    "cached": { "origin": "param", "line": 1 },
-    "row": { "origin": "binding", "line": 11 }
+    "cached": { "origin": "param", "line": 2 },
+    "row": { "origin": "binding", "line": 12 }
   },
   "lines": [
+    { "number": 1, "depth": 0, "text": "", "blank": true },
     {
-      "number": 1,
+      "number": 2,
       "depth": 0,
       "text": "check(cached):",
       "signature": true,
@@ -20,10 +21,10 @@
       ]
     },
     {
-      "number": 2,
+      "number": 3,
       "depth": 1,
       "text": "return cached",
-      "parent": 1,
+      "parent": 2,
       "segments": [
         { "type": "word", "text": "return" },
         { "type": "text", "text": " " },
@@ -31,78 +32,78 @@
       ]
     },
     {
-      "number": 3,
-      "depth": 1,
-      "text": "else:",
-      "parent": 1,
-      "segments": [{ "type": "word", "text": "else" }, { "type": "text", "text": ":" }]
-    },
-    {
       "number": 4,
       "depth": 1,
-      "text": "re-check the lock",
-      "parent": 1,
-      "segments": [{ "type": "word", "text": "re-check" }, { "type": "text", "text": " the lock" }]
+      "text": "else:",
+      "parent": 2,
+      "segments": [{ "type": "word", "text": "else" }, { "type": "text", "text": ":" }]
     },
     {
       "number": 5,
       "depth": 1,
-      "text": "don't retry",
-      "parent": 1,
-      "segments": [{ "type": "word", "text": "don't" }, { "type": "text", "text": " retry" }]
+      "text": "re-check the lock",
+      "parent": 2,
+      "segments": [{ "type": "word", "text": "re-check" }, { "type": "text", "text": " the lock" }]
     },
     {
       "number": 6,
       "depth": 1,
-      "text": "Über cool",
-      "parent": 1,
-      "segments": [{ "type": "word", "text": "Über" }, { "type": "text", "text": " cool" }]
+      "text": "don't retry",
+      "parent": 2,
+      "segments": [{ "type": "word", "text": "don't" }, { "type": "text", "text": " retry" }]
     },
     {
       "number": 7,
       "depth": 1,
+      "text": "Über cool",
+      "parent": 2,
+      "segments": [{ "type": "word", "text": "Über" }, { "type": "text", "text": " cool" }]
+    },
+    {
+      "number": 8,
+      "depth": 1,
       "text": "cached is stale",
-      "parent": 1,
+      "parent": 2,
       "segments": [
         { "type": "var", "text": "cached", "name": "cached" },
         { "type": "text", "text": " is stale" }
       ]
     },
     {
-      "number": 8,
+      "number": 9,
       "depth": 1,
       "text": "cache.set(key)",
-      "parent": 1,
+      "parent": 2,
       "segments": [
         { "type": "call", "text": "cache.set", "name": "cache.set" },
         { "type": "text", "text": "(key)" }
       ]
     },
     {
-      "number": 9,
+      "number": 10,
       "depth": 1,
       "text": "validate(input)",
-      "parent": 1,
+      "parent": 2,
       "segments": [
         { "type": "call", "text": "validate", "name": "validate" },
         { "type": "text", "text": "(input)" }
       ]
     },
     {
-      "number": 10,
+      "number": 11,
       "depth": 1,
       "text": "std::mem::take(buf)",
-      "parent": 1,
+      "parent": 2,
       "segments": [
         { "type": "call", "text": "std::mem::take", "name": "std::mem::take" },
         { "type": "text", "text": "(buf)" }
       ]
     },
     {
-      "number": 11,
+      "number": 12,
       "depth": 1,
       "text": "row = load()",
-      "parent": 1,
+      "parent": 2,
       "binding": "row",
       "segments": [
         { "type": "var", "text": "row", "name": "row", "definition": true },
@@ -112,39 +113,39 @@
       ]
     },
     {
-      "number": 12,
+      "number": 13,
       "depth": 1,
       "text": "::fail:Nope",
-      "parent": 1,
+      "parent": 2,
       "tags": [{ "raw": "::fail:Nope", "kind": "fail", "value": "Nope" }],
       "segments": [{ "type": "tag", "raw": "::fail:Nope" }]
     },
     {
-      "number": 13,
-      "depth": 1,
-      "text": "42 is the answer",
-      "parent": 1,
-      "segments": [{ "type": "text", "text": "42 is the answer" }]
-    },
-    {
       "number": 14,
       "depth": 1,
-      "text": "\"quoted\" text",
-      "parent": 1,
-      "segments": [{ "type": "text", "text": "\"quoted\" text" }]
+      "text": "42 is the answer",
+      "parent": 2,
+      "segments": [{ "type": "text", "text": "42 is the answer" }]
     },
     {
       "number": 15,
       "depth": 1,
-      "text": "_private stuff",
-      "parent": 1,
-      "segments": [{ "type": "text", "text": "_private stuff" }]
+      "text": "\"quoted\" text",
+      "parent": 2,
+      "segments": [{ "type": "text", "text": "\"quoted\" text" }]
     },
     {
       "number": 16,
       "depth": 1,
+      "text": "_private stuff",
+      "parent": 2,
+      "segments": [{ "type": "text", "text": "_private stuff" }]
+    },
+    {
+      "number": 17,
+      "depth": 1,
       "text": "Done.",
-      "parent": 1,
+      "parent": 2,
       "segments": [{ "type": "text", "text": "Done." }]
     }
   ]

@@ -1,0 +1,3 @@
+view: code
+view: data
+  read the rows ::read:db

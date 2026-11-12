@@ -9,9 +9,9 @@ import { codePatterns, codeRepository } from './code.ts';
 import { dataPatterns, dataRepository } from './data.ts';
 import { LINE_START, NEVER, type Rule } from './shared.ts';
 
-/** A view's name alone on a sketch's first line, which picks the rules for the rest of the sketch. */
-const header = (view: string, patterns: Rule[]): Rule => ({
-  begin: String.raw`${LINE_START}(${view})\s*$`,
+/** `view:` and a name alone on a sketch's first line, which picks the rules for the rest of the sketch. */
+const header = (name: string, patterns: Rule[]): Rule => ({
+  begin: String.raw`${LINE_START}(view:\s*${name})\s*$`,
   beginCaptures: { 1: { name: 'keyword.control.view.skeudo' } },
   end: NEVER,
   patterns,
@@ -19,8 +19,8 @@ const header = (view: string, patterns: Rule[]): Rule => ({
 
 /**
  * The first line that isn't blank picks the view. Each rule here runs to the end of the sketch, so once
- * one starts the others are no longer tried, and a later line reading `data` is just a line of code.
- * Without a header, the sketch is code.
+ * one starts the others are no longer tried, and a later line reading `view: data` is just a line of code.
+ * Without a header, the sketch is code, and a first line naming no view, such as `view: dat`, is its first line.
  */
 const VIEWS: Rule[] = [header('data', dataPatterns), header('code', codePatterns), ...codePatterns];
 

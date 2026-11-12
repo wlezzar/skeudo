@@ -86,10 +86,10 @@ describe('sketch fences', () => {
   });
 
   test("reports the parser's warnings on the file, at their line in the document", () => {
-    const doc = `# Doc\n\n${fenced('skeudo', 'f():\n    a     ::changed\n')}`;
+    const doc = `# Doc\n\n${fenced('skeudo', 'view: code\nf():\n    a     ::changed\n')}`;
     const file = unified().use(remarkParse).use(remarkSkeudo).use(remarkRehype).use(rehypeStringify).processSync(doc);
     expect(file.messages.map((m) => [m.line, m.source, m.reason])).toEqual([
-      [5, 'remark-skeudo', '::changed needs a note saying how, as in ::changed[was …].'],
+      [6, 'remark-skeudo', '::changed needs a note saying how, as in ::changed[was …].'],
     ]);
   });
 });

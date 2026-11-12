@@ -2,7 +2,7 @@
 
 > **Alpha.** The format and this API will change in ways that break existing sketches and code. Until 1.0, breaking changes come in minor versions (0.1 to 0.2), never in patches, and [CHANGELOG.md](https://github.com/wlezzar/skeudo/blob/main/CHANGELOG.md) lists each one.
 
-A [markdown-it](https://github.com/markdown-it/markdown-it) plugin that renders [Skeudo](https://github.com/wlezzar/skeudo) sketches. A sketch is pseudocode for code review where every outside effect is tagged, or, when it starts with a `data` line, a data model drawn as tables and a story of how their rows change. The format is defined in [spec/spec.md](https://github.com/wlezzar/skeudo/blob/main/spec/spec.md).
+A [markdown-it](https://github.com/markdown-it/markdown-it) plugin that renders [Skeudo](https://github.com/wlezzar/skeudo) sketches. A sketch is pseudocode for code review where every outside effect is tagged, or a data model drawn as tables and a story of how their rows change, and its first line says which: `view: code` or `view: data`. The format is defined in [spec/spec.md](https://github.com/wlezzar/skeudo/blob/main/spec/spec.md).
 
 - Every ` ```skeudo ` fence becomes a sketch (` ```sketch ` works too).
 - Inline code made only of tags, such as `` `::read:postgres.users` ``, becomes pills.

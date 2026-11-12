@@ -41,6 +41,7 @@ const DOC = lines(
   'Reads `::read:postgres.orders` first.',
   '',
   '```skeudo',
+  'view: code',
   'cancel_order(order_id):                  ::src[shop/orders.py:40-60]',
   '    order = load_order(order_id)         ::read:postgres.orders ::src[42]',
   '    refund(order.payment)                ::write:stripe',
@@ -48,12 +49,13 @@ const DOC = lines(
   '```',
   '',
   '```skeudo',
+  'view: code',
   'notify(order):',
   '   send it                              ::write',
   '```',
 );
 
-const CLEAN = lines('get_user(id):', '    row = find(id)    ::read:postgres.users', '    return row');
+const CLEAN = lines('view: code', 'get_user(id):', '    row = find(id)    ::read:postgres.users', '    return row');
 
 describe('check', () => {
   test('reports warnings at their lines in the document, and exits with 1', async () => {
@@ -61,9 +63,9 @@ describe('check', () => {
     expect(skeudo(['check', 'doc.md'])).toEqual({
       code: 1,
       stdout: lines(
-        'doc.md:13: warning: ::fail needs a name, as in ::fail:NotFound.',
-        'doc.md:18: warning: Indent by 2 or 4 spaces per level, not 3.',
-        'doc.md:18: warning: ::write needs the system it touches, as in ::write:postgres.',
+        'doc.md:14: warning: ::fail needs a name, as in ::fail:NotFound.',
+        'doc.md:20: warning: Indent by 2 or 4 spaces per level, not 3.',
+        'doc.md:20: warning: ::write needs the system it touches, as in ::write:postgres.',
         'Checked 2 sketches: 3 warnings.',
       ),
       stderr: '',
@@ -75,9 +77,9 @@ describe('check', () => {
     expect(skeudo(['check', 'old.md'])).toEqual({
       code: 1,
       stdout: lines(
-        'old.md:13: warning: ::fail needs a name, as in ::fail:NotFound.',
-        'old.md:18: warning: Indent by 2 or 4 spaces per level, not 3.',
-        'old.md:18: warning: ::write needs the system it touches, as in ::write:postgres.',
+        'old.md:14: warning: ::fail needs a name, as in ::fail:NotFound.',
+        'old.md:20: warning: Indent by 2 or 4 spaces per level, not 3.',
+        'old.md:20: warning: ::write needs the system it touches, as in ::write:postgres.',
         'Checked 2 sketches: 3 warnings.',
       ),
       stderr: '',
@@ -96,7 +98,7 @@ describe('check', () => {
 
   test('searches directories for Markdown and .skeudo files, skipping .sketch files, hidden folders and node_modules', async () => {
     await files({
-      'tree/b.md': '```skeudo\nf(x):\n    ::fail\n```\n',
+      'tree/b.md': '```skeudo\nview: code\nf(x):\n    ::fail\n```\n',
       'tree/a/z.skeudo': CLEAN,
       'tree/a/design.sketch': 'f(x):\n    ::fail\n',
       'tree/a/notes.txt': 'f(x):\n    ::fail\n',
@@ -105,27 +107,27 @@ describe('check', () => {
     });
     expect(skeudo(['check', 'tree'])).toMatchObject({
       code: 1,
-      stdout: lines(`${join('tree', 'b.md')}:3: warning: ::fail needs a name, as in ::fail:NotFound.`, 'Checked 2 sketches in 2 files: 1 warning.'),
+      stdout: lines(`${join('tree', 'b.md')}:4: warning: ::fail needs a name, as in ::fail:NotFound.`, 'Checked 2 sketches in 2 files: 1 warning.'),
     });
   });
 
   test('checks a named file whatever its extension, as Markdown when it has a sketch fence', async () => {
-    await files({ 'pr.txt': 'Summary\n\n~~~sketch\nf(x):\n    ::fail\n~~~\n', 'raw.txt': 'f(x):\n    ::fail\n' });
+    await files({ 'pr.txt': 'Summary\n\n~~~sketch\nview: code\nf(x):\n    ::fail\n~~~\n', 'raw.txt': 'view: code\nf(x):\n    ::fail\n' });
     expect(skeudo(['check', 'pr.txt', 'raw.txt']).stdout).toBe(
       lines(
-        'pr.txt:5: warning: ::fail needs a name, as in ::fail:NotFound.',
-        'raw.txt:2: warning: ::fail needs a name, as in ::fail:NotFound.',
+        'pr.txt:6: warning: ::fail needs a name, as in ::fail:NotFound.',
+        'raw.txt:3: warning: ::fail needs a name, as in ::fail:NotFound.',
         'Checked 2 sketches in 2 files: 2 warnings.',
       ),
     );
   });
 
   test('reads stdin with no path or with -', () => {
-    const sketch = 'f(x):\n    ::read\n';
-    const expected = lines('<stdin>:2: warning: ::read needs the system it touches, as in ::read:postgres.', 'Checked 1 sketch: 1 warning.');
+    const sketch = 'view: code\nf(x):\n    ::read\n';
+    const expected = lines('<stdin>:3: warning: ::read needs the system it touches, as in ::read:postgres.', 'Checked 1 sketch: 1 warning.');
     expect(skeudo(['check'], sketch).stdout).toBe(expected);
     expect(skeudo(['check', '-'], sketch).stdout).toBe(expected);
-    expect(skeudo(['check'], DOC).stdout).toContain('<stdin>:13: warning: ::fail needs a name');
+    expect(skeudo(['check'], DOC).stdout).toContain('<stdin>:14: warning: ::fail needs a name');
     expect(skeudo(['check'], '').stdout).toBe('No sketches found.\n');
   });
 });
@@ -146,7 +148,7 @@ describe('render', () => {
     // The front matter isn't shown.
     expect(stdout).not.toContain('srcBase');
     // Warnings go to stderr, so stdout holds only the page.
-    expect(stderr).toBe(lines('doc.md:13: warning: ::fail needs a name, as in ::fail:NotFound.', 'doc.md:18: warning: Indent by 2 or 4 spaces per level, not 3.', 'doc.md:18: warning: ::write needs the system it touches, as in ::write:postgres.'));
+    expect(stderr).toBe(lines('doc.md:14: warning: ::fail needs a name, as in ::fail:NotFound.', 'doc.md:20: warning: Indent by 2 or 4 spaces per level, not 3.', 'doc.md:20: warning: ::write needs the system it touches, as in ::write:postgres.'));
   });
 
   test('links ::src locations under srcBase from the front matter, or --src-base', async () => {
@@ -178,12 +180,12 @@ describe('render', () => {
 
   test('titles the page by front matter, then the first heading, the signature and the file name', async () => {
     const title = (args: string[], input = '') => /<title>(.*)<\/title>/.exec(skeudo(args, input).stdout)?.[1];
-    await files({ 'cancel.md': DOC.replace('title: Refunds\n', ''), 'flow.skeudo': 'Every night:\n    purge old rows    ::write:postgres\n' });
+    await files({ 'cancel.md': DOC.replace('title: Refunds\n', ''), 'flow.skeudo': 'view: code\nEvery night:\n    purge old rows    ::write:postgres\n' });
     expect(title(['render', 'cancel.md'])).toBe('Cancel an order');
-    expect(title(['render'], '# Use `get_user` & <more>\n\n```skeudo\nf(x):\n```\n')).toBe('Use get_user &amp; &lt;more&gt;');
+    expect(title(['render'], '# Use `get_user` & <more>\n\n```skeudo\nview: code\nf(x):\n```\n')).toBe('Use get_user &amp; &lt;more&gt;');
     expect(title(['render'], CLEAN)).toBe('get_user');
     expect(title(['render', 'flow.skeudo'])).toBe('flow');
-    expect(title(['render'], 'Every night:\n    purge    ::write:postgres\n')).toBe('Sketch');
+    expect(title(['render'], 'view: code\nEvery night:\n    purge    ::write:postgres\n')).toBe('Sketch');
   });
 
   test('renders a sketch on its own', () => {

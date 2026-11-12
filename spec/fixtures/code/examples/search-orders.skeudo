@@ -1,3 +1,4 @@
+view: code
 search_orders(user_id, term):
     user = get_user(user_id)          ::read:postgres.users[lookup by key]
     orders = recent_orders(user)      ::read:postgres.orders[range on created_at]

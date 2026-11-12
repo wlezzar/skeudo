@@ -1,5 +1,5 @@
 {
-  "signature": { "name": "settle", "params": ["invoice"], "line": 1 },
+  "signature": { "name": "settle", "params": ["invoice"], "line": 2 },
   "indentUnit": 4,
   "callSources": { "add_fee": { "path": "billing/fees.py", "start": 10, "end": 10 } },
   "callDocs": {
@@ -9,12 +9,13 @@
     "add_fee": "2% of the amount due"
   },
   "variables": {
-    "invoice": { "origin": "param", "line": 1 },
-    "left": { "origin": "binding", "line": 5 }
+    "invoice": { "origin": "param", "line": 2 },
+    "left": { "origin": "binding", "line": 6 }
   },
   "lines": [
+    { "number": 1, "depth": 0, "text": "", "blank": true },
     {
-      "number": 1,
+      "number": 2,
       "depth": 0,
       "text": "settle(invoice):                           ::doc[runs nightly for every open invoice]",
       "signature": true,
@@ -36,11 +37,11 @@
       ]
     },
     {
-      "number": 2,
+      "number": 3,
       "depth": 1,
       "text": "if invoice is past due:                ::doc[past the due date plus the grace period]",
       "header": true,
-      "parent": 1,
+      "parent": 2,
       "doc": "past the due date plus the grace period",
       "tags": [
         {
@@ -58,10 +59,10 @@
       ]
     },
     {
-      "number": 3,
+      "number": 4,
       "depth": 2,
       "text": "add_fee(invoice)                   ::write:postgres.invoices",
-      "parent": 2,
+      "parent": 3,
       "tags": [
         {
           "raw": "::write:postgres.invoices",
@@ -78,10 +79,10 @@
       ]
     },
     {
-      "number": 4,
+      "number": 5,
       "depth": 1,
       "text": "ledger.post(invoice)                   ::write:ledger ::doc[one entry per line item] ::doc[in the invoice's currency]",
-      "parent": 1,
+      "parent": 2,
       "doc": "one entry per line item\nin the invoice's currency",
       "tags": [
         { "raw": "::write:ledger", "kind": "write", "value": "ledger", "trailing": true },
@@ -106,10 +107,10 @@
       ]
     },
     {
-      "number": 5,
+      "number": 6,
       "depth": 1,
       "text": "left = apply_credits(invoice)          ::write:postgres.credits",
-      "parent": 1,
+      "parent": 2,
       "binding": "left",
       "tags": [
         {
@@ -129,10 +130,10 @@
       ]
     },
     {
-      "number": 6,
+      "number": 7,
       "depth": 1,
       "text": "charge(left) ::doc:charge[retried by the job queue] ::write:stripe",
-      "parent": 1,
+      "parent": 2,
       "tags": [
         {
           "raw": "::doc:charge[retried by the job queue]",
@@ -151,11 +152,11 @@
       ]
     },
     {
-      "number": 7,
+      "number": 8,
       "depth": 1,
       "text": "::doc:apply_credits[spends the oldest credits first]",
       "hidden": true,
-      "parent": 1,
+      "parent": 2,
       "tags": [
         {
           "raw": "::doc:apply_credits[spends the oldest credits first]",
@@ -167,11 +168,11 @@
       "segments": [{ "type": "tag", "raw": "::doc:apply_credits[spends the oldest credits first]" }]
     },
     {
-      "number": 8,
+      "number": 9,
       "depth": 1,
       "text": "::doc:apply_credits[returns what is left to pay]",
       "hidden": true,
-      "parent": 1,
+      "parent": 2,
       "tags": [
         {
           "raw": "::doc:apply_credits[returns what is left to pay]",
@@ -183,11 +184,11 @@
       "segments": [{ "type": "tag", "raw": "::doc:apply_credits[returns what is left to pay]" }]
     },
     {
-      "number": 9,
+      "number": 10,
       "depth": 1,
       "text": "::doc:ledger.post[idempotent per invoice]",
       "hidden": true,
-      "parent": 1,
+      "parent": 2,
       "tags": [
         {
           "raw": "::doc:ledger.post[idempotent per invoice]",
@@ -199,11 +200,11 @@
       "segments": [{ "type": "tag", "raw": "::doc:ledger.post[idempotent per invoice]" }]
     },
     {
-      "number": 10,
+      "number": 11,
       "depth": 1,
       "text": "::doc:add_fee[2% of the amount due] ::src:add_fee[billing/fees.py:10]",
       "hidden": true,
-      "parent": 1,
+      "parent": 2,
       "tags": [
         {
           "raw": "::doc:add_fee[2% of the amount due]",

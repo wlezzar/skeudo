@@ -1,3 +1,4 @@
+view: code
 cancel_order(order_id):
     order = load_order(order_id)            ::read:postgres.orders[lookup by key]
     if order is shipped:

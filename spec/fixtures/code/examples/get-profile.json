@@ -1,14 +1,15 @@
 {
-  "signature": { "name": "get_profile", "params": ["user_id"], "line": 1 },
+  "signature": { "name": "get_profile", "params": ["user_id"], "line": 2 },
   "indentUnit": 4,
   "variables": {
-    "user_id": { "origin": "param", "line": 1 },
-    "cached": { "origin": "binding", "line": 2 },
-    "row": { "origin": "binding", "line": 6 }
+    "user_id": { "origin": "param", "line": 2 },
+    "cached": { "origin": "binding", "line": 3 },
+    "row": { "origin": "binding", "line": 7 }
   },
   "lines": [
+    { "number": 1, "depth": 0, "text": "", "blank": true },
     {
-      "number": 1,
+      "number": 2,
       "depth": 0,
       "text": "get_profile(user_id):",
       "signature": true,
@@ -21,10 +22,10 @@
       ]
     },
     {
-      "number": 2,
+      "number": 3,
       "depth": 1,
       "text": "cached = cache.get(user_id)    ::read:redis[lookup by key]",
-      "parent": 1,
+      "parent": 2,
       "binding": "cached",
       "tags": [
         {
@@ -45,11 +46,11 @@
       ]
     },
     {
-      "number": 3,
+      "number": 4,
       "depth": 1,
       "text": "if cached:",
       "header": true,
-      "parent": 1,
+      "parent": 2,
       "segments": [
         { "type": "word", "text": "if" },
         { "type": "text", "text": " " },
@@ -58,10 +59,10 @@
       ]
     },
     {
-      "number": 4,
+      "number": 5,
       "depth": 2,
       "text": "return cached",
-      "parent": 3,
+      "parent": 4,
       "segments": [
         { "type": "word", "text": "return" },
         { "type": "text", "text": " " },
@@ -69,18 +70,18 @@
       ]
     },
     {
-      "number": 5,
+      "number": 6,
       "depth": 1,
       "text": "else:",
       "header": true,
-      "parent": 1,
+      "parent": 2,
       "segments": [{ "type": "word", "text": "else" }, { "type": "text", "text": ":" }]
     },
     {
-      "number": 6,
+      "number": 7,
       "depth": 2,
       "text": "row = load_user(user_id)   ::read:postgres.users[lookup by key]",
-      "parent": 5,
+      "parent": 6,
       "binding": "row",
       "tags": [
         {
@@ -101,11 +102,11 @@
       ]
     },
     {
-      "number": 7,
+      "number": 8,
       "depth": 2,
       "text": "if no row:",
       "header": true,
-      "parent": 5,
+      "parent": 6,
       "segments": [
         { "type": "word", "text": "if" },
         { "type": "text", "text": " no " },
@@ -114,18 +115,18 @@
       ]
     },
     {
-      "number": 8,
+      "number": 9,
       "depth": 3,
       "text": "::fail:NotFound",
-      "parent": 7,
+      "parent": 8,
       "tags": [{ "raw": "::fail:NotFound", "kind": "fail", "value": "NotFound" }],
       "segments": [{ "type": "tag", "raw": "::fail:NotFound" }]
     },
     {
-      "number": 9,
+      "number": 10,
       "depth": 2,
       "text": "cache.set(user_id, row)    ::write:redis[5 min ttl]",
-      "parent": 5,
+      "parent": 6,
       "tags": [
         {
           "raw": "::write:redis[5 min ttl]",
@@ -145,10 +146,10 @@
       ]
     },
     {
-      "number": 10,
+      "number": 11,
       "depth": 2,
       "text": "return row",
-      "parent": 5,
+      "parent": 6,
       "segments": [
         { "type": "word", "text": "return" },
         { "type": "text", "text": " " },

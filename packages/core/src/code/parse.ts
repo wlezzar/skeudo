@@ -1,5 +1,5 @@
 import type { Diagnostic } from '../diagnostic.ts';
-import { firstLine, splitLines } from '../header.ts';
+import { readHeader, splitLines } from '../header.ts';
 import type {
   ChangeKind,
   CodeSketch,
@@ -218,9 +218,10 @@ export function parseCode(source: string, options: ParseOptions = {}): CodeSketc
 
   const rawLines = splitLines(source);
   while (rawLines.length && rawLines[rawLines.length - 1].trim() === '') rawLines.pop();
-  // A `code` header only names the view. It stays a line, left blank, so line numbers still count it.
-  const header = firstLine(rawLines);
-  if (header?.text === 'code') rawLines[header.index] = '';
+  // The header only names the view. It stays a line, left blank, so line numbers still count it. A first
+  // line naming no view, such as `view: dat`, stays as it is, so the warning parse() puts on it shows.
+  const header = readHeader(rawLines);
+  if (header?.name === 'code') rawLines[header.index] = '';
 
   const indents: number[] = [];
   const lines: SketchLine[] = rawLines.map((raw, idx) => {

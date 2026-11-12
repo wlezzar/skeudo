@@ -2,10 +2,11 @@
 
 > **Alpha.** The format will change in ways that break existing sketches. Until 1.0, breaking changes come in the format's minor versions (0.1 to 0.2), and the extension's [changelog](https://github.com/wlezzar/skeudo/blob/main/apps/vscode/CHANGELOG.md) says which format each version reads.
 
-Highlights sketches in the editor and renders them in VS Code's Markdown preview. A sketch is pseudocode for code review where every outside effect is tagged, or, when it starts with a `data` line, a data model drawn as tables and a story of how their rows change. The format is defined in [spec/spec.md](https://github.com/wlezzar/skeudo/blob/main/spec/spec.md).
+Highlights sketches in the editor and renders them in VS Code's Markdown preview. A sketch is pseudocode for code review where every outside effect is tagged, or a data model drawn as tables and a story of how their rows change, and its first line says which: `view: code` or `view: data`. The format is defined in [spec/spec.md](https://github.com/wlezzar/skeudo/blob/main/spec/spec.md).
 
 ````markdown
 ```skeudo
+view: code
 get_profile(user_id):                    ::src[app/profile.py:12-24]
     cached = cache.get(user_id)          ::read:redis[lookup by key]
     ...
@@ -50,7 +51,7 @@ In a data sketch:
 
 | Element | Scope |
 | --- | --- |
-| The `data` or `code` line that names the view | `keyword.control.view.skeudo` |
+| The `view: code` or `view: data` line that names the view | `keyword.control.view.skeudo` |
 | `table` or `folder`, the word that starts a declaration | `storage.type.kind.skeudo` |
 | Table or folder name, in a declaration, a change or a read | `entity.name.type.table.skeudo` |
 | Column | `variable.other.property.column.skeudo` |
@@ -64,7 +65,7 @@ In a data sketch:
 | Value, `null`, quoted value | `string.unquoted.value.skeudo`, `constant.language.null.skeudo`, `string.quoted.double.skeudo` |
 | Explanation | `comment.block.documentation.explanation.skeudo` |
 
-The editor can't match everything the preview does. It doesn't know which words are variables, so a line that starts with one still gets its first word colored, and it takes a call alone on the first line for a signature even when no indented lines follow. In a data sketch inside a Markdown list item, every line is indented by the list, so step titles are colored as explanations.
+The editor can't match everything the preview does. It doesn't know which words are variables, so a line that starts with one still gets its first word colored, and it takes a call alone on the line after the header for a signature even when no indented lines follow. In a data sketch inside a Markdown list item, every line is indented by the list, so step titles are colored as explanations.
 
 ## Preview
 

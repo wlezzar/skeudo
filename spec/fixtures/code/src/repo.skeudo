@@ -1,3 +1,4 @@
+view: code
 get_profile(user_id):                    ::src[app/profile.py:12-24]
     row = load_user(user_id)             ::read:postgres.users ::src[14]
     ::src:load_user[app/users.py:88]     ::repo[git+ssh://git@github.com/org/shop.git@a1b2c3d]

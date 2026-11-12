@@ -4,7 +4,7 @@
 
 ## A sketch, from text to page
 
-1. **View.** `viewOf` in `packages/core/src/views.ts` reads the first non-blank line (`packages/core/src/header.ts`). A view's name alone on it, such as `data`, picks that view. Otherwise the sketch is code.
+1. **View.** `parse` in `packages/core/src/views.ts` reads the header, `view: data`, on the first non-blank line (`readHeader` in `packages/core/src/header.ts`). A sketch without a header, or whose first line names no view (`view: dat`), is code, and `parse` adds the warning. Each view's parser skips only its own header line, so `view: dat` stays a visible line, and calling `parseCode` or `parseData` directly gives no header warning.
 2. **Parse.** `parse` calls the view's parser. The code view's is `parseCode` in `packages/core/src/code/parse.ts`, with `analyze` (`packages/core/src/code/analyze.ts`) deriving flows and changes for review. The data view's is `parseData` in `packages/core/src/data/parse.ts`, which also replays the story (`replayData` and `checkData` in `packages/core/src/data/replay.ts`). The story plays in frames: one per substep, or one for a step without substeps. `replayData` returns each frame's rows and the rows its reads find. The result is a `Sketch`, a union told apart by `view`, with `diagnostics`.
 3. **Never throw.** Problems are warnings attached to a line, and line numbers count the header line, so a half-written sketch still renders.
 4. **Render.** `toHast` in `packages/html/src/index.ts` switches on `view` and returns one hast element. `toHtml` serializes it. Rendering never touches the DOM, so it runs in Node, in MDX and in VS Code's preview.

@@ -1,16 +1,17 @@
 {
-  "signature": { "name": "f", "line": 1 },
+  "signature": { "name": "f", "line": 2 },
   "indentUnit": 4,
   "diagnostics": [
     {
-      "line": 4,
+      "line": 5,
       "severity": "warning",
       "message": "This level is indented by 2 spaces; the rest of the sketch uses 4."
     }
   ],
   "lines": [
+    { "number": 1, "depth": 0, "text": "", "blank": true },
     {
-      "number": 1,
+      "number": 2,
       "depth": 0,
       "text": "f():",
       "signature": true,
@@ -18,25 +19,25 @@
       "segments": [{ "type": "fn", "text": "f" }, { "type": "text", "text": "():" }]
     },
     {
-      "number": 2,
+      "number": 3,
       "depth": 1,
       "text": "four",
-      "parent": 1,
+      "parent": 2,
       "segments": [{ "type": "word", "text": "four" }]
     },
     {
-      "number": 3,
+      "number": 4,
       "depth": 1,
       "text": "if x:",
       "header": true,
-      "parent": 1,
+      "parent": 2,
       "segments": [{ "type": "word", "text": "if" }, { "type": "text", "text": " x:" }]
     },
     {
-      "number": 4,
+      "number": 5,
       "depth": 2,
       "text": "two more",
-      "parent": 3,
+      "parent": 4,
       "segments": [{ "type": "word", "text": "two" }, { "type": "text", "text": " more" }]
     }
   ]

@@ -1,3 +1,4 @@
+view: code
 search(mut user_id: u64, limit: int = 10, filters: Map<str, list[str]>, ...rest, user_id): returns matches
     use user_id, limit, filters and rest
     forward(...rest) for i in 0..limit

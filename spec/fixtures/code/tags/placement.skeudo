@@ -1,3 +1,4 @@
+view: code
 load(path):
     data = std::fs::read(path)        ::read:fs
     v = Vec::new()

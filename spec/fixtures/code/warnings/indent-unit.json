@@ -1,12 +1,13 @@
 {
-  "signature": { "name": "f", "line": 1 },
+  "signature": { "name": "f", "line": 2 },
   "indentUnit": 3,
   "diagnostics": [
-    { "line": 2, "severity": "warning", "message": "Indent by 2 or 4 spaces per level, not 3." }
+    { "line": 3, "severity": "warning", "message": "Indent by 2 or 4 spaces per level, not 3." }
   ],
   "lines": [
+    { "number": 1, "depth": 0, "text": "", "blank": true },
     {
-      "number": 1,
+      "number": 2,
       "depth": 0,
       "text": "f():",
       "signature": true,
@@ -14,10 +15,10 @@
       "segments": [{ "type": "fn", "text": "f" }, { "type": "text", "text": "():" }]
     },
     {
-      "number": 2,
+      "number": 3,
       "depth": 1,
       "text": "three spaces",
-      "parent": 1,
+      "parent": 2,
       "segments": [{ "type": "word", "text": "three" }, { "type": "text", "text": " spaces" }]
     }
   ]

@@ -1,4 +1,4 @@
-data
+view: data
 [Search index]
   Rebuilt from orders by a job
   a few seconds after each write.

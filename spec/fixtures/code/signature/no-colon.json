@@ -1,13 +1,14 @@
 {
-  "signature": { "name": "charge", "params": ["card", "amount"], "line": 1 },
+  "signature": { "name": "charge", "params": ["card", "amount"], "line": 2 },
   "indentUnit": 4,
   "variables": {
-    "card": { "origin": "param", "line": 1 },
-    "amount": { "origin": "param", "line": 1 }
+    "card": { "origin": "param", "line": 2 },
+    "amount": { "origin": "param", "line": 2 }
   },
   "lines": [
+    { "number": 1, "depth": 0, "text": "", "blank": true },
     {
-      "number": 1,
+      "number": 2,
       "depth": 0,
       "text": "charge(card, amount)",
       "signature": true,
@@ -22,10 +23,10 @@
       ]
     },
     {
-      "number": 2,
+      "number": 3,
       "depth": 1,
       "text": "stripe.charges.create(card, amount)   ::write:stripe[!no idempotency key]",
-      "parent": 1,
+      "parent": 2,
       "tags": [
         {
           "raw": "::write:stripe[!no idempotency key]",

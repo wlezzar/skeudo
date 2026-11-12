@@ -1,3 +1,4 @@
+view: code
 book_trip(trip, card):
     seat = hold_seat(trip.flight)           ::write:airline-api
     room = reserve_room(trip.hotel)         ::write:hotel-api

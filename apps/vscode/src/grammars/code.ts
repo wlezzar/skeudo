@@ -5,8 +5,8 @@
  * (packages/core/src/code/parse.ts) as far as that allows, with two gaps:
  * - It can't know which words are tracked variables, so a line starting with one, such as `cached is
  *   stale`, still gets its first word colored.
- * - It can't see the next line, so a first line such as `charge(card, amount)` is taken for a signature
- *   whether or not indented lines follow.
+ * - It can't see the next line, so a first line after the header such as `charge(card, amount)` is taken
+ *   for a signature whether or not indented lines follow.
  *
  * Scopes are picked for how common themes color them, starting with VS Code's defaults; README.md lists
  * them for anyone who wants to recolor them.
@@ -143,8 +143,8 @@ export const codeRepository = {
   },
 };
 
-// The first line is either a signature or the start of a signature-less sketch. Both rules run to the
-// end of the sketch, so the signature can only be found on the first line.
+// The first line after the header is either a signature or the start of a signature-less sketch. Both
+// rules run to the end of the sketch, so the signature can only be found on that line.
 export const codePatterns: Rule[] = [
   {
     begin: String.raw`${LINE_START}(${CHAIN})(\()((?:[^()]|(${PARENS}))*)(\))(?=\s*(?::|$))`,

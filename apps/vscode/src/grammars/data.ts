@@ -1,5 +1,5 @@
 /**
- * TextMate rules for data sketches, which grammars/index.ts puts in `source.skeudo` after a `data` header.
+ * TextMate rules for data sketches, which grammars/index.ts puts in `source.skeudo` after a `view: data` header.
  *
  * They follow the parser (packages/core/src/data/parse.ts) line by line: a group line, a declaration, a
  * step title, a substep, a change, a read, or an explanation. One gap: in a fence inside a Markdown list item, every line is

@@ -1,3 +1,4 @@
+view: code
 signup(request):
     body = request.json()                 ::untrusted:body
     if body.email is malformed:

@@ -1,20 +1,21 @@
 {
-  "signature": { "name": "cancel_order", "params": ["order_id"], "line": 1 },
+  "signature": { "name": "cancel_order", "params": ["order_id"], "line": 2 },
   "indentUnit": 4,
   "variables": {
-    "order_id": { "origin": "param", "line": 1 },
-    "order": { "origin": "binding", "line": 2 },
-    "refund_id": { "origin": "binding", "line": 5 }
+    "order_id": { "origin": "param", "line": 2 },
+    "order": { "origin": "binding", "line": 3 },
+    "refund_id": { "origin": "binding", "line": 6 }
   },
   "changes": [
-    { "line": 5, "kind": "new", "effects": ["L5 ::write:stripe"] },
-    { "line": 6, "kind": "new", "block": true },
-    { "line": 8, "kind": "changed", "effects": ["L8 ::write:postgres.orders"] },
-    { "line": 9, "kind": "removed", "effects": ["L9 ::write:sendgrid"] }
+    { "line": 6, "kind": "new", "effects": ["L6 ::write:stripe"] },
+    { "line": 7, "kind": "new", "block": true },
+    { "line": 9, "kind": "changed", "effects": ["L9 ::write:postgres.orders"] },
+    { "line": 10, "kind": "removed", "effects": ["L10 ::write:sendgrid"] }
   ],
   "lines": [
+    { "number": 1, "depth": 0, "text": "", "blank": true },
     {
-      "number": 1,
+      "number": 2,
       "depth": 0,
       "text": "cancel_order(order_id):",
       "signature": true,
@@ -27,10 +28,10 @@
       ]
     },
     {
-      "number": 2,
+      "number": 3,
       "depth": 1,
       "text": "order = load_order(order_id)            ::read:postgres.orders[lookup by key]",
-      "parent": 1,
+      "parent": 2,
       "binding": "order",
       "tags": [
         {
@@ -51,11 +52,11 @@
       ]
     },
     {
-      "number": 3,
+      "number": 4,
       "depth": 1,
       "text": "if order is shipped:",
       "header": true,
-      "parent": 1,
+      "parent": 2,
       "segments": [
         { "type": "word", "text": "if" },
         { "type": "text", "text": " " },
@@ -64,18 +65,18 @@
       ]
     },
     {
-      "number": 4,
+      "number": 5,
       "depth": 2,
       "text": "::fail:AlreadyShipped",
-      "parent": 3,
+      "parent": 4,
       "tags": [{ "raw": "::fail:AlreadyShipped", "kind": "fail", "value": "AlreadyShipped" }],
       "segments": [{ "type": "tag", "raw": "::fail:AlreadyShipped" }]
     },
     {
-      "number": 5,
+      "number": 6,
       "depth": 1,
       "text": "refund_id = refund(order.payment)       ::write:stripe ::new",
-      "parent": 1,
+      "parent": 2,
       "binding": "refund_id",
       "change": { "kind": "new" },
       "tags": [
@@ -92,29 +93,29 @@
       ]
     },
     {
-      "number": 6,
+      "number": 7,
       "depth": 1,
       "text": "if that fails:                          ::new",
       "header": true,
-      "parent": 1,
+      "parent": 2,
       "change": { "kind": "new" },
       "tags": [{ "raw": "::new", "kind": "new", "trailing": true }],
       "segments": [{ "type": "word", "text": "if" }, { "type": "text", "text": " that fails:" }]
     },
     {
-      "number": 7,
+      "number": 8,
       "depth": 2,
       "text": "::fail:RefundFailed",
-      "parent": 6,
-      "change": { "kind": "new", "from": 6 },
+      "parent": 7,
+      "change": { "kind": "new", "from": 7 },
       "tags": [{ "raw": "::fail:RefundFailed", "kind": "fail", "value": "RefundFailed" }],
       "segments": [{ "type": "tag", "raw": "::fail:RefundFailed" }]
     },
     {
-      "number": 8,
+      "number": 9,
       "depth": 1,
       "text": "mark order cancelled, with refund_id    ::write:postgres.orders ::changed[was deleted]",
-      "parent": 1,
+      "parent": 2,
       "change": { "kind": "changed", "note": "was deleted" },
       "tags": [
         {
@@ -139,10 +140,10 @@
       ]
     },
     {
-      "number": 9,
+      "number": 10,
       "depth": 1,
       "text": "email the customer                      ::write:sendgrid ::removed",
-      "parent": 1,
+      "parent": 2,
       "change": { "kind": "removed" },
       "tags": [
         { "raw": "::write:sendgrid", "kind": "write", "value": "sendgrid", "trailing": true },

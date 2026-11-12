@@ -27,8 +27,8 @@ Change the old form in place rather than keeping it working (see the rules in [A
 
 The data view was added in two commits: e968eae organized the code by view with no change in behavior, then 9e16dfc added the view. Their messages explain the design (`git show -s e968eae 9e16dfc`). The steps:
 
-1. **Spec**: `spec/<name>.md`, a row in the Views table of `spec/spec.md`, and fixtures in `spec/fixtures/<name>/` that start with the header line.
-2. **Core**: `packages/core/src/<name>/` with a parser that takes the whole block, header included, skips the header line and keeps line numbers. Add its type to `Sketch` and a `View` to `VIEWS` in `packages/core/src/views.ts`, and export it from `packages/core/src/index.ts`. The fixture test needs an entry in `PROJECTIONS` (`packages/core/test/fixtures.test.ts`) with a projection in `packages/core/test/fixture.ts`.
+1. **Spec**: `spec/<name>.md`, a row in the Views table of `spec/spec.md`, the list of views in the header's warning message there, and fixtures in `spec/fixtures/<name>/` that start with the header line, `view: <name>`.
+2. **Core**: `packages/core/src/<name>/` with a parser that takes the whole block, header included, skips the header line (`readHeader` in `packages/core/src/header.ts`) and keeps line numbers. Add its type to `Sketch` and a `View` to `VIEWS` in `packages/core/src/views.ts`, and export it from `packages/core/src/index.ts`. The fixture test needs an entry in `PROJECTIONS` (`packages/core/test/fixtures.test.ts`) with a projection in `packages/core/test/fixture.ts`.
 3. **HTML**: `packages/html/src/<name>/` with a renderer to hast, a case in `toHast` and a call in `enhance()` (`packages/html/src/index.ts`), and its CSS imported in `packages/html/src/skeudo.css`. Pick a class prefix.
 4. **Grammar**: `apps/vscode/src/grammars/<name>.ts`, added to `VIEWS` in `apps/vscode/src/grammars/index.ts` with a header rule.
 5. **Docs**: a guide in `skills/skeudo/` linked from `skills/skeudo/SKILL.md`, a playground example, and the line that says what a sketch is in `README.md`, `apps/cli/README.md`, `apps/vscode/README.md` and `packages/remark/README.md`.

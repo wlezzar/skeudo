@@ -1,3 +1,4 @@
+view: code
 run(task):
     messages = [task]
     reply = model.create(messages)   ::read:anthropic[cached for [some] time]
