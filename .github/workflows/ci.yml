@@ -1,8 +1,11 @@
 # Type-checks, tests and builds every package and app, on each supported Node version.
 name: CI
 
+# Branches only: a release tag points at a commit CI has passed on main, and a second run, for the tag,
+# would make pnpm release wait for it.
 on:
   push:
+    branches: ['**']
   pull_request:
 
 permissions:

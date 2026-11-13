@@ -1,6 +1,6 @@
 {
   "name": "markdown-it-skeudo",
-  "version": "0.1.0",
+  "version": "0.0.0",
   "description": "A markdown-it plugin that renders Skeudo sketches: pseudocode with every outside effect tagged, and data models drawn as tables with a story of how their rows change.",
   "keywords": ["skeudo", "markdown-it-plugin", "markdown-it", "markdown", "pseudocode", "code-review", "data-model"],
   "license": "MIT",

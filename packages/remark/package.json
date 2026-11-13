@@ -1,6 +1,6 @@
 {
   "name": "remark-skeudo",
-  "version": "0.1.0",
+  "version": "0.0.0",
   "description": "A remark plugin that renders Skeudo sketches in Markdown and MDX: pseudocode with every outside effect tagged, and data models drawn as tables with a story of how their rows change.",
   "keywords": ["skeudo", "remark-plugin", "remark", "unified", "mdx", "markdown", "pseudocode", "code-review", "data-model"],
   "license": "MIT",

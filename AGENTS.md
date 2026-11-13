@@ -20,10 +20,10 @@ Both must pass before you say a change works. A change to how sketches look also
 ## Rules
 
 - **The spec leads.** A format change starts in `spec/<view>.md` and goes through every layer. [changing-the-format.md](.agents-docs/changing-the-format.md) lists them.
-- **No backward compatibility until 1.0.** Change the format in place, with no aliases, migrations or deprecation warnings. A format change also needs a line in [CHANGELOG.md](CHANGELOG.md) and the next minor version (0.1 to 0.2), and is released soon after it reaches `main`, since agents install the skill from `main` while renderers come from npm.
+- **No backward compatibility until 1.0.** Change the format in place, with no aliases, migrations or deprecation warnings. A format change is a commit with `!` after its type (`feat!: …`), so the release notes list it first and `pnpm release` calls for the next minor version (0.1 to 0.2). Release it soon after it reaches `main`, since agents install the skill from `main` while renderers come from npm.
 - **Read generated fixtures.** `pnpm test -u` rewrites `spec/fixtures/**/*.json`, and a new fixture gets its `.json` on its first run. Read each one against the spec before committing, since a wrong `.json` locks a bug in.
 - **Keep private code out of git.** `apps/playground/local-examples/` and untracked `.tasks/` folders can hold sketches of private repositories. Committed specs, fixtures and examples use invented models.
-- **Git.** Commit only when asked, and branch first if you are on `main`. "Push" means fast-forward `main` to the commit and push `origin main`. Don't open a pull request. A commit message is `type: What changed, so <why it matters>.`, then a body saying what changed in each package and how it was checked. See `git log -3`.
+- **Git.** Commit only when asked, and branch first if you are on `main`. "Push" means fast-forward `main` to the commit and push `origin main`. Don't open a pull request. A commit message is `type: What changed, so <why it matters>.`, with `!` after the type for a format change, then a body saying what changed in each package and how it was checked. See `git log -3`. The subjects of commits that touch a package become the [release notes](.agents-docs/releasing.md#releasing-a-version), so write them for someone who uses Skeudo, and never rewrite them once on `main`.
 - **Write like the existing docs.** Short sentences, plain words, and the reason after "so" or "since".
 
 ## Keep the agent docs current

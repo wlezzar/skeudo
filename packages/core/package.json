@@ -1,6 +1,6 @@
 {
   "name": "@skeudo/core",
-  "version": "0.1.0",
+  "version": "0.0.0",
   "description": "Parses Skeudo sketches, small text formats for explaining code: pseudocode with every outside effect tagged, and data models drawn as tables with a story of how their rows change.",
   "keywords": ["skeudo", "pseudocode", "code-review", "data-model", "parser", "documentation"],
   "license": "MIT",

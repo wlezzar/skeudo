@@ -1,6 +1,6 @@
 {
   "name": "@skeudo/html",
-  "version": "0.1.0",
+  "version": "0.0.0",
   "description": "Renders Skeudo sketches as HTML, with the stylesheet, and a browser script for hovering names and stepping through data stories.",
   "keywords": ["skeudo", "pseudocode", "code-review", "data-model", "html", "hast"],
   "license": "MIT",

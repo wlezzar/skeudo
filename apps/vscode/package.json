@@ -2,7 +2,7 @@
   "name": "skeudo-vscode",
   "displayName": "Skeudo",
   "description": "Highlights sketches in .skeudo files and Markdown fences, and renders them in the Markdown preview: pseudocode for code review, with every outside effect tagged.",
-  "version": "0.1.0",
+  "version": "0.0.0",
   "private": true,
   "publisher": "wlezzar",
   "license": "MIT",

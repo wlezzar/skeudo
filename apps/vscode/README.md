@@ -1,6 +1,6 @@
 # Skeudo for VS Code
 
-> **Alpha.** The format will change in ways that break existing sketches. Until 1.0, breaking changes come in the format's minor versions (0.1 to 0.2), and the extension's [changelog](https://github.com/wlezzar/skeudo/blob/main/apps/vscode/CHANGELOG.md) says which format each version reads.
+> **Alpha.** The format will change in ways that break existing sketches. Until 1.0, breaking changes come in minor versions (0.1 to 0.2), never in patches, and the [release notes](https://github.com/wlezzar/skeudo/releases) list each one. The extension shares its version with the format it reads.
 
 Highlights sketches in the editor and renders them in VS Code's Markdown preview. A sketch is pseudocode for code review where every outside effect is tagged, or a data model drawn as tables and a story of how their rows change, and its first line says which: `view: code` or `view: data`. The format is defined in [spec/spec.md](https://github.com/wlezzar/skeudo/blob/main/spec/spec.md).
 
@@ -117,8 +117,8 @@ From the repository root:
 
 ```sh
 pnpm install
-pnpm package:vscode     # writes apps/vscode/skeudo-vscode-0.1.0.vsix
-code --install-extension apps/vscode/skeudo-vscode-0.1.0.vsix
+pnpm package:vscode     # writes apps/vscode/skeudo-vscode-0.0.0.vsix, since releases set the version
+code --install-extension apps/vscode/skeudo-vscode-0.0.0.vsix
 ```
 
 Then reload VS Code. To try a change without installing it, run `pnpm --filter skeudo-vscode build` and start VS Code with `code --extensionDevelopmentPath="$PWD/apps/vscode"`.

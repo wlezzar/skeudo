@@ -1,10 +1,10 @@
 # Building and releasing
 
-How the published packages are built, released, and checked the way a user installs them, and how the site is deployed. The publishing plan, with its later stages, is `.tasks/002-publishing/plan.md`.
+How the published packages are built, released, and checked the way a user installs them, and how the site is deployed.
 
 ## What gets published
 
-Five npm packages share one version: `@skeudo/core`, `@skeudo/html`, `markdown-it-skeudo`, `remark-skeudo` and the `skeudo` CLI. Their `package.json` files say what goes in (`files`) and what the published `exports` are (`publishConfig`). The playground, the repository root and the VS Code extension are `"private": true`, so `pnpm publish -r` skips them. The extension is published apart, with its own version: see [The VS Code extension](#the-vs-code-extension).
+Five npm packages and the VS Code extension share one version: `@skeudo/core`, `@skeudo/html`, `markdown-it-skeudo`, `remark-skeudo`, the `skeudo` CLI, and `wlezzar.skeudo-vscode`. Their `package.json` files say what goes in (`files`) and what the published `exports` are (`publishConfig`). The playground, the repository root and the VS Code extension are `"private": true`, so `pnpm publish -r` skips them. The extension goes to its stores apart: see [The VS Code extension](#the-vs-code-extension).
 
 ## The build
 
@@ -17,21 +17,33 @@ Five npm packages share one version: `@skeudo/core`, `@skeudo/html`, `markdown-i
 
 ## Releasing a version
 
-`CHANGELOG.md` says when a change needs a minor version and when a patch.
+A tag `vX.Y.Z` is a release, and the only record of its version. The six published `package.json` files say `0.0.0`, and the release writes the version into them in a worktree checked out at the tag. There is no changelog file: the GitHub Releases are the changelog, and `scripts/release.mts` writes their notes from the commits.
 
-1. Set the same `version` in the five published `package.json` files (`grep -n '"version"' packages/*/package.json apps/cli/package.json`), and add the version's entry to `CHANGELOG.md`. For a new extension version, also set it in `apps/vscode/package.json` and add an entry to `apps/vscode/CHANGELOG.md`.
-2. Commit, push `main`, and wait for CI to pass: `gh run list --limit 1`.
-3. Pack the packages and check them, as the next section says.
-4. `pnpm release --dry-run` lists what the versions still lack, and what must be fixed first: the branch, uncommitted changes, CI, a missing changelog entry.
-5. The user runs `pnpm release` in their own terminal. It asks for an npm one-time code and an Open VSX token, so it can't run from the agent's shell or from `!` in the prompt. `scripts/release.mts` checks each step before doing it, so after a failure it runs again from where it stopped:
-   - npm: `pnpm publish -r --access public --no-git-checks --otp=<code>`, which builds and publishes each package whose version isn't on npm yet, in dependency order. It waits until npm lists all five and `latest` points at the version, then tags the commit `vX.Y.Z` and pushes the tag.
-   - The extension: it packages the `.vsix` from the `vscode-vX.Y.Z` tag if there is one, in a temporary worktree, so both stores get the same file, and from `HEAD` if not. It waits for the user's upload to the Marketplace (or runs `vsce publish` when `VSCE_PAT` is set), publishes to Open VSX with `ovsx`, waits until each store lists the version, then pushes the tag.
-6. Check `npm view <name> version` for each package, then install them from npm in a scratch project.
+- `pnpm release` names the last release, says whether it is finished, and lists the commits since that change the packages, with the version they call for: a minor one if a subject has `!` after its type (a format change), a patch otherwise. `nextVersion` in `scripts/versions.mts` holds the rule.
+- `pnpm release X.Y.Z --dry-run` shows what is done and what is left for that version, its release notes, and what must be fixed first. It asks nothing, so an agent can run it.
+- The user runs `pnpm release X.Y.Z` in their own terminal. It asks for an npm one-time code and an Open VSX token, so it can't run from the agent's shell or from `!` in the prompt.
+
+`pnpm release X.Y.Z` checks each step before doing it, so after a failure the same command finishes the release:
+
+1. It picks the commit: the tag's if `vX.Y.Z` exists, HEAD if not. A new tag needs HEAD to be `origin/main`, a version after the last release, and the last release finished. CI must have passed on the commit on `main`.
+2. It checks the commit out in a temporary worktree, writes the version into each `package.json` and the release notes into `apps/vscode/CHANGELOG.md`, then builds everything, so a build that fails leaves no tag.
+3. It tags the commit and pushes the tag, before anything is published, so a rerun builds from the same commit even after `main` moved on.
+4. npm: `pnpm publish -r --access public --no-git-checks --otp=<code>` in the worktree, which publishes each package whose version isn't on npm yet, in dependency order and with `workspace:*` turned into the version. It waits until npm lists all five and `latest` points at the version.
+5. The extension: it copies the `.vsix` to `apps/vscode/`, waits for the user's upload to the Marketplace (or runs `vsce publish` when `VSCE_PAT` is set), publishes to Open VSX with `ovsx`, and waits until each store lists the version.
+6. It creates the GitHub Release, last, so that a release on GitHub means everything is out. Its notes are the subjects, without their types, of the commits since the last release that touch `packages/`, `apps/cli/` or `apps/vscode/` outside test folders, format changes first (`releaseNotes` in `scripts/versions.mts`).
+
+If the tag exists and nothing is published from it, the script offers to move it to HEAD, so a fix can go into the same version. Once anything is out, the tag stays, and a fix takes the next patch version.
+
+Before a release that changes how the packages are built, pack them and check them, as the next section says. After one, install them from npm in a scratch project.
 
 Traps:
 
-- **The untracked `.tasks/` folders make pnpm refuse to publish** ("Unclean working tree"), hence `--no-git-checks`. Check first that `git status --porcelain --untracked-files=no` prints nothing.
-- **Claude Code's auto mode refuses `pnpm publish`**, since it makes something public. 0.1.0 went out by the user typing `! pnpm publish -r --access public --no-git-checks` in the prompt (2026-11-10). Since then the user runs `pnpm release` in a terminal.
+- **pnpm refuses to publish from a detached HEAD or a changed tree**, and the release's worktree is both, hence `--no-git-checks`.
+- **A tag push would run CI on the commit again**, and `gh run list --commit` then sees a run in progress (seen 2026-11-10, when `vscode-v0.1.0` was pushed). `.github/workflows/ci.yml` runs on branches only, and the script asks for a run on `main`.
+- **vsce refuses a `files` pattern that matches nothing.** `apps/vscode/CHANGELOG.md` therefore stays in the repository, as a fixed pointer to the GitHub Releases, which the release replaces in its worktree. (Seen 2026-11-11.)
+- **Commit subjects can't be fixed once on `main`.** A format change committed without `!` makes `pnpm release` suggest a patch, so read its list of commits before choosing the version.
+- **Claude Code's auto mode refuses `pnpm publish`**, since it makes something public. The user runs `pnpm release` in a terminal.
+- **Tags from before the shared version**: npm's 0.1.0 came from `v0.1.0`, and the extension's 0.1.0 on both stores from `vscode-v0.1.0`, a later commit. `v*` matches the old tag too, so the script keeps only tags that parse as versions.
 - **A package without `"private": true` goes to npm with the others.** The extension needs no `private` for vsce, which ignores it, but without it `pnpm publish -r --dry-run` listed `skeudo-vscode` to publish on npm. (Seen 2026-11-10.)
 - **npm never takes the same version twice**, even after an unpublish, so a broken release is fixed with a patch version.
 - **A package's first publish adds a `0.0.0-stage` version**, npm's "temporary package placeholder for staged publishing", before the real one. For 0.1.0, the five placeholders came a minute before the real versions, and meanwhile `latest` pointed at them, which looks like a failed publish. Wait, then check that every package's `dist-tags` names the new version: `npm view <name> dist-tags`. (Seen 2026-11-10.)
@@ -40,15 +52,15 @@ Traps:
 
 ## Checking the packed packages
 
-Pack all five into a scratch folder, then install them in scratch projects, outside the repository:
+Pack all five into a scratch folder, then install them in scratch projects, outside the repository. They pack as `0.0.0`, the repository's version:
 
 ```sh
 pnpm --filter './packages/*' --filter skeudo pack --pack-destination "$S/tarballs"
-tar tzf "$S/tarballs/skeudo-html-0.1.0.tgz"                         # dist, LICENSE, README, package.json
-tar xzf "$S/tarballs/markdown-it-skeudo-0.1.0.tgz" -O package/package.json   # exports point at dist/
+tar tzf "$S/tarballs/skeudo-html-0.0.0.tgz"                         # dist, LICENSE, README, package.json
+tar xzf "$S/tarballs/markdown-it-skeudo-0.0.0.tgz" -O package/package.json   # exports point at dist/
 ```
 
-- **npm** installs local tarballs together: `npm i $S/tarballs/*.tgz markdown-it unified remark-parse remark-rehype rehype-stringify`. npm finds `@skeudo/core@0.1.0` among them instead of fetching it.
+- **npm** installs local tarballs together: `npm i $S/tarballs/*.tgz markdown-it unified remark-parse remark-rehype rehype-stringify`. npm finds `@skeudo/core@0.0.0` among them instead of fetching it.
 - **pnpm** needs `overrides` in the scratch project's `pnpm-workspace.yaml`, pointing `@skeudo/core` and `@skeudo/html` at their tarballs, or it looks for them on the registry. Its strict `node_modules` catches a missing dependency.
 - Check: an ESM script imports each package and renders a sketch, `require.resolve('@skeudo/html/skeudo.css')` finds the stylesheet, `npx skeudo check` runs, and a `.ts` file importing every package's types passes `tsc --noEmit` under `nodenext` and `bundler`.
 
@@ -63,9 +75,9 @@ skeudo.dev serves `apps/playground` from GitHub Pages: a landing page at `/` and
 
 ## The VS Code extension
 
-`apps/vscode` goes to the Visual Studio Marketplace and to Open VSX, which VSCodium, Cursor and other editors use, as `wlezzar.skeudo-vscode`: the user's `wlezzar` publisher and the package's `name`. That ID can't change once published. The extension has its own version and changelog (`apps/vscode/CHANGELOG.md`), and each entry says which format version it reads, since it bundles `@skeudo/core` and `@skeudo/html` from the commit it is built from, not from npm. Its tags look like `vscode-v0.1.0`.
+`apps/vscode` goes to the Visual Studio Marketplace and to Open VSX, which VSCodium, Cursor and other editors use, as `wlezzar.skeudo-vscode`: the user's `wlezzar` publisher and the package's `name`. That ID can't change once published. It shares the packages' version, since it bundles `@skeudo/core` and `@skeudo/html` from the commit it is built from, not from npm, so its version also says which format it reads.
 
-- **Package**: `pnpm package:vscode` builds and writes `apps/vscode/skeudo-vscode-<version>.vsix`. The build copies the root LICENSE in, as the libraries' build does. `unzip -l` on the `.vsix` lists what went in. `icon.png` is the favicon's shapes drawn at 256px.
+- **Package**: `pnpm package:vscode` builds and writes `apps/vscode/skeudo-vscode-0.0.0.vsix`, or the release's version in its worktree. The build copies the root LICENSE in, as the libraries' build does. `unzip -l` on the `.vsix` lists what went in. `icon.png` is the favicon's shapes drawn at 256px.
 - **Publish** with `pnpm release`, as [Releasing a version](#releasing-a-version) says. The user uploads the `.vsix` on the Marketplace's publisher page, which needs no token, since `vsce publish` needs an Azure DevOps token of a kind Microsoft is retiring. 0.1.0 was live a few minutes after its upload on 2026-11-10, and `pnpm exec vsce show wlezzar.skeudo-vscode --json` from `apps/vscode` shows the versions. For Open VSX, the script runs `ovsx` (a pinned dev dependency of the extension) with the user's token in `OVSX_PAT`, typed in their terminal, so the token never reaches the agent. `ovsx` publishes under the manifest's `publisher`, so the namespace is `wlezzar` too. The user owns it, and Open VSX verified it on 2026-11-10, so `curl -s https://open-vsx.org/api/wlezzar` shows `"verified":true`. A version's page is `https://open-vsx.org/api/<namespace>/<name>/<version>`, a 404 until it is published. 0.1.0 went out on 2026-11-10, with the same files as on the Marketplace.
 - **`"preview": true`** shows a Preview badge on the Marketplace, for as long as the format is 0.x.
 
