@@ -1,3 +1,4 @@
+view: code
 rotate(token, user):
     remember result for later
     if token is expired:

@@ -1,3 +1,4 @@
+view: code
 retry(job):
   for up to 3 attempts:
     run(job)       ::write:*

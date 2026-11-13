@@ -13,11 +13,11 @@ When the question is how data is stored or what happens to it during a flow, rat
 
 ## Syntax
 
-Sketches go in fenced code blocks tagged `skeudo`. Lines nest by indentation, 4 spaces per level.
+Sketches go in fenced code blocks tagged `skeudo`. The first line is always `view: code`, which names the view. Lines nest by indentation, 4 spaces per level.
 
 | Element | Form | Notes |
 | --- | --- | --- |
-| Signature | `name(params):` on the first line | Real function name, plain parameter names. Optional: a hook or handler can start with a prose line. |
+| Signature | `name(params):` on the line after `view: code` | Real function name, plain parameter names. Optional: a hook or handler can start with a prose line. |
 | Block | A line followed by deeper-indented lines | Header words are free: `if`, `for each`, `in one transaction:`, `if that fails:`. |
 | Call | `name(args)`, `obj.name(args)` | Only for real functions a reviewer may open. Use `…` for arguments that don't matter. The `)` must be on the same line. |
 | Binding | `name = …` at the start of a line | Plain names only. Every later use of the name is highlighted. |
@@ -93,6 +93,7 @@ Return a Markdown document:
 <one sentence of context>
 
 ```skeudo
+view: code
 ...
 ```
 
@@ -105,6 +106,7 @@ Each item in the last section should be something the sketches make visible: an 
 
 ## Checklist
 
+- Every sketch starts with `view: code`, or `view: data` for a data sketch.
 - Every line that reads or changes outside state carries a tag, including prose lines.
 - No effect hides in words like "save and notify" or "clean up": one tag per effect, in order.
 - Read and write chosen by state change; hidden conditions marked `?`; unverified effects marked `~`; guesses say "probably".
@@ -118,6 +120,7 @@ Each item in the last section should be something the sketches make visible: an 
 ## Example
 
 ```skeudo
+view: code
 get_profile(user_id):                    ::src[app/profile.py:12-24]
     Returns a user's profile, cached for 5 minutes.
     cached = cache.get(user_id)          ::read:redis[lookup by key] ::src[13]

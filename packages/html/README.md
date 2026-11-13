@@ -2,7 +2,7 @@
 
 > **Alpha.** The format and this API will change in ways that break existing sketches and code. Until 1.0, breaking changes come in minor versions (0.1 to 0.2), never in patches, and [CHANGELOG.md](https://github.com/wlezzar/skeudo/blob/main/CHANGELOG.md) lists each one.
 
-Renders [Skeudo](https://github.com/wlezzar/skeudo) sketches as HTML. A sketch is pseudocode for code review where every outside effect is tagged, or, when it starts with a `data` line, a data model drawn as tables and a story of how their rows change. The format is defined in [spec/spec.md](https://github.com/wlezzar/skeudo/blob/main/spec/spec.md).
+Renders [Skeudo](https://github.com/wlezzar/skeudo) sketches as HTML. A sketch is pseudocode for code review where every outside effect is tagged, or a data model drawn as tables and a story of how their rows change, and its first line says which: `view: code` or `view: data`. The format is defined in [spec/spec.md](https://github.com/wlezzar/skeudo/blob/main/spec/spec.md).
 
 For Markdown, use [`markdown-it-skeudo`](https://www.npmjs.com/package/markdown-it-skeudo) or [`remark-skeudo`](https://www.npmjs.com/package/remark-skeudo), which call this package. To render whole pages from the command line, use the [`skeudo`](https://www.npmjs.com/package/skeudo) CLI.
 
@@ -15,7 +15,8 @@ npm install @skeudo/html
 ```js
 import { toHtml } from '@skeudo/html';
 
-const html = toHtml(`get_user(id):
+const html = toHtml(`view: code
+get_user(id):
     row = find(id)    ::read:postgres.users
     return row
 `);

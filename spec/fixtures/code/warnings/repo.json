@@ -1,5 +1,5 @@
 {
-  "signature": { "name": "get_profile", "params": ["user_id"], "line": 1 },
+  "signature": { "name": "get_profile", "params": ["user_id"], "line": 2 },
   "file": "app/profile.py",
   "repo": {
     "type": "local",
@@ -10,28 +10,29 @@
   "indentUnit": 4,
   "diagnostics": [
     {
-      "line": 3,
-      "severity": "warning",
-      "message": "::repo needs a URL in its note, as in ::repo[git+https://github.com/org/repo@a1b2c3d]."
-    },
-    {
       "line": 4,
       "severity": "warning",
       "message": "::repo needs a URL in its note, as in ::repo[git+https://github.com/org/repo@a1b2c3d]."
     },
     {
-      "line": 6,
+      "line": 5,
       "severity": "warning",
-      "message": "This sketch already names its repository on line 5; only the first ::repo applies."
+      "message": "::repo needs a URL in its note, as in ::repo[git+https://github.com/org/repo@a1b2c3d]."
+    },
+    {
+      "line": 7,
+      "severity": "warning",
+      "message": "This sketch already names its repository on line 6; only the first ::repo applies."
     }
   ],
   "variables": {
-    "user_id": { "origin": "param", "line": 1 },
-    "row": { "origin": "binding", "line": 2 }
+    "user_id": { "origin": "param", "line": 2 },
+    "row": { "origin": "binding", "line": 3 }
   },
   "lines": [
+    { "number": 1, "depth": 0, "text": "", "blank": true },
     {
-      "number": 1,
+      "number": 2,
       "depth": 0,
       "text": "get_profile(user_id):                    ::src[app/profile.py:12-24]",
       "signature": true,
@@ -53,10 +54,10 @@
       ]
     },
     {
-      "number": 2,
+      "number": 3,
       "depth": 1,
       "text": "row = load_user(user_id)             ::read:postgres.users",
-      "parent": 1,
+      "parent": 2,
       "binding": "row",
       "src": { "path": "app/profile.py", "start": 12, "end": 24, "inherited": true },
       "tags": [
@@ -77,21 +78,21 @@
       ]
     },
     {
-      "number": 3,
+      "number": 4,
       "depth": 1,
       "text": "::repo",
       "hidden": true,
-      "parent": 1,
+      "parent": 2,
       "src": { "path": "app/profile.py", "start": 12, "end": 24, "inherited": true },
       "tags": [{ "raw": "::repo", "kind": "repo" }],
       "segments": [{ "type": "tag", "raw": "::repo" }]
     },
     {
-      "number": 4,
+      "number": 5,
       "depth": 1,
       "text": "::repo[github.com/org/shop]",
       "hidden": true,
-      "parent": 1,
+      "parent": 2,
       "src": { "path": "app/profile.py", "start": 12, "end": 24, "inherited": true },
       "tags": [
         {
@@ -103,11 +104,11 @@
       "segments": [{ "type": "tag", "raw": "::repo[github.com/org/shop]" }]
     },
     {
-      "number": 5,
+      "number": 6,
       "depth": 1,
       "text": "::repo[git+file:///home/me/shop@a1b2c3d]",
       "hidden": true,
-      "parent": 1,
+      "parent": 2,
       "src": { "path": "app/profile.py", "start": 12, "end": 24, "inherited": true },
       "tags": [
         {
@@ -119,11 +120,11 @@
       "segments": [{ "type": "tag", "raw": "::repo[git+file:///home/me/shop@a1b2c3d]" }]
     },
     {
-      "number": 6,
+      "number": 7,
       "depth": 1,
       "text": "::repo[git+https://github.com/org/shop@a1b2c3d]",
       "hidden": true,
-      "parent": 1,
+      "parent": 2,
       "src": { "path": "app/profile.py", "start": 12, "end": 24, "inherited": true },
       "tags": [
         {

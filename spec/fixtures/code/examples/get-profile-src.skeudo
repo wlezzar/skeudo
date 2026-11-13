@@ -1,3 +1,4 @@
+view: code
 get_profile(user_id):                    ::src[app/profile.py:12-24]
     cached = cache.get(user_id)          ::read:redis[lookup by key] ::src[13]
     if cached:

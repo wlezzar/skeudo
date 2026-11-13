@@ -1,3 +1,4 @@
+view: code
 f():
     four
     if x:

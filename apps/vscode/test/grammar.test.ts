@@ -147,7 +147,6 @@ function allowedDifferences(sketch: CodeSketch, line: SketchLine, raw: string, m
 const docSketches = (doc: string) =>
   [...readFileSync(join(ROOT, doc), 'utf8').matchAll(/^```skeudo\n([\s\S]*?)^```/gm)]
     .map((m) => m[1].replace(/\n$/, ''))
-    .filter((b) => b.trim() !== '...')
     .map((source, i) => ({ name: `${doc} #${i + 1}`, source }));
 
 const SKETCHES = [
@@ -271,7 +270,7 @@ describe('scopes', () => {
 
 describe('the data view', () => {
   const SOURCE = [
-    'data', // 1
+    'view: data', // 1
     'table order(customer -> customer, state, total)',
     '  What the customer buys.',
     'table customer(',
@@ -307,7 +306,7 @@ describe('the data view', () => {
   };
 
   test('starts with a header that names the view', () => {
-    expect(at(1, 'data')).toEqual(['source.skeudo', 'keyword.control.view.skeudo']);
+    expect(at(1, 'view: data')).toEqual(['source.skeudo', 'keyword.control.view.skeudo']);
   });
 
   test('declarations start with their kind, and name a table, its columns and the tables they point at', () => {
@@ -373,19 +372,27 @@ describe('the data view', () => {
     expect(at(25, '+')).toContain('markup.inserted.skeudo');
   });
 
-  test('a later line reading data is a line of code', () => {
-    expect(sketchScopes('x = 1\ndata', 'data')).not.toContain('keyword.control.view.skeudo');
+  test('a later line reading view: data is a line of code', () => {
+    expect(sketchScopes('view: code\nx = 1\nview: data', 'view: data')).not.toContain('keyword.control.view.skeudo');
   });
 
   test('a code header keeps the signature on the line after it', () => {
-    const source = ['code', '', 'charge(card):', '    stripe.charge(card)'].join('\n');
-    expect(sketchScopes(source, 'code')).toContain('keyword.control.view.skeudo');
+    const source = ['view: code', '', 'charge(card):', '    stripe.charge(card)'].join('\n');
+    expect(sketchScopes(source, 'view: code')).toContain('keyword.control.view.skeudo');
     expect(sketchScopes(source, 'charge(')).toContain('meta.function.signature.skeudo');
     expect(sketchScopes(source, 'card)')).toContain('variable.parameter.skeudo');
   });
 
+  test('a first line naming no view is a line of code, as in the parser', () => {
+    expect(sketchScopes('view: dat\ntable media(role)', 'view')).not.toContain('keyword.control.view.skeudo');
+  });
+
+  test('a first line with more than a name after view: is not a header', () => {
+    expect(sketchScopes('view: data flows\n  read the rows', 'view')).not.toContain('keyword.control.view.skeudo');
+  });
+
   test('in a Markdown fence', () => {
-    const doc = ['```skeudo', 'data', 'table media(role)', '', 'Upload', '  + media m1  role: x', '```', 'After.'].join('\n');
+    const doc = ['```skeudo', 'view: data', 'table media(role)', '', 'Upload', '  + media m1  role: x', '```', 'After.'].join('\n');
     const tokens = tokenize(markdownTm, doc);
     const first = (line: number) => tokens[line - 1].find((t) => t.text.trim())!.scopes;
     expect(first(2)).toContain('keyword.control.view.skeudo');

@@ -15,7 +15,7 @@ An entity-relationship diagram shows every table and every column, but not what 
 ## Example
 
 ```skeudo
-data
+view: data
 table customer(name, email)
   One account. A guest gets a row too, with no email.
 
@@ -58,7 +58,7 @@ Rendered, the four tables sit side by side and the six steps are listed beside t
 
 ## Format
 
-A data sketch starts with the line `data`. After it, a line that isn't indented starts a group, declares a table or starts a step, and indented lines belong to the group, table or step above them.
+A data sketch starts with the header `view: data`. After it, a line that isn't indented starts a group, declares a table or starts a step, and indented lines belong to the group, table or step above them.
 
 | Element | Form | Meaning |
 | --- | --- | --- |
@@ -88,7 +88,7 @@ More precisely:
 A folder holds files keyed by path: an S3 bucket, a folder on disk. Its rows are files, so `+` uploads one, `~` overwrites it or changes its metadata, and `-` deletes it.
 
 ```skeudo
-data
+view: data
 table media(owner, state, file -> uploads)
 
 folder uploads(type, size)
@@ -115,7 +115,7 @@ The raw file is deleted after a week
 A group is a labeled frame around some tables, for a sketch whose tables fall into parts a reader looks at separately. The label is free words, and the parser doesn't interpret it. A group may stand for a feature, a store, a role in the data, a lifecycle or an owner. The author decides.
 
 ```skeudo
-data
+view: data
 [Checkout]
   What a purchase writes, in one transaction.
 table customer(name, email)
@@ -172,7 +172,7 @@ The customs form is deleted after delivery
 A step can pause more than once. Under a step, a line starting with `>` starts a substep. Its title is free words, like a step's. The lines indented under it are its changes, its reads and its explanation, and they show together, as one board.
 
 ```skeudo
-data
+view: data
 table media(owner, state, file -> uploads)
   One video or photo.
 
@@ -223,7 +223,7 @@ A read is a line under a step or substep, in the same shape as a change. It find
 | `? folder prefix/` | The files whose path starts with the prefix. A prefix ends with `/`. |
 
 ```skeudo
-data
+view: data
 table customer(name, email)
   One account per email.
 
@@ -365,7 +365,7 @@ A data sketch always renders. A parser warns when:
 
 | Decision | Why |
 | --- | --- |
-| The view is named on the block's first line, in the same `skeudo` fence | The view travels with the text when it is copied out of its fence, piped to the CLI or saved as a `.skeudo` file. A new view adds no fence or language. See spec.md |
+| The view is named on the block's first line, as `view: data`, in the same `skeudo` fence | The view travels with the text when it is copied out of its fence, piped to the CLI or saved as a `.skeudo` file. A new view adds no fence or language. See spec.md |
 | A deleted row stays visible, struck through, for the step that deletes it | The reader sees what went away. It is gone from the next step on |
 | Explanations are never shown inline | The first prototype showed them on the page, and readers lost track of the tables |
 | Values have no types | The view shows examples, not a schema |

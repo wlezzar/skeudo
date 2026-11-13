@@ -1,16 +1,17 @@
 {
-  "signature": { "name": "search_orders", "params": ["user_id", "term"], "line": 1 },
+  "signature": { "name": "search_orders", "params": ["user_id", "term"], "line": 2 },
   "indentUnit": 4,
   "variables": {
-    "user_id": { "origin": "param", "line": 1 },
-    "term": { "origin": "param", "line": 1 },
-    "user": { "origin": "binding", "line": 2 },
-    "orders": { "origin": "binding", "line": 3 },
-    "items": { "origin": "binding", "line": 7 }
+    "user_id": { "origin": "param", "line": 2 },
+    "term": { "origin": "param", "line": 2 },
+    "user": { "origin": "binding", "line": 3 },
+    "orders": { "origin": "binding", "line": 4 },
+    "items": { "origin": "binding", "line": 8 }
   },
   "lines": [
+    { "number": 1, "depth": 0, "text": "", "blank": true },
     {
-      "number": 1,
+      "number": 2,
       "depth": 0,
       "text": "search_orders(user_id, term):",
       "signature": true,
@@ -25,10 +26,10 @@
       ]
     },
     {
-      "number": 2,
+      "number": 3,
       "depth": 1,
       "text": "user = get_user(user_id)          ::read:postgres.users[lookup by key]",
-      "parent": 1,
+      "parent": 2,
       "binding": "user",
       "tags": [
         {
@@ -49,10 +50,10 @@
       ]
     },
     {
-      "number": 3,
+      "number": 4,
       "depth": 1,
       "text": "orders = recent_orders(user)      ::read:postgres.orders[range on created_at]",
-      "parent": 1,
+      "parent": 2,
       "binding": "orders",
       "tags": [
         {
@@ -73,11 +74,11 @@
       ]
     },
     {
-      "number": 4,
+      "number": 5,
       "depth": 1,
       "text": "if a term is given:",
       "header": true,
-      "parent": 1,
+      "parent": 2,
       "segments": [
         { "type": "word", "text": "if" },
         { "type": "text", "text": " a " },
@@ -86,10 +87,10 @@
       ]
     },
     {
-      "number": 5,
+      "number": 6,
       "depth": 2,
       "text": "filter orders by note text    ::read:postgres.orders[!full scan]",
-      "parent": 4,
+      "parent": 5,
       "tags": [
         {
           "raw": "::read:postgres.orders[!full scan]",
@@ -107,18 +108,18 @@
       ]
     },
     {
-      "number": 6,
+      "number": 7,
       "depth": 1,
       "text": "for each order:",
       "header": true,
-      "parent": 1,
+      "parent": 2,
       "segments": [{ "type": "word", "text": "for" }, { "type": "text", "text": " each order:" }]
     },
     {
-      "number": 7,
+      "number": 8,
       "depth": 2,
       "text": "items = get_items(order.id)   ::read:postgres.items[!n x lookup by key]",
-      "parent": 6,
+      "parent": 7,
       "binding": "items",
       "tags": [
         {
@@ -137,10 +138,10 @@
       ]
     },
     {
-      "number": 8,
+      "number": 9,
       "depth": 1,
       "text": "count orders by status            ::read:postgres.orders[!full scan, probably]",
-      "parent": 1,
+      "parent": 2,
       "tags": [
         {
           "raw": "::read:postgres.orders[!full scan, probably]",

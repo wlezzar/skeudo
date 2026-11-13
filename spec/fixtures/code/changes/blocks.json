@@ -1,26 +1,27 @@
 {
-  "signature": { "name": "sync", "params": ["account"], "line": 1 },
+  "signature": { "name": "sync", "params": ["account"], "line": 2 },
   "indentUnit": 4,
   "variables": {
-    "account": { "origin": "param", "line": 1 },
-    "token": { "origin": "label", "line": 14, "labels": ["secret"] }
+    "account": { "origin": "param", "line": 2 },
+    "token": { "origin": "label", "line": 15, "labels": ["secret"] }
   },
   "changes": [
-    { "line": 2, "kind": "new", "block": true, "effects": ["L3 ::read:crm"] },
-    { "line": 6, "kind": "changed" },
-    { "line": 7, "kind": "changed", "effects": ["L7 ::write:postgres.accounts"] },
-    { "line": 8, "kind": "removed" },
-    { "line": 9, "kind": "changed" },
+    { "line": 3, "kind": "new", "block": true, "effects": ["L4 ::read:crm"] },
+    { "line": 7, "kind": "changed" },
+    { "line": 8, "kind": "changed", "effects": ["L8 ::write:postgres.accounts"] },
+    { "line": 9, "kind": "removed" },
+    { "line": 10, "kind": "changed" },
     {
-      "line": 11,
+      "line": 12,
       "kind": "removed",
       "block": true,
-      "effects": ["L12 ::write:logs", "L13 ::write:redis"]
+      "effects": ["L13 ::write:logs", "L14 ::write:redis"]
     }
   ],
   "lines": [
+    { "number": 1, "depth": 0, "text": "", "blank": true },
     {
-      "number": 1,
+      "number": 2,
       "depth": 0,
       "text": "sync(account):",
       "signature": true,
@@ -33,11 +34,11 @@
       ]
     },
     {
-      "number": 2,
+      "number": 3,
       "depth": 1,
       "text": "if account is stale:                  ::new",
       "header": true,
-      "parent": 1,
+      "parent": 2,
       "change": { "kind": "new" },
       "tags": [{ "raw": "::new", "kind": "new", "trailing": true }],
       "segments": [
@@ -48,11 +49,11 @@
       ]
     },
     {
-      "number": 3,
+      "number": 4,
       "depth": 2,
       "text": "fetch(account)                    ::read:crm",
-      "parent": 2,
-      "change": { "kind": "new", "from": 2 },
+      "parent": 3,
+      "change": { "kind": "new", "from": 3 },
       "tags": [{ "raw": "::read:crm", "kind": "read", "value": "crm", "trailing": true }],
       "segments": [
         { "type": "call", "text": "fetch", "name": "fetch" },
@@ -62,28 +63,28 @@
       ]
     },
     {
-      "number": 4,
+      "number": 5,
       "depth": 2,
       "text": "if that fails:",
       "header": true,
-      "parent": 2,
-      "change": { "kind": "new", "from": 2 },
+      "parent": 3,
+      "change": { "kind": "new", "from": 3 },
       "segments": [{ "type": "word", "text": "if" }, { "type": "text", "text": " that fails:" }]
     },
     {
-      "number": 5,
+      "number": 6,
       "depth": 3,
       "text": "::fail:CrmDown",
-      "parent": 4,
-      "change": { "kind": "new", "from": 2 },
+      "parent": 5,
+      "change": { "kind": "new", "from": 3 },
       "tags": [{ "raw": "::fail:CrmDown", "kind": "fail", "value": "CrmDown" }],
       "segments": [{ "type": "tag", "raw": "::fail:CrmDown" }]
     },
     {
-      "number": 6,
+      "number": 7,
       "depth": 2,
       "text": "mark it fresh                     ::changed[ran after the save]",
-      "parent": 2,
+      "parent": 3,
       "change": { "kind": "changed", "note": "ran after the save" },
       "tags": [
         {
@@ -96,10 +97,10 @@
       "segments": [{ "type": "word", "text": "mark" }, { "type": "text", "text": " it fresh" }]
     },
     {
-      "number": 7,
+      "number": 8,
       "depth": 1,
       "text": "save(account)                         ::write:postgres.accounts ::changed[now upserts]",
-      "parent": 1,
+      "parent": 2,
       "change": { "kind": "changed", "note": "now upserts" },
       "tags": [
         {
@@ -123,10 +124,10 @@
       ]
     },
     {
-      "number": 8,
+      "number": 9,
       "depth": 1,
       "text": "::removed[no longer retries on timeout]",
-      "parent": 1,
+      "parent": 2,
       "change": { "kind": "removed", "note": "no longer retries on timeout" },
       "tags": [
         {
@@ -138,11 +139,11 @@
       "segments": [{ "type": "tag", "raw": "::removed[no longer retries on timeout]" }]
     },
     {
-      "number": 9,
+      "number": 10,
       "depth": 1,
       "text": "if the save took over a second:       ::changed[was half a second]",
       "header": true,
-      "parent": 1,
+      "parent": 2,
       "change": { "kind": "changed", "note": "was half a second" },
       "tags": [
         {
@@ -158,10 +159,10 @@
       ]
     },
     {
-      "number": 10,
+      "number": 11,
       "depth": 2,
       "text": "alert(account)                    ::write:pagerduty",
-      "parent": 9,
+      "parent": 10,
       "tags": [
         { "raw": "::write:pagerduty", "kind": "write", "value": "pagerduty", "trailing": true }
       ],
@@ -173,11 +174,11 @@
       ]
     },
     {
-      "number": 11,
+      "number": 12,
       "depth": 1,
       "text": "when the account is archived:         ::removed",
       "header": true,
-      "parent": 1,
+      "parent": 2,
       "change": { "kind": "removed" },
       "tags": [{ "raw": "::removed", "kind": "removed", "trailing": true }],
       "segments": [
@@ -188,11 +189,11 @@
       ]
     },
     {
-      "number": 12,
+      "number": 13,
       "depth": 2,
       "text": "log_event(token)                  ::write:logs",
-      "parent": 11,
-      "change": { "kind": "removed", "from": 11 },
+      "parent": 12,
+      "change": { "kind": "removed", "from": 12 },
       "tags": [{ "raw": "::write:logs", "kind": "write", "value": "logs", "trailing": true }],
       "segments": [
         { "type": "call", "text": "log_event", "name": "log_event" },
@@ -202,19 +203,19 @@
       ]
     },
     {
-      "number": 13,
+      "number": 14,
       "depth": 2,
       "text": "purge the cache                   ::write:redis",
-      "parent": 11,
-      "change": { "kind": "removed", "from": 11 },
+      "parent": 12,
+      "change": { "kind": "removed", "from": 12 },
       "tags": [{ "raw": "::write:redis", "kind": "write", "value": "redis", "trailing": true }],
       "segments": [{ "type": "word", "text": "purge" }, { "type": "text", "text": " the cache" }]
     },
     {
-      "number": 14,
+      "number": 15,
       "depth": 1,
       "text": "::secret:token",
-      "parent": 1,
+      "parent": 2,
       "tags": [{ "raw": "::secret:token", "kind": "secret", "value": "token" }],
       "segments": [{ "type": "tag", "raw": "::secret:token" }]
     }

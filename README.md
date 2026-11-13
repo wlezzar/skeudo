@@ -7,9 +7,10 @@ Small text formats for explaining code to a reader. Each format is a **view**:
 - **code**: readable pseudocode for code review, loose about logic and strict about effects. Every read, write and failure is tagged, so a reviewer sees what the code touches before reading how.
 - **data**: a data model as a few tables with example rows, and a story of how the rows change.
 
-A sketch lives in a ` ```skeudo ` fence in any Markdown file, or in a `.skeudo` file. You can write one by hand, or ask an agent to sketch a function, a commit or a pull request.
+A sketch lives in a ` ```skeudo ` fence in any Markdown file, or in a `.skeudo` file, and its first line names its view. You can write one by hand, or ask an agent to sketch a function, a commit or a pull request.
 
 ```
+view: code
 signup(request):
     body = request.json()                 ::untrusted:body
     if body.email is malformed:
@@ -27,10 +28,10 @@ Rendered, the tags line up in a column, and hovering a name highlights its other
 
 <img src=".github/readme/code.png" alt="The signup sketch rendered: code on the left, a column of colored tags on the right." width="720">
 
-A data sketch starts with a `data` line, declares its tables, then tells a story. Each step adds, changes or removes rows, and the reader steps through it:
+A data sketch declares its tables, then tells a story. Each step adds, changes or removes rows, and the reader steps through it:
 
 ```
-data
+view: data
 table customer(name, email)
 table order(customer -> customer, state, total, payment -> payment)
 table payment(provider, state, amount)

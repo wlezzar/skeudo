@@ -1,3 +1,4 @@
+view: code
 settle_invoice(invoice_id):
     invoice = load_invoice(invoice_id)        ::read:postgres.invoices[lookup by key]
     if invoice is past due:                   ::doc[past the due date plus the account's grace period]

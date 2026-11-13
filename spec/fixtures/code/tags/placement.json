@@ -1,14 +1,15 @@
 {
-  "signature": { "name": "load", "params": ["path"], "line": 1 },
+  "signature": { "name": "load", "params": ["path"], "line": 2 },
   "indentUnit": 4,
   "variables": {
-    "path": { "origin": "param", "line": 1 },
-    "data": { "origin": "binding", "line": 2 },
-    "v": { "origin": "binding", "line": 3 }
+    "path": { "origin": "param", "line": 2 },
+    "data": { "origin": "binding", "line": 3 },
+    "v": { "origin": "binding", "line": 4 }
   },
   "lines": [
+    { "number": 1, "depth": 0, "text": "", "blank": true },
     {
-      "number": 1,
+      "number": 2,
       "depth": 0,
       "text": "load(path):",
       "signature": true,
@@ -21,10 +22,10 @@
       ]
     },
     {
-      "number": 2,
+      "number": 3,
       "depth": 1,
       "text": "data = std::fs::read(path)        ::read:fs",
-      "parent": 1,
+      "parent": 2,
       "binding": "data",
       "tags": [{ "raw": "::read:fs", "kind": "read", "value": "fs", "trailing": true }],
       "segments": [
@@ -37,10 +38,10 @@
       ]
     },
     {
-      "number": 3,
+      "number": 4,
       "depth": 1,
       "text": "v = Vec::new()",
-      "parent": 1,
+      "parent": 2,
       "binding": "v",
       "segments": [
         { "type": "var", "text": "v", "name": "v", "definition": true },
@@ -50,30 +51,30 @@
       ]
     },
     {
-      "number": 4,
+      "number": 5,
       "depth": 1,
       "text": "see a::b and x::read:foo, they are code",
-      "parent": 1,
+      "parent": 2,
       "segments": [
         { "type": "word", "text": "see" },
         { "type": "text", "text": " a::b and x::read:foo, they are code" }
       ]
     },
     {
-      "number": 5,
+      "number": 6,
       "depth": 1,
       "text": "copy(::read:s3)",
-      "parent": 1,
+      "parent": 2,
       "segments": [
         { "type": "call", "text": "copy", "name": "copy" },
         { "type": "text", "text": "(::read:s3)" }
       ]
     },
     {
-      "number": 6,
+      "number": 7,
       "depth": 1,
       "text": "fetch ::read:api then parse it",
-      "parent": 1,
+      "parent": 2,
       "tags": [{ "raw": "::read:api", "kind": "read", "value": "api" }],
       "segments": [
         { "type": "word", "text": "fetch" },
@@ -83,10 +84,10 @@
       ]
     },
     {
-      "number": 7,
+      "number": 8,
       "depth": 1,
       "text": "::write:gcs stream it, then",
-      "parent": 1,
+      "parent": 2,
       "tags": [{ "raw": "::write:gcs", "kind": "write", "value": "gcs" }],
       "segments": [
         { "type": "tag", "raw": "::write:gcs" },
@@ -94,10 +95,10 @@
       ]
     },
     {
-      "number": 8,
+      "number": 9,
       "depth": 1,
       "text": "stream it ::read:s3 ::write:gcs",
-      "parent": 1,
+      "parent": 2,
       "tags": [
         { "raw": "::read:s3", "kind": "read", "value": "s3", "trailing": true },
         { "raw": "::write:gcs", "kind": "write", "value": "gcs", "trailing": true }
@@ -105,10 +106,10 @@
       "segments": [{ "type": "word", "text": "stream" }, { "type": "text", "text": " it" }]
     },
     {
-      "number": 9,
+      "number": 10,
       "depth": 1,
       "text": "::read:s3 ::write:gcs",
-      "parent": 1,
+      "parent": 2,
       "tags": [
         { "raw": "::read:s3", "kind": "read", "value": "s3" },
         { "raw": "::write:gcs", "kind": "write", "value": "gcs" }

@@ -1,13 +1,8 @@
 {
-  "signature": { "name": "f", "params": ["x"], "line": 1 },
+  "signature": { "name": "f", "params": ["x"], "line": 2 },
   "indentUnit": 4,
   "callSources": { "load": { "start": 40, "end": 44 } },
   "diagnostics": [
-    {
-      "line": 1,
-      "severity": "warning",
-      "message": "This ::src location has no file. Name the file with a ::src tag on the signature."
-    },
     {
       "line": 2,
       "severity": "warning",
@@ -17,12 +12,18 @@
       "line": 3,
       "severity": "warning",
       "message": "This ::src location has no file. Name the file with a ::src tag on the signature."
+    },
+    {
+      "line": 4,
+      "severity": "warning",
+      "message": "This ::src location has no file. Name the file with a ::src tag on the signature."
     }
   ],
-  "variables": { "x": { "origin": "param", "line": 1 } },
+  "variables": { "x": { "origin": "param", "line": 2 } },
   "lines": [
+    { "number": 1, "depth": 0, "text": "", "blank": true },
     {
-      "number": 1,
+      "number": 2,
       "depth": 0,
       "text": "f(x):              ::src[1-10]",
       "signature": true,
@@ -39,10 +40,10 @@
       ]
     },
     {
-      "number": 2,
+      "number": 3,
       "depth": 1,
       "text": "load(x)        ::read:db ::src[4]",
-      "parent": 1,
+      "parent": 2,
       "src": { "start": 4, "end": 4 },
       "tags": [
         { "raw": "::read:db", "kind": "read", "value": "db", "trailing": true },
@@ -56,11 +57,11 @@
       ]
     },
     {
-      "number": 3,
+      "number": 4,
       "depth": 1,
       "text": "::src:load[40-44]",
       "hidden": true,
-      "parent": 1,
+      "parent": 2,
       "src": { "start": 1, "end": 10, "inherited": true },
       "tags": [
         { "raw": "::src:load[40-44]", "kind": "src", "value": "load", "note": { "text": "40-44" } }

@@ -17,20 +17,32 @@ Skeudo is a set of small text formats for explaining code to a reader: a reviewe
 
 A block of any view is a **sketch**. In Markdown, a sketch lives in a fenced code block tagged `skeudo`. Renderers also accept `sketch`, the format's former working name. A file holding a single sketch has the extension `.skeudo`.
 
-Every view uses the same fence and extension. A sketch names its view on its first line, as Mermaid diagrams do:
+Every view uses the same fence and extension. A sketch starts by naming its view:
 
 ```skeudo
-data
+view: data
 table customer(name, email)
 
 Ana signs up
   + customer c1  name: Ana | email: ana@example.com
 ```
 
-- **The header** is a view's name alone on the first line that isn't blank: `code` or `data`. Spaces around it don't count.
-- **A sketch without a header is in the code view.** So a code sketch doesn't need one. A code sketch whose first line is exactly a view's name needs a `code` header.
+- **The header** is `view:` and a view's name, `code` or `data`, alone on the first line that isn't blank. Spaces around the name don't count.
+- **Every sketch has a header**, code sketches included, so a reader always knows what they are looking at, even in plain text.
+- **A sketch without a header still renders**, in the code view, with a warning on its first line. So does a sketch whose first line names a view that doesn't exist, such as `view: dat`. That line isn't a header, so it stays a line of the sketch, and its warning shows where the mistake is.
+- **Only the first line is a header.** A later line reading `view: data` is just a line of the sketch.
 - **The header is a line of the sketch.** Line numbers count it, so a warning's line matches the line in the block. Renderers don't show it.
 - **Why a line, not a fence per view or a word after `skeudo`.** The view travels with the text when it is copied out of its fence, piped to the CLI or saved as a file. A new view adds no fence, file extension or editor language.
+- **Why `view: data`, not a bare `data`.** A bare word reads like the start of the content, and a typo such as `dat` would make the sketch a one-line code sketch with no warning. `view:` says what the line is, and lets a parser warn about a name it doesn't know. A call form such as `view(data)` would look like the signature that often starts a code sketch.
+
+### Warnings
+
+A parser warns about the header whatever the view:
+
+| Problem | Message |
+| --- | --- |
+| The first line that isn't blank isn't a header. The sketch is read as code | `A sketch should start with its view, as in view: code.` |
+| The first line names a view that doesn't exist, as in `view: dat`. The sketch is read as code, that line included | `No view named dat. The views are code and data.` |
 
 ## Rules every view follows
 

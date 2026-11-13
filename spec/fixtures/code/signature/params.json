@@ -1,15 +1,16 @@
 {
-  "signature": { "name": "search", "params": ["user_id", "limit", "filters", "rest"], "line": 1 },
+  "signature": { "name": "search", "params": ["user_id", "limit", "filters", "rest"], "line": 2 },
   "indentUnit": 4,
   "variables": {
-    "user_id": { "origin": "param", "line": 1 },
-    "limit": { "origin": "param", "line": 1 },
-    "filters": { "origin": "param", "line": 1 },
-    "rest": { "origin": "param", "line": 1 }
+    "user_id": { "origin": "param", "line": 2 },
+    "limit": { "origin": "param", "line": 2 },
+    "filters": { "origin": "param", "line": 2 },
+    "rest": { "origin": "param", "line": 2 }
   },
   "lines": [
+    { "number": 1, "depth": 0, "text": "", "blank": true },
     {
-      "number": 1,
+      "number": 2,
       "depth": 0,
       "text": "search(mut user_id: u64, limit: int = 10, filters: Map<str, list[str]>, ...rest, user_id): returns matches",
       "signature": true,
@@ -30,10 +31,10 @@
       ]
     },
     {
-      "number": 2,
+      "number": 3,
       "depth": 1,
       "text": "use user_id, limit, filters and rest",
-      "parent": 1,
+      "parent": 2,
       "segments": [
         { "type": "word", "text": "use" },
         { "type": "text", "text": " " },
@@ -47,10 +48,10 @@
       ]
     },
     {
-      "number": 3,
+      "number": 4,
       "depth": 1,
       "text": "forward(...rest) for i in 0..limit",
-      "parent": 1,
+      "parent": 2,
       "segments": [
         { "type": "call", "text": "forward", "name": "forward" },
         { "type": "text", "text": "(..." },

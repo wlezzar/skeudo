@@ -2,7 +2,7 @@
 
 > **Alpha.** The format and this API will change in ways that break existing sketches and code. Until 1.0, breaking changes come in minor versions (0.1 to 0.2), never in patches, and [CHANGELOG.md](https://github.com/wlezzar/skeudo/blob/main/CHANGELOG.md) lists each one.
 
-The parser for [Skeudo](https://github.com/wlezzar/skeudo), small text formats for explaining code to a reader. A sketch is pseudocode for code review where every outside effect is tagged, or, when it starts with a `data` line, a data model drawn as tables and a story of how their rows change. The format is defined in [spec/spec.md](https://github.com/wlezzar/skeudo/blob/main/spec/spec.md).
+The parser for [Skeudo](https://github.com/wlezzar/skeudo), small text formats for explaining code to a reader. A sketch is pseudocode for code review where every outside effect is tagged, or a data model drawn as tables and a story of how their rows change, and its first line says which: `view: code` or `view: data`. The format is defined in [spec/spec.md](https://github.com/wlezzar/skeudo/blob/main/spec/spec.md).
 
 Most people want a renderer instead: [`@skeudo/html`](https://www.npmjs.com/package/@skeudo/html), [`markdown-it-skeudo`](https://www.npmjs.com/package/markdown-it-skeudo), [`remark-skeudo`](https://www.npmjs.com/package/remark-skeudo) or the [`skeudo`](https://www.npmjs.com/package/skeudo) CLI. Use this package to read sketches in your own tools.
 
@@ -15,12 +15,13 @@ npm install @skeudo/core
 ```js
 import { parse } from '@skeudo/core';
 
-const sketch = parse(`get_user(id):
+const sketch = parse(`view: code
+get_user(id):
     row = find(id)    ::read:postgres.users
     return row
 `);
 
-sketch.view;        // 'code', or 'data' for a sketch whose first line is `data`
+sketch.view;        // 'code', or 'data' for a sketch whose first line is `view: data`
 sketch.diagnostics; // [{ line, severity, message }], the warnings listed in the spec
 ```
 

@@ -1,4 +1,4 @@
-data
+view: data
 [Media]
   > Upload
 table media(role)

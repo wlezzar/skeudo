@@ -1,3 +1,4 @@
+view: code
 settle(invoice):                           ::doc[runs nightly for every open invoice]
     if invoice is past due:                ::doc[past the due date plus the grace period]
         add_fee(invoice)                   ::write:postgres.invoices

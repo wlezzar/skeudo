@@ -1,0 +1,44 @@
+{
+  "indentUnit": 2,
+  "diagnostics": [
+    {
+      "line": 1,
+      "severity": "warning",
+      "message": "No view named dat. The views are code and data."
+    }
+  ],
+  "lines": [
+    {
+      "number": 1,
+      "depth": 0,
+      "text": "view: dat",
+      "segments": [{ "type": "word", "text": "view" }, { "type": "text", "text": ": dat" }]
+    },
+    {
+      "number": 2,
+      "depth": 0,
+      "text": "table media(role)",
+      "segments": [
+        { "type": "word", "text": "table" },
+        { "type": "text", "text": " " },
+        { "type": "call", "text": "media", "name": "media" },
+        { "type": "text", "text": "(role)" }
+      ]
+    },
+    { "number": 3, "depth": 0, "text": "", "blank": true },
+    {
+      "number": 4,
+      "depth": 0,
+      "text": "Upload",
+      "header": true,
+      "segments": [{ "type": "word", "text": "Upload" }]
+    },
+    {
+      "number": 5,
+      "depth": 1,
+      "text": "+ media m1  role: avatar",
+      "parent": 4,
+      "segments": [{ "type": "text", "text": "+ media m1  role: avatar" }]
+    }
+  ]
+}

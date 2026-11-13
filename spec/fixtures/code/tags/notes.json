@@ -1,14 +1,15 @@
 {
-  "signature": { "name": "run", "params": ["task"], "line": 1 },
+  "signature": { "name": "run", "params": ["task"], "line": 2 },
   "indentUnit": 4,
   "variables": {
-    "task": { "origin": "param", "line": 1 },
-    "messages": { "origin": "binding", "line": 2 },
-    "reply": { "origin": "binding", "line": 3 }
+    "task": { "origin": "param", "line": 2 },
+    "messages": { "origin": "binding", "line": 3 },
+    "reply": { "origin": "binding", "line": 4 }
   },
   "lines": [
+    { "number": 1, "depth": 0, "text": "", "blank": true },
     {
-      "number": 1,
+      "number": 2,
       "depth": 0,
       "text": "run(task):",
       "signature": true,
@@ -21,10 +22,10 @@
       ]
     },
     {
-      "number": 2,
+      "number": 3,
       "depth": 1,
       "text": "messages = [task]",
-      "parent": 1,
+      "parent": 2,
       "binding": "messages",
       "segments": [
         { "type": "var", "text": "messages", "name": "messages", "definition": true },
@@ -34,10 +35,10 @@
       ]
     },
     {
-      "number": 3,
+      "number": 4,
       "depth": 1,
       "text": "reply = model.create(messages)   ::read:anthropic[cached for [some] time]",
-      "parent": 1,
+      "parent": 2,
       "binding": "reply",
       "tags": [
         {
@@ -59,10 +60,10 @@
       ]
     },
     {
-      "number": 4,
+      "number": 5,
       "depth": 1,
       "text": "store(reply) ::write:s3 [archive]",
-      "parent": 1,
+      "parent": 2,
       "tags": [{ "raw": "::write:s3", "kind": "write", "value": "s3" }],
       "segments": [
         { "type": "call", "text": "store", "name": "store" },
@@ -74,10 +75,10 @@
       ]
     },
     {
-      "number": 5,
+      "number": 6,
       "depth": 1,
       "text": "store(reply)                     ::write:s3[!no lifecycle rule]",
-      "parent": 1,
+      "parent": 2,
       "tags": [
         {
           "raw": "::write:s3[!no lifecycle rule]",
@@ -95,10 +96,10 @@
       ]
     },
     {
-      "number": 6,
+      "number": 7,
       "depth": 1,
       "text": "::danger[!double bang]",
-      "parent": 1,
+      "parent": 2,
       "tags": [
         {
           "raw": "::danger[!double bang]",

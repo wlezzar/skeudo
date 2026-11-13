@@ -1,17 +1,18 @@
 {
   "indentUnit": 4,
-  "variables": { "event": { "origin": "binding", "line": 2, "labels": ["untrusted"] } },
+  "variables": { "event": { "origin": "binding", "line": 3, "labels": ["untrusted"] } },
   "flows": [
     {
-      "line": 4,
+      "line": 5,
       "variable": "event",
       "labels": ["untrusted"],
       "effect": "::write:postgres.invoices"
     }
   ],
   "lines": [
+    { "number": 1, "depth": 0, "text": "", "blank": true },
     {
-      "number": 1,
+      "number": 2,
       "depth": 0,
       "text": "When a webhook arrives:",
       "header": true,
@@ -21,10 +22,10 @@
       ]
     },
     {
-      "number": 2,
+      "number": 3,
       "depth": 1,
       "text": "event = parse(request.body)       ::untrusted:event",
-      "parent": 1,
+      "parent": 2,
       "binding": "event",
       "tags": [
         { "raw": "::untrusted:event", "kind": "untrusted", "value": "event", "trailing": true }
@@ -37,11 +38,11 @@
       ]
     },
     {
-      "number": 3,
+      "number": 4,
       "depth": 1,
       "text": "if event.type is \"invoice.paid\":",
       "header": true,
-      "parent": 1,
+      "parent": 2,
       "segments": [
         { "type": "word", "text": "if" },
         { "type": "text", "text": " " },
@@ -50,10 +51,10 @@
       ]
     },
     {
-      "number": 4,
+      "number": 5,
       "depth": 2,
       "text": "mark_paid(event.invoice_id)   ::write:postgres.invoices",
-      "parent": 3,
+      "parent": 4,
       "tags": [
         {
           "raw": "::write:postgres.invoices",

@@ -37,7 +37,8 @@ function localExample(path: string, raw: string): Example {
   };
 }
 
-const refreshToken = `refresh_token(account_id):                      ::src[auth/tokens.py:40-78]
+const refreshToken = `view: code
+refresh_token(account_id):                      ::src[auth/tokens.py:40-78]
     Only one refresh at a time per account.
     take the refresh lock                         ::lock:token-refresh ::write:redis[30 s ttl]
     token = load_token(account_id)                ::read:postgres.tokens[lookup by key] ::secret:token
@@ -59,7 +60,8 @@ const refreshToken = `refresh_token(account_id):                      ::src[auth
     ::src:oauth.refresh[auth/oauth.py:88-120]
 `;
 
-const getProfile = `get_profile(user_id):                    ::src[app/profile.py:12-24]
+const getProfile = `view: code
+get_profile(user_id):                    ::src[app/profile.py:12-24]
     cached = cache.get(user_id)          ::read:redis[lookup by key] ::src[13]
     if cached:
         return cached
@@ -73,7 +75,8 @@ const getProfile = `get_profile(user_id):                    ::src[app/profile.p
     ::src:cache.set[lib/cache.py:31]
 `;
 
-const settleInvoice = `settle_invoice(invoice_id):
+const settleInvoice = `view: code
+settle_invoice(invoice_id):
     invoice = load_invoice(invoice_id)        ::read:postgres.invoices[lookup by key]
     if invoice is past due:                   ::doc[past the due date plus the account's grace period]
         add_late_fee(invoice)                 ::write:postgres.invoices
@@ -83,7 +86,8 @@ const settleInvoice = `settle_invoice(invoice_id):
     ::doc:add_late_fee[2% of the amount due, at most once per invoice]
 `;
 
-const signup = `signup(request):
+const signup = `view: code
+signup(request):
     body = request.json()                 ::untrusted:body
     if body.email is malformed:
         ::fail:InvalidEmail
@@ -96,7 +100,8 @@ const signup = `signup(request):
     log_event("signup", body)             ::write:logs
 `;
 
-const searchOrders = `search_orders(user_id, term):
+const searchOrders = `view: code
+search_orders(user_id, term):
     user = get_user(user_id)          ::read:postgres.users[lookup by key]
     orders = recent_orders(user)      ::read:postgres.orders[range on created_at]
     if a term is given:
@@ -106,7 +111,8 @@ const searchOrders = `search_orders(user_id, term):
     count orders by status            ::read:postgres.orders[!full scan, probably]
 `;
 
-const bookTrip = `book_trip(trip, card):
+const bookTrip = `view: code
+book_trip(trip, card):
     seat = hold_seat(trip.flight)           ::write:airline-api
     room = reserve_room(trip.hotel)         ::write:hotel-api
     if that fails:
@@ -120,7 +126,8 @@ const bookTrip = `book_trip(trip, card):
     save_booking(trip, seat, room)          ::write:postgres.bookings
 `;
 
-const runAgent = `run_agent(task):
+const runAgent = `view: code
+run_agent(task):
     messages = [task]
     repeat up to 20 turns:
         reply = claude.create(messages, tools)  ::read:anthropic
@@ -131,7 +138,8 @@ const runAgent = `run_agent(task):
     ::fail:TooManyTurns
 `;
 
-const cancelOrder = `cancel_order(order_id):
+const cancelOrder = `view: code
+cancel_order(order_id):
     order = load_order(order_id)            ::read:postgres.orders[lookup by key]
     if order is shipped:
         ::fail:AlreadyShipped
@@ -142,7 +150,8 @@ const cancelOrder = `cancel_order(order_id):
     email the customer                      ::write:sendgrid ::removed
 `;
 
-const realCode = `load_config(path):
+const realCode = `view: code
+load_config(path):
     Real code stays plain: only tags after whitespace are markers.
     text = std::fs::read_to_string(&path)   ::read:fs ::untrusted:text
     defaults = Vec::new()
@@ -160,6 +169,7 @@ const prComment = `### Review: \`book_trip\` after #482
 The new payment step looks right, but one write has no failure path:
 
 \`\`\`skeudo
+view: code
 book_trip(trip, card):
     seat = hold_seat(trip.flight)           ::write:airline-api
     room = reserve_room(trip.hotel)         ::write:hotel-api
@@ -180,6 +190,7 @@ book_trip(trip, card):
 Suggested shape:
 
 \`\`\`skeudo
+view: code
     save_booking(trip, seat, room)          ::write:postgres.bookings
     if that fails:
         refund(card, trip.total)            ::write:stripe

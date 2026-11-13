@@ -1,4 +1,4 @@
-data
+view: data
 table customer(name, email)
   One account. A guest gets a row too, with no email.
 

@@ -1,4 +1,4 @@
-data
+view: data
 table media(role)
 table media(type)
   This explanation belongs to the second declaration, which is dropped.

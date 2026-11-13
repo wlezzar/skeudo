@@ -1,4 +1,4 @@
-data
+view: data
 [Checkout]
 table order(state)
 

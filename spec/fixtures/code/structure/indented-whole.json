@@ -1,13 +1,14 @@
 {
-  "signature": { "name": "get", "params": ["key"], "line": 1 },
+  "signature": { "name": "get", "params": ["key"], "line": 2 },
   "indentUnit": 4,
   "variables": {
-    "key": { "origin": "param", "line": 1 },
-    "value": { "origin": "binding", "line": 2 }
+    "key": { "origin": "param", "line": 2 },
+    "value": { "origin": "binding", "line": 3 }
   },
   "lines": [
+    { "number": 1, "depth": 0, "text": "", "blank": true },
     {
-      "number": 1,
+      "number": 2,
       "depth": 0,
       "text": "get(key):",
       "signature": true,
@@ -20,10 +21,10 @@
       ]
     },
     {
-      "number": 2,
+      "number": 3,
       "depth": 1,
       "text": "value = cache.get(key)   ::read:redis",
-      "parent": 1,
+      "parent": 2,
       "binding": "value",
       "tags": [{ "raw": "::read:redis", "kind": "read", "value": "redis", "trailing": true }],
       "segments": [
@@ -36,10 +37,10 @@
       ]
     },
     {
-      "number": 3,
+      "number": 4,
       "depth": 1,
       "text": "return value",
-      "parent": 1,
+      "parent": 2,
       "segments": [
         { "type": "word", "text": "return" },
         { "type": "text", "text": " " },

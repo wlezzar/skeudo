@@ -1,3 +1,4 @@
+view: code
 render(page):
     html = template.render(page, …)
     body = std::fs::read_to_string(path)    ::read:fs

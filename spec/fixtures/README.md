@@ -4,10 +4,11 @@ Each `.skeudo` file is an input, and the `.json` file next to it is what the par
 
 ## code
 
-The fixtures in `code/` pin down the rules in [code.md](../code.md), including the cases the spec leaves to the parser.
+The fixtures in `code/` pin down the rules in [code.md](../code.md), including the cases the spec leaves to the parser. Each starts with the `view: code` header, except in `header/`.
 
 - `examples/` holds the spec's examples, copied word for word.
 - The other folders hold edge cases, grouped by spec section. `warnings/` holds sketches that must produce warnings.
+- `header/` holds the header rules of [spec.md](../spec.md), since a sketch without a header, or whose header names no view, is read as code.
 
 The JSON is the parser's AST (`CodeSketch` in `packages/core/src/code/types.ts`), with these changes:
 
@@ -22,7 +23,7 @@ The JSON is the parser's AST (`CodeSketch` in `packages/core/src/code/types.ts`)
 
 ## data
 
-The fixtures in `data/` pin down the rules in [data.md](../data.md). Each starts with the `data` header.
+The fixtures in `data/` pin down the rules in [data.md](../data.md). Each starts with the `view: data` header.
 
 - `examples/` holds the spec's examples, copied word for word.
 - `format/` and `story/` hold edge cases of the format and of how steps play. `header/` checks that line numbers count the header.
@@ -32,7 +33,7 @@ The JSON is the parser's output (`DataSketch` in `packages/core/src/data/types.t
 
 ## Both views
 
-`packages/core/test/fixture.ts` does the conversions. Warning messages are compared word for word, so rewording one means updating the fixtures that produce it.
+`packages/core/test/fixture.ts` does the conversions. It parses with `parse()`, so the header's warnings show. Warning messages are compared word for word, so rewording one means updating the fixtures that produce it.
 
 ## Running
 

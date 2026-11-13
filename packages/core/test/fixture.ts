@@ -1,11 +1,18 @@
-import { analyze, parseCode, parseData, replayData } from '../src/index.ts';
+import { analyze, parse, replayData, type Sketch } from '../src/index.ts';
+
+/** Parses a fixture with parse(), so the header's warnings show, and checks it is in the expected view. */
+function parseAs<V extends Sketch['view']>(source: string, view: V): Extract<Sketch, { view: V }> {
+  const sketch = parse(source);
+  if (sketch.view !== view) throw new Error(`Expected a ${view} sketch, got ${sketch.view}.`);
+  return sketch as Extract<Sketch, { view: V }>;
+}
 
 /**
  * The expected output of a data fixture: the parsed tables and steps, with the rows each table holds
  * after each step without substeps and after each substep, and the rows each read finds.
  */
 export function projectData(source: string): unknown {
-  const sketch = parseData(source);
+  const sketch = parseAs(source, 'data');
   const frames = replayData(sketch);
   const { view: _view, source: _source, steps, ...rest } = sketch;
   const played = <T extends object>(part: T, step: number, substep?: number) => {
@@ -25,7 +32,7 @@ export function projectData(source: string): unknown {
  * plus label flows. spec/fixtures/README.md describes the shape.
  */
 export function project(source: string): unknown {
-  const sketch = parseCode(source);
+  const sketch = parseAs(source, 'code');
   const review = analyze(sketch);
   // The fixture's folder gives the view.
   const { view: _view, source: _source, variables, lines, ...rest } = sketch;

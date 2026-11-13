@@ -1,0 +1,21 @@
+{
+  "indentUnit": 2,
+  "lines": [
+    { "number": 1, "depth": 0, "text": "", "blank": true },
+    {
+      "number": 2,
+      "depth": 0,
+      "text": "view: data",
+      "header": true,
+      "segments": [{ "type": "word", "text": "view" }, { "type": "text", "text": ": data" }]
+    },
+    {
+      "number": 3,
+      "depth": 1,
+      "text": "read the rows ::read:db",
+      "parent": 2,
+      "tags": [{ "raw": "::read:db", "kind": "read", "value": "db", "trailing": true }],
+      "segments": [{ "type": "word", "text": "read" }, { "type": "text", "text": " the rows" }]
+    }
+  ]
+}

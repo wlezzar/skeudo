@@ -96,14 +96,14 @@ describe('edge cases', () => {
 
   test('a value longer than the cap is cut at the column width, with all of it in the tooltip', () => {
     const long = 'So the way I would describe my last role is mostly as a facilitator';
-    const html = toHtml(`data\ntable source(transcript)\n\nTranscribed\n  + source s1  transcript: ${long}\n`);
+    const html = toHtml(`view: data\ntable source(transcript)\n\nTranscribed\n  + source s1  transcript: ${long}\n`);
     expect(html).toContain(`<td title="${long}"><span class="skd-long">${long}</span></td>`);
     const cap = /\.skd-long \{[^}]*max-width: (\d+)ch;/.exec(CSS)![1];
     expect(table(html, 'source')).toContain(`<col style="width:calc(${cap}ch + 16px)">`);
   });
 
   test('a reference to a row that is not there is drawn broken, and warnings are listed with their lines', () => {
-    const html = toHtml('data\ntable media(role)\ntable source(input -> media)\n\nUpload\n  + source s1  input: m9\n');
+    const html = toHtml('view: data\ntable media(role)\ntable source(input -> media)\n\nUpload\n  + source s1  input: m9\n');
     expect(html).toContain('<span class="skd-ref skd-broken" data-skd-ref="media:m9">m9</span>');
     expect(html).toContain('<ul class="skd-warnings"><li>Line 6: source s1.input points at media m9, which doesn&#39;t exist at step 1.</li></ul>');
   });
@@ -188,7 +188,7 @@ describe('groups', () => {
 
   test('a long label is cut, with the whole label in its tooltip', () => {
     const label = 'Everything the nightly accounting export reads';
-    const long = toHtml(`data\n[${label}]\ntable order(state)\n`);
+    const long = toHtml(`view: data\n[${label}]\ntable order(state)\n`);
     expect(long).toContain(`<span title="${label}">${label}</span>`);
     const cap = /\.skd-group-name > span:first-child \{[^}]*max-width: (\d+)ch;/.exec(CSS)![1];
     expect(cap).toBe(/\.skd-long \{[^}]*max-width: (\d+)ch;/.exec(CSS)![1]);

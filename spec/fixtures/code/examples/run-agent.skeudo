@@ -1,3 +1,4 @@
+view: code
 run_agent(task):
     messages = [task]
     repeat up to 20 turns:

@@ -4,7 +4,7 @@ Oct 22, 2026 · updated Nov 9, 2026 · @Walid Lezzar
 
 > **Alpha.** This view will change in ways that break existing sketches. Until 1.0, breaking changes come in minor versions (0.1 to 0.2), never in patches, and [CHANGELOG.md](../CHANGELOG.md) lists each one.
 
-This is the code view of Skeudo. [spec.md](spec.md) covers what every view shares: the fence, the file extension, and how warnings work.
+This is the code view of Skeudo. A code sketch starts with the header `view: code`. [spec.md](spec.md) covers what every view shares: the fence, the file extension, the header, and how warnings work.
 
 ## Purpose and core contract
 
@@ -22,7 +22,7 @@ A sketch is a list of lines nested by indentation. Each line mixes free prose an
 
 | Element | Form | Meaning |
 | --- | --- | --- |
-| Signature | `name(params):` as the first line | Names the function the sketch describes. Its parameters become tracked variables. A `::src` tag on it names the source file. The colon can be dropped when indented lines follow. A sketch without a signature is still valid. |
+| Signature | `name(params):` as the first line after the header | Names the function the sketch describes. Its parameters become tracked variables. A `::src` tag on it names the source file. The colon can be dropped when indented lines follow. A sketch without a signature is still valid. |
 | Block | A line followed by deeper-indented lines | Opens a block; the deeper-indented lines belong to it. Header words are free: `if`, `for each`, `in parallel`, `if that fails`. Ending the header with `:` is a convention. |
 | Call | `name(args)`, `obj.name(args)` or `mod::name(args)`, closed on the same line | A reference to real code. Use `…` to elide arguments that don't matter. |
 | Binding | `name = …` at the start of a line | Names a value. The name becomes a tracked variable. Only a plain name binds, so `order.status = paid` and `a == b` are not bindings. |
@@ -33,6 +33,7 @@ A sketch is a list of lines nested by indentation. Each line mixes free prose an
 Indentation must be consistent within a sketch, at 2 or 4 spaces per level. The first indented line sets the unit, and a tab counts as 4 spaces. A sketch indented as a whole, such as one nested in a list item, keeps its shape. By convention, a plain-language summary of the function's purpose may follow the signature.
 
 ```skeudo
+view: code
 get_profile(user_id):
     cached = cache.get(user_id)    ::read:redis[lookup by key]
     if cached:
@@ -104,6 +105,7 @@ With a call name as its value, `::src` gives that call's definition, as in `::sr
 `::repo` names the repository and the revision the locations refer to. Its note holds a URL. It applies to the whole sketch, wherever it sits; by convention it goes on the last line.
 
 ```skeudo
+view: code
 get_profile(user_id):                    ::src[app/profile.py:12-24]
     cached = cache.get(user_id)          ::read:redis[lookup by key] ::src[13]
     if cached:
@@ -144,6 +146,7 @@ With a call name as its value, `::doc:name[text]` explains what that call does. 
 Without a value, `::doc[text]` explains the line it sits on. On a block header, it explains the whole block. By convention it follows the line's other tags, before `::src`.
 
 ```skeudo
+view: code
 settle_invoice(invoice_id):
     invoice = load_invoice(invoice_id)        ::read:postgres.invoices[lookup by key]
     if invoice is past due:                   ::doc[past the due date plus the account's grace period]
@@ -201,6 +204,7 @@ A removed line stays where the behavior used to run, and keeps its effect tags. 
 By convention, change tags follow a line's effect tags and come before its `::src` tags. In a sketch of a change, `::src` locations refer to the code after the change, so `::repo` names that revision.
 
 ```skeudo
+view: code
 cancel_order(order_id):
     order = load_order(order_id)            ::read:postgres.orders[lookup by key]
     if order is shipped:
@@ -329,6 +333,7 @@ Each example below surfaces at least one issue a reviewer would catch from the s
 ### Signup: labels and conditional writes
 
 ```skeudo
+view: code
 signup(request):
     body = request.json()                 ::untrusted:body
     if body.email is malformed:
@@ -347,6 +352,7 @@ The untrusted `body` flows into the log write, so the plain-text password gets l
 ### Order search: access patterns
 
 ```skeudo
+view: code
 search_orders(user_id, term):
     user = get_user(user_id)          ::read:postgres.users[lookup by key]
     orders = recent_orders(user)      ::read:postgres.orders[range on created_at]
@@ -362,6 +368,7 @@ The notes say how each query touches the table, in the author's own words. `get_
 ### Trip booking: failure blocks
 
 ```skeudo
+view: code
 book_trip(trip, card):
     seat = hold_seat(trip.flight)           ::write:airline-api
     room = reserve_room(trip.hotel)         ::write:hotel-api
@@ -381,6 +388,7 @@ The final write has no failure block. If saving fails after the charge succeeds,
 ### Agent loop: effects decided at runtime
 
 ```skeudo
+view: code
 run_agent(task):
     messages = [task]
     repeat up to 20 turns:

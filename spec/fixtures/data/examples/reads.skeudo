@@ -1,4 +1,4 @@
-data
+view: data
 table customer(name, email)
   One account per email.
 

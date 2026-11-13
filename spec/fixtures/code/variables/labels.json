@@ -1,22 +1,23 @@
 {
-  "signature": { "name": "refresh", "params": ["account"], "line": 1 },
+  "signature": { "name": "refresh", "params": ["account"], "line": 2 },
   "indentUnit": 4,
   "variables": {
-    "account": { "origin": "param", "line": 1, "labels": ["untrusted"] },
-    "token": { "origin": "binding", "line": 3, "labels": ["secret"] },
-    "session": { "origin": "binding", "line": 4 },
-    "apikey": { "origin": "label", "line": 6, "labels": ["secret"] }
+    "account": { "origin": "param", "line": 2, "labels": ["untrusted"] },
+    "token": { "origin": "binding", "line": 4, "labels": ["secret"] },
+    "session": { "origin": "binding", "line": 5 },
+    "apikey": { "origin": "label", "line": 7, "labels": ["secret"] }
   },
   "flows": [
-    { "line": 2, "variable": "token", "labels": ["secret"], "effect": "::write:logs" },
-    { "line": 3, "variable": "account", "labels": ["untrusted"], "effect": "::write:oauth" },
-    { "line": 4, "variable": "token", "labels": ["secret"], "effect": "::write:redis" },
-    { "line": 6, "variable": "apikey", "labels": ["secret"], "effect": "::read:vault" },
-    { "line": 6, "variable": "apikey", "labels": ["secret"], "effect": "::write:http" }
+    { "line": 3, "variable": "token", "labels": ["secret"], "effect": "::write:logs" },
+    { "line": 4, "variable": "account", "labels": ["untrusted"], "effect": "::write:oauth" },
+    { "line": 5, "variable": "token", "labels": ["secret"], "effect": "::write:redis" },
+    { "line": 7, "variable": "apikey", "labels": ["secret"], "effect": "::read:vault" },
+    { "line": 7, "variable": "apikey", "labels": ["secret"], "effect": "::write:http" }
   ],
   "lines": [
+    { "number": 1, "depth": 0, "text": "", "blank": true },
     {
-      "number": 1,
+      "number": 2,
       "depth": 0,
       "text": "refresh(account):                                 ::untrusted:account",
       "signature": true,
@@ -32,10 +33,10 @@
       ]
     },
     {
-      "number": 2,
+      "number": 3,
       "depth": 1,
       "text": "log_event(token)                              ::write:logs",
-      "parent": 1,
+      "parent": 2,
       "tags": [{ "raw": "::write:logs", "kind": "write", "value": "logs", "trailing": true }],
       "segments": [
         { "type": "call", "text": "log_event", "name": "log_event" },
@@ -45,10 +46,10 @@
       ]
     },
     {
-      "number": 3,
+      "number": 4,
       "depth": 1,
       "text": "token = provider.refresh(account)             ::write:oauth ::secret:token",
-      "parent": 1,
+      "parent": 2,
       "binding": "token",
       "tags": [
         { "raw": "::write:oauth", "kind": "write", "value": "oauth", "trailing": true },
@@ -64,10 +65,10 @@
       ]
     },
     {
-      "number": 4,
+      "number": 5,
       "depth": 1,
       "text": "session = store(token)                        ::write:redis",
-      "parent": 1,
+      "parent": 2,
       "binding": "session",
       "tags": [{ "raw": "::write:redis", "kind": "write", "value": "redis", "trailing": true }],
       "segments": [
@@ -80,10 +81,10 @@
       ]
     },
     {
-      "number": 5,
+      "number": 6,
       "depth": 1,
       "text": "send(session)                                 ::write:http",
-      "parent": 1,
+      "parent": 2,
       "tags": [{ "raw": "::write:http", "kind": "write", "value": "http", "trailing": true }],
       "segments": [
         { "type": "call", "text": "send", "name": "send" },
@@ -93,10 +94,10 @@
       ]
     },
     {
-      "number": 6,
+      "number": 7,
       "depth": 1,
       "text": "sign with apikey and send                     ::read:vault ::write:http ::secret:apikey",
-      "parent": 1,
+      "parent": 2,
       "tags": [
         { "raw": "::read:vault", "kind": "read", "value": "vault", "trailing": true },
         { "raw": "::write:http", "kind": "write", "value": "http", "trailing": true },

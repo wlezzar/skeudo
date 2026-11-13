@@ -1,3 +1,4 @@
+view: code
 update(order):
     total = sum of item prices
     order.status = paid

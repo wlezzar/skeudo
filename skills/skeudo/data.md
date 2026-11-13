@@ -6,7 +6,7 @@ Write one when someone asks how data is stored, what a table holds, how records 
 
 ## Syntax
 
-A data sketch is a `skeudo` fence whose first line is `data`.
+A data sketch is a `skeudo` fence whose first line is `view: data`.
 
 | Element | Form | Notes |
 | --- | --- | --- |
@@ -36,7 +36,7 @@ When a file's content matters, such as a JSON export, its columns are the fields
 Add groups only when the tables fall into two or more parts a reader looks at separately. A sketch of three or four tables needs none. Pick one reason for the groups before writing (a feature, a store, a role in the data, or a lifecycle), keep to it, and use two to four groups with labels of a word or two:
 
 ```skeudo
-data
+view: data
 [Postgres]
 table order(state, total)
 
@@ -63,7 +63,7 @@ Most columns and keys exist for a read: `order.payment` so the order page finds 
 - **Only equality.** Write ranges, sorting and joins in the title, and name the rows the read finds by id.
 
 ```skeudo
-data
+view: data
 table customer(name, email)
   One account per email.
 
@@ -98,7 +98,7 @@ As for code sketches, a Markdown document: a sentence or two on what the model i
 ## Example
 
 ```skeudo
-data
+view: data
 table customer(name, email)
   One account. A guest gets a row too, with no email.
 

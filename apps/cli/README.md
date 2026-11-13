@@ -2,7 +2,7 @@
 
 > **Alpha.** The format and the commands will change in ways that break existing sketches and scripts. Until 1.0, breaking changes come in minor versions (0.1 to 0.2), never in patches, and [CHANGELOG.md](https://github.com/wlezzar/skeudo/blob/main/CHANGELOG.md) lists each one.
 
-Checks [Skeudo](https://github.com/wlezzar/skeudo) sketches and renders them as standalone HTML pages. A sketch is pseudocode for code review where every outside effect is tagged, or, when it starts with a `data` line, a data model drawn as tables and a story of how their rows change. The format is defined in [spec/spec.md](https://github.com/wlezzar/skeudo/blob/main/spec/spec.md).
+Checks [Skeudo](https://github.com/wlezzar/skeudo) sketches and renders them as standalone HTML pages. A sketch is pseudocode for code review where every outside effect is tagged, or a data model drawn as tables and a story of how their rows change, and its first line says which: `view: code` or `view: data`. The format is defined in [spec/spec.md](https://github.com/wlezzar/skeudo/blob/main/spec/spec.md).
 
 ```sh
 npm install -g skeudo               # or run it once with npx skeudo
@@ -37,6 +37,7 @@ It exits with 0 when there are no warnings, 1 when there are, and 2 when a file 
 
 ```sh
 skeudo check <<'EOF'
+view: code
 get_user(id):
     row = find(id)    ::read:postgres.users
 EOF

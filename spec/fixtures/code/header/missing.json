@@ -1,0 +1,51 @@
+{
+  "signature": { "name": "get_user", "params": ["id"], "line": 2 },
+  "indentUnit": 2,
+  "diagnostics": [
+    {
+      "line": 2,
+      "severity": "warning",
+      "message": "A sketch should start with its view, as in view: code."
+    }
+  ],
+  "variables": { "id": { "origin": "param", "line": 2 }, "row": { "origin": "binding", "line": 3 } },
+  "lines": [
+    { "number": 1, "depth": 0, "text": "", "blank": true },
+    {
+      "number": 2,
+      "depth": 0,
+      "text": "get_user(id):",
+      "signature": true,
+      "header": true,
+      "segments": [
+        { "type": "fn", "text": "get_user" },
+        { "type": "text", "text": "(" },
+        { "type": "var", "text": "id", "name": "id", "definition": true },
+        { "type": "text", "text": "):" }
+      ]
+    },
+    {
+      "number": 3,
+      "depth": 1,
+      "text": "row = find(id) ::read:postgres.users",
+      "parent": 2,
+      "binding": "row",
+      "tags": [
+        {
+          "raw": "::read:postgres.users",
+          "kind": "read",
+          "value": "postgres.users",
+          "trailing": true
+        }
+      ],
+      "segments": [
+        { "type": "var", "text": "row", "name": "row", "definition": true },
+        { "type": "text", "text": " = " },
+        { "type": "call", "text": "find", "name": "find" },
+        { "type": "text", "text": "(" },
+        { "type": "var", "text": "id", "name": "id" },
+        { "type": "text", "text": ")" }
+      ]
+    }
+  ]
+}

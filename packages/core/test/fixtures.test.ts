@@ -38,10 +38,7 @@ describe('sketches in the docs parse without warnings', () => {
   const docs = [...globSync('spec/*.md', { cwd: ROOT }), ...globSync('skills/skeudo/**/*.md', { cwd: ROOT })].sort();
   for (const doc of docs) {
     const text = readFileSync(join(ROOT, doc), 'utf8');
-    // The skill's output template holds a placeholder fence whose body is just "...".
-    const blocks = [...text.matchAll(/^```skeudo\n([\s\S]*?)^```/gm)]
-      .map((m) => m[1])
-      .filter((b) => b.trim() !== '...');
+    const blocks = [...text.matchAll(/^```skeudo\n([\s\S]*?)^```/gm)].map((m) => m[1]);
 
     test(`${doc} has sketches`, () => {
       expect(blocks.length).toBeGreaterThan(0);
