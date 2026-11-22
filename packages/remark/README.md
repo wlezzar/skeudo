@@ -43,7 +43,7 @@ const js = await compile(mdx, { remarkPlugins: [remarkSkeudo] });
 
 Site generators built on remark take it in their list of remark plugins, such as `markdown.remarkPlugins` in Astro. To pass options, give the plugin and its options as a pair: `[remarkSkeudo, { inlineTags: false }]`.
 
-The page needs the stylesheet, `@skeudo/html/skeudo.css`, and `enhance()` from `@skeudo/html`, called once in the browser for hovering names, explanations in a popover and stepping through data sketches. [`@skeudo/html`](https://www.npmjs.com/package/@skeudo/html) is installed with the plugin, and its README says what each one does.
+The page needs the stylesheet, `@skeudo/html/skeudo.css`, and `enhance()` from `@skeudo/html`, called once in the browser for hovering names, explanations in a popover, folding blocks and stepping through data sketches. [`@skeudo/html`](https://www.npmjs.com/package/@skeudo/html) is installed with the plugin, and its README says what each one does.
 
 ### Docusaurus
 

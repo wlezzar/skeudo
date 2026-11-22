@@ -16,7 +16,7 @@ get_profile(user_id):                    ::src[app/profile.py:12-24]
 
 ## Highlighting
 
-Sketches in Markdown fences tagged `skeudo` (or `sketch`) and in `.skeudo` files are highlighted in the editor. Tags are colored by kind, with notes muted, dangers in bold and `::src`, `::repo` and `::doc` tags muted like comments. Calls, the signature, its parameters, bindings and the first word of each line are colored as in code.
+Sketches in Markdown fences tagged `skeudo` (or `sketch`) and in `.skeudo` files are highlighted in the editor. Tags are colored by kind, with notes muted, dangers in bold and `::src`, `::repo`, `::doc` and `::fold` tags muted like comments. Calls, the signature, its parameters, bindings and the first word of each line are colored as in code.
 
 The colors come from your theme, so they vary from theme to theme; VS Code's default themes give reads, writes, failures and changes their own colors. To change a color, add a rule to `editor.tokenColorCustomizations` for the scope below, or for the first scope **Developer: Inspect Editor Tokens and Scopes** shows on the token:
 
@@ -38,6 +38,7 @@ The colors come from your theme, so they vary from theme to theme; VS Code's def
 | `::new`, `::changed[…]`, `::removed` | `markup.inserted.new.skeudo`, `markup.changed.skeudo`, `markup.strikethrough.removed.skeudo` |
 | `::src[…]`, `::repo[…]` | `comment.src.skeudo` |
 | `::doc[…]` | `comment.doc.skeudo` |
+| `::fold` | `comment.fold.skeudo` |
 | Any other tag, such as `::todo` | `entity.name.label.todo.skeudo` |
 | Note | `comment.note.skeudo` |
 | `?` and `~` modifiers, runtime system `*` | `storage.modifier.conditional.skeudo`, `storage.modifier.unverified.skeudo`, `constant.language.wildcard.skeudo` |
@@ -45,7 +46,7 @@ The colors come from your theme, so they vary from theme to theme; VS Code's def
 | Parameter, binding | `variable.parameter.skeudo`, `entity.name.variable.skeudo` |
 | First word of a line | `keyword.control.first-word.skeudo` |
 
-Each whole tag is also `meta.tag.<family>.skeudo`, for rules that need it as a parent scope: `read`, `write`, `fail`, `label`, `danger`, `new`, `changed`, `removed`, `src`, `doc` or `other`.
+Each whole tag is also `meta.tag.<family>.skeudo`, for rules that need it as a parent scope: `read`, `write`, `fail`, `label`, `danger`, `new`, `changed`, `removed`, `src`, `doc`, `fold` or `other`.
 
 In a data sketch:
 
@@ -74,6 +75,7 @@ Open a Markdown file and run **Markdown: Open Preview to the Side** (`Ctrl+K V`)
 - Hovering a variable highlights its uses in the sketch; clicking it keeps them highlighted.
 - Hovering over a call or a line explained with `::doc`, or moving to it with Tab, shows the explanation. Lines with one have a small ⓘ after their code.
 - Clicking a `::src` location opens the file with those lines selected. See Source links below.
+- The chevron left of a block header folds the block, and blocks tagged `::fold` start folded. A folded line shows the tags of the lines under it; clicking them opens the block.
 - Inline code made only of tags, such as `` `::read:postgres` ``, renders as pills.
 - A data sketch starts at its first step. Click a step, or use the arrow keys after clicking the sketch, to see the rows change. Hovering over a reference highlights the row it points at. Resting on a step, a table's name or a group's label shows its explanation, and clicking its ⓘ keeps it open.
 

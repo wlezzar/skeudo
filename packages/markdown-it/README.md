@@ -21,7 +21,7 @@ const md = new MarkdownIt().use(markdownItSkeudo);
 const html = md.render(markdown);
 ```
 
-The page needs the stylesheet, `@skeudo/html/skeudo.css`, and `enhance()` from `@skeudo/html`, called once in the browser for hovering names, explanations in a popover and stepping through data sketches. [`@skeudo/html`](https://www.npmjs.com/package/@skeudo/html) is installed with the plugin, and its README says what each one does.
+The page needs the stylesheet, `@skeudo/html/skeudo.css`, and `enhance()` from `@skeudo/html`, called once in the browser for hovering names, explanations in a popover, folding blocks and stepping through data sketches. [`@skeudo/html`](https://www.npmjs.com/package/@skeudo/html) is installed with the plugin, and its README says what each one does.
 
 ### VitePress
 

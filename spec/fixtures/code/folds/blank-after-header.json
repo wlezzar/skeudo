@@ -1,0 +1,63 @@
+{
+  "signature": { "name": "sync", "params": ["account"], "line": 2 },
+  "indentUnit": 4,
+  "variables": {
+    "account": { "origin": "param", "line": 2 },
+    "rows": { "origin": "binding", "line": 5 }
+  },
+  "folds": [{ "header": 3, "lines": 1, "tags": [{ "tag": "::read:crm", "lines": [5] }] }],
+  "lines": [
+    { "number": 1, "depth": 0, "text": "", "blank": true },
+    {
+      "number": 2,
+      "depth": 0,
+      "text": "sync(account):",
+      "signature": true,
+      "header": true,
+      "segments": [
+        { "type": "fn", "text": "sync" },
+        { "type": "text", "text": "(" },
+        { "type": "var", "text": "account", "name": "account", "definition": true },
+        { "type": "text", "text": "):" }
+      ]
+    },
+    {
+      "number": 3,
+      "depth": 1,
+      "text": "pull the changes:                         ::fold",
+      "header": true,
+      "fold": true,
+      "parent": 2,
+      "tags": [{ "raw": "::fold", "kind": "fold", "trailing": true }],
+      "segments": [{ "type": "word", "text": "pull" }, { "type": "text", "text": " the changes:" }]
+    },
+    { "number": 4, "depth": 1, "text": "", "blank": true },
+    {
+      "number": 5,
+      "depth": 2,
+      "text": "rows = fetch(account)                 ::read:crm",
+      "parent": 3,
+      "binding": "rows",
+      "tags": [{ "raw": "::read:crm", "kind": "read", "value": "crm", "trailing": true }],
+      "segments": [
+        { "type": "var", "text": "rows", "name": "rows", "definition": true },
+        { "type": "text", "text": " = " },
+        { "type": "call", "text": "fetch", "name": "fetch" },
+        { "type": "text", "text": "(" },
+        { "type": "var", "text": "account", "name": "account" },
+        { "type": "text", "text": ")" }
+      ]
+    },
+    { "number": 6, "depth": 1, "text": "", "blank": true },
+    {
+      "number": 7,
+      "depth": 1,
+      "text": "push them                                 ::write:warehouse",
+      "parent": 2,
+      "tags": [
+        { "raw": "::write:warehouse", "kind": "write", "value": "warehouse", "trailing": true }
+      ],
+      "segments": [{ "type": "word", "text": "push" }, { "type": "text", "text": " them" }]
+    }
+  ]
+}

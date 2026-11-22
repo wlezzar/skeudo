@@ -32,8 +32,26 @@ const WORD_RE = /^[\p{L}][\p{L}\p{N}_'’-]*/u;
 const DEFAULT_LABEL_KINDS = ['untrusted', 'secret'];
 /** Tag kinds that mark what a commit or pull request did to a line. */
 export const CHANGE_KINDS: ReadonlySet<string> = new Set<ChangeKind>(['new', 'changed', 'removed']);
-/** Tag kinds that renderers hide: `::src` and `::repo` become links, and `::doc` shows on hover. */
-export const HIDDEN_KINDS: ReadonlySet<string> = new Set(['src', 'repo', 'doc']);
+/**
+ * Tag kinds that renderers hide: `::src` and `::repo` become links, `::doc` shows on hover, and `::fold`
+ * folds its block.
+ */
+export const HIDDEN_KINDS: ReadonlySet<string> = new Set(['src', 'repo', 'doc', 'fold']);
+
+/**
+ * The lines of a header's block, in order: every line after it until a line that is no deeper, with the
+ * blank lines between them but not the blank lines after the block's last line.
+ */
+export function blockLines(lines: SketchLine[], header: SketchLine): SketchLine[] {
+  const start = lines.indexOf(header) + 1;
+  let end = start;
+  for (let i = start; i < lines.length; i++) {
+    if (lines[i].blank) continue;
+    if (lines[i].depth <= header.depth) break;
+    end = i + 1;
+  }
+  return lines.slice(start, end);
+}
 
 /**
  * Finds every tag in a line. A tag starts at the beginning of the text or after whitespace,
@@ -240,6 +258,7 @@ export function parseCode(source: string, options: ParseOptions = {}): CodeSketc
       segments: [],
       trailingStart: text.length,
       hidden: false,
+      fold: false,
     };
   });
 
@@ -431,6 +450,31 @@ export function parseCode(source: string, options: ParseOptions = {}): CodeSketc
     const outer = parent?.change;
     if (parent && outer && outer.kind !== 'changed') {
       line.change = { kind: outer.kind, from: outer.from ?? parent.number };
+    }
+  }
+
+  // --- Folds ----------------------------------------------------------------------
+  // A folded line shows the effects of the lines under it, so an effect tagged on both would count twice.
+  for (const line of body) {
+    if (!line.tags.some((t) => t.kind === 'fold')) continue;
+    if (line.signature) {
+      warn(line.number, `The signature can't fold. Put ::fold on a block inside the sketch.`);
+      continue;
+    }
+    if (!line.header) {
+      warn(line.number, `There is nothing under this line to fold. Put ::fold on a line with indented lines under it.`);
+      continue;
+    }
+    line.fold = true;
+    const inside = blockLines(lines, line);
+    const seen = new Set<string>();
+    for (const t of line.tags) {
+      if ((t.kind !== 'read' && t.kind !== 'write') || !t.value || seen.has(`${t.kind}:${t.value}`)) continue;
+      seen.add(`${t.kind}:${t.value}`);
+      if (inside.some((l) => l.tags.some((u) => u.kind === t.kind && u.value === t.value))) {
+        const verb = t.kind === 'read' ? 'read' : 'written';
+        warn(line.number, `${t.value} is ${verb} inside this block too. Tag an effect once, where it happens; the folded line shows it.`);
+      }
     }
   }
 

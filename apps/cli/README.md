@@ -49,7 +49,7 @@ EOF
 skeudo render [file] [-o out.html] [--src-base <url>]
 ```
 
-Writes one HTML page with the styles and the script inlined (variable highlighting, explanations on hover, and stepping through data sketches), so it loads nothing from elsewhere and can be sent as a file. It follows the reader's light or dark mode. The page goes to stdout unless `-o` names a file, and warnings go to stderr; a sketch with warnings still renders.
+Writes one HTML page with the styles and the script inlined (variable highlighting, explanations on hover, folding blocks, and stepping through data sketches), so it loads nothing from elsewhere and can be sent as a file. It follows the reader's light or dark mode. The page goes to stdout unless `-o` names a file, and warnings go to stderr; a sketch with warnings still renders.
 
 The title is the front matter's `title`, or else the first `#` heading, the sketch's function name, or the file name.
 

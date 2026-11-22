@@ -111,8 +111,10 @@ export interface SketchLine {
   change?: LineChange;
   /** Explanation of the line, from its `::doc[text]` tags, one per line of text. On a block header it explains the block. */
   doc?: string;
-  /** True when the line holds nothing but `::src`, `::repo` and `::doc` tags, so a renderer drops it. */
+  /** True when the line holds nothing but `::src`, `::repo`, `::doc` and `::fold` tags, so a renderer drops it. */
   hidden: boolean;
+  /** True when the line is a block header tagged `::fold`, so renderers start its block folded. */
+  fold: boolean;
 }
 
 export interface Variable {

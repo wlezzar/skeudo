@@ -23,4 +23,4 @@ Notes for agents working on this repository: what the code and its docs don't sa
 - **Write full paths from the repository root** in backticks, so `check.mjs` can tell when a file moves.
 - **Add a row to the table above** for every new file, saying when to read it.
 
-`node .agents-docs/check.mjs` checks every file's size, that relative links resolve, that repository paths in backticks exist, and that the table lists every file.
+`node .agents-docs/check.mjs` checks every file's size, that relative links resolve, that repository paths in backticks exist, and that the table lists every file. In a fresh worktree it reports the playground's local examples folder and the extension's .vsix as missing, since both are gitignored and only exist in the main checkout. Those four errors are not yours (seen 2026-11-22).

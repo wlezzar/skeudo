@@ -75,7 +75,7 @@ interface Marks {
   dangers: string[];
 }
 
-const FAMILIES = ['read', 'write', 'fail', 'danger', 'new', 'changed', 'removed', 'src', 'doc'];
+const FAMILIES = ['read', 'write', 'fail', 'danger', 'new', 'changed', 'removed', 'src', 'doc', 'fold'];
 const family = (kind: string) =>
   kind === 'untrusted' || kind === 'secret' ? 'label' : kind === 'repo' ? 'src' : FAMILIES.includes(kind) ? kind : 'other';
 
@@ -196,6 +196,7 @@ describe('scopes', () => {
     ['::src[app/a.py:3]', 'comment.src.skeudo'],
     ['::doc[what it does]', 'comment.doc.skeudo'],
     ['::doc:load[what it does]', 'comment.doc.skeudo'],
+    ['::fold', 'comment.fold.skeudo'],
     ['::todo[ask]', 'entity.name.label.todo.skeudo'],
     ['::unsure[maybe]', 'entity.name.label.unsure.skeudo'],
   ])('%s', (tag, scope) => {

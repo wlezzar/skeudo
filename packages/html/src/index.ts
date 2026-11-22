@@ -6,6 +6,7 @@
 import { parse, type Sketch } from '@skeudo/core';
 import type { Element as HastElement } from 'hast';
 import { enhanceCode } from './code/enhance.ts';
+export { unfoldTo } from './code/enhance.ts';
 import { codeToHast, type CodeHtmlOptions } from './code/render.ts';
 import { enhanceData } from './data/enhance.ts';
 import { dataToHast } from './data/render.ts';
@@ -45,6 +46,8 @@ export function toHtml(input: string | Sketch, opts: HtmlOptions = {}): string {
  *   clicking pins the highlight.
  * - Hovering or focusing a call or a line with a `::doc` shows its explanation in a popover. On a
  *   block header, the block is highlighted with it.
+ * - The chevron on a block header folds or unfolds the block. A folded header shows the tags of the
+ *   lines under it, and clicking them unfolds it. Blocks tagged `::fold` start folded.
  *
  * In data sketches:
  * - The story starts at its first step. Clicking a step shows its rows, and the arrow keys step through

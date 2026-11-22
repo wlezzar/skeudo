@@ -1,0 +1,242 @@
+{
+  "signature": { "name": "place_order", "params": ["cart", "card"], "line": 2 },
+  "indentUnit": 4,
+  "variables": {
+    "cart": { "origin": "param", "line": 2 },
+    "card": { "origin": "param", "line": 2 },
+    "order": { "origin": "binding", "line": 3 },
+    "stock": { "origin": "binding", "line": 6 },
+    "remaining": { "origin": "binding", "line": 10 }
+  },
+  "folds": [
+    {
+      "header": 4,
+      "lines": 5,
+      "tags": [
+        { "tag": "::read:postgres.stock[lookup by key]", "lines": [6] },
+        { "tag": "::fail:OutOfStock", "lines": [8] },
+        { "tag": "::write:postgres.stock[!no lock]", "lines": [9], "dangers": ["no lock"] }
+      ]
+    },
+    { "header": 10, "lines": 1, "tags": [{ "tag": "::write:postgres.credits", "lines": [11] }] }
+  ],
+  "lines": [
+    { "number": 1, "depth": 0, "text": "", "blank": true },
+    {
+      "number": 2,
+      "depth": 0,
+      "text": "place_order(cart, card):",
+      "signature": true,
+      "header": true,
+      "segments": [
+        { "type": "fn", "text": "place_order" },
+        { "type": "text", "text": "(" },
+        { "type": "var", "text": "cart", "name": "cart", "definition": true },
+        { "type": "text", "text": ", " },
+        { "type": "var", "text": "card", "name": "card", "definition": true },
+        { "type": "text", "text": "):" }
+      ]
+    },
+    {
+      "number": 3,
+      "depth": 1,
+      "text": "order = create_order(cart)                  ::write:postgres.orders",
+      "parent": 2,
+      "binding": "order",
+      "tags": [
+        {
+          "raw": "::write:postgres.orders",
+          "kind": "write",
+          "value": "postgres.orders",
+          "trailing": true
+        }
+      ],
+      "segments": [
+        { "type": "var", "text": "order", "name": "order", "definition": true },
+        { "type": "text", "text": " = " },
+        { "type": "call", "text": "create_order", "name": "create_order" },
+        { "type": "text", "text": "(" },
+        { "type": "var", "text": "cart", "name": "cart" },
+        { "type": "text", "text": ")" }
+      ]
+    },
+    {
+      "number": 4,
+      "depth": 1,
+      "text": "reserve stock:                              ::fold",
+      "header": true,
+      "fold": true,
+      "parent": 2,
+      "tags": [{ "raw": "::fold", "kind": "fold", "trailing": true }],
+      "segments": [
+        { "type": "word", "text": "reserve" },
+        { "type": "text", "text": " " },
+        { "type": "var", "text": "stock", "name": "stock" },
+        { "type": "text", "text": ":" }
+      ]
+    },
+    {
+      "number": 5,
+      "depth": 2,
+      "text": "for each item in cart:",
+      "header": true,
+      "parent": 4,
+      "segments": [
+        { "type": "word", "text": "for" },
+        { "type": "text", "text": " each item in " },
+        { "type": "var", "text": "cart", "name": "cart" },
+        { "type": "text", "text": ":" }
+      ]
+    },
+    {
+      "number": 6,
+      "depth": 3,
+      "text": "stock = get_stock(item.sku)         ::read:postgres.stock[lookup by key]",
+      "parent": 5,
+      "binding": "stock",
+      "tags": [
+        {
+          "raw": "::read:postgres.stock[lookup by key]",
+          "kind": "read",
+          "value": "postgres.stock",
+          "note": { "text": "lookup by key" },
+          "trailing": true
+        }
+      ],
+      "segments": [
+        { "type": "var", "text": "stock", "name": "stock", "definition": true },
+        { "type": "text", "text": " = " },
+        { "type": "call", "text": "get_stock", "name": "get_stock" },
+        { "type": "text", "text": "(item.sku)" }
+      ]
+    },
+    {
+      "number": 7,
+      "depth": 3,
+      "text": "if stock < item.qty:",
+      "header": true,
+      "parent": 5,
+      "segments": [
+        { "type": "word", "text": "if" },
+        { "type": "text", "text": " " },
+        { "type": "var", "text": "stock", "name": "stock" },
+        { "type": "text", "text": " < item.qty:" }
+      ]
+    },
+    {
+      "number": 8,
+      "depth": 4,
+      "text": "::fail:OutOfStock",
+      "parent": 7,
+      "tags": [{ "raw": "::fail:OutOfStock", "kind": "fail", "value": "OutOfStock" }],
+      "segments": [{ "type": "tag", "raw": "::fail:OutOfStock" }]
+    },
+    {
+      "number": 9,
+      "depth": 3,
+      "text": "decrement stock                     ::write:postgres.stock[!no lock]",
+      "parent": 5,
+      "tags": [
+        {
+          "raw": "::write:postgres.stock[!no lock]",
+          "kind": "write",
+          "value": "postgres.stock",
+          "note": { "text": "no lock", "danger": true },
+          "trailing": true
+        }
+      ],
+      "segments": [
+        { "type": "word", "text": "decrement" },
+        { "type": "text", "text": " " },
+        { "type": "var", "text": "stock", "name": "stock" }
+      ]
+    },
+    {
+      "number": 10,
+      "depth": 1,
+      "text": "remaining = apply_credits(order)            ::fold",
+      "header": true,
+      "fold": true,
+      "parent": 2,
+      "binding": "remaining",
+      "tags": [{ "raw": "::fold", "kind": "fold", "trailing": true }],
+      "segments": [
+        { "type": "var", "text": "remaining", "name": "remaining", "definition": true },
+        { "type": "text", "text": " = " },
+        { "type": "call", "text": "apply_credits", "name": "apply_credits" },
+        { "type": "text", "text": "(" },
+        { "type": "var", "text": "order", "name": "order" },
+        { "type": "text", "text": ")" }
+      ]
+    },
+    {
+      "number": 11,
+      "depth": 2,
+      "text": "spend open credits, oldest first        ::write:postgres.credits",
+      "parent": 10,
+      "tags": [
+        {
+          "raw": "::write:postgres.credits",
+          "kind": "write",
+          "value": "postgres.credits",
+          "trailing": true
+        }
+      ],
+      "segments": [
+        { "type": "word", "text": "spend" },
+        { "type": "text", "text": " open credits, oldest first" }
+      ]
+    },
+    {
+      "number": 12,
+      "depth": 1,
+      "text": "charge(card, remaining)                     ::write:stripe",
+      "parent": 2,
+      "tags": [{ "raw": "::write:stripe", "kind": "write", "value": "stripe", "trailing": true }],
+      "segments": [
+        { "type": "call", "text": "charge", "name": "charge" },
+        { "type": "text", "text": "(" },
+        { "type": "var", "text": "card", "name": "card" },
+        { "type": "text", "text": ", " },
+        { "type": "var", "text": "remaining", "name": "remaining" },
+        { "type": "text", "text": ")" }
+      ]
+    },
+    {
+      "number": 13,
+      "depth": 1,
+      "text": "if that fails:",
+      "header": true,
+      "parent": 2,
+      "segments": [{ "type": "word", "text": "if" }, { "type": "text", "text": " that fails:" }]
+    },
+    {
+      "number": 14,
+      "depth": 2,
+      "text": "give the stock back                     ::write:postgres.stock",
+      "parent": 13,
+      "tags": [
+        {
+          "raw": "::write:postgres.stock",
+          "kind": "write",
+          "value": "postgres.stock",
+          "trailing": true
+        }
+      ],
+      "segments": [
+        { "type": "word", "text": "give" },
+        { "type": "text", "text": " the " },
+        { "type": "var", "text": "stock", "name": "stock" },
+        { "type": "text", "text": " back" }
+      ]
+    },
+    {
+      "number": 15,
+      "depth": 2,
+      "text": "::fail:PaymentFailed",
+      "parent": 13,
+      "tags": [{ "raw": "::fail:PaymentFailed", "kind": "fail", "value": "PaymentFailed" }],
+      "segments": [{ "type": "tag", "raw": "::fail:PaymentFailed" }]
+    }
+  ]
+}

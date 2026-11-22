@@ -19,6 +19,7 @@ The JSON is the parser's AST (`CodeSketch` in `packages/core/src/code/types.ts`)
 - Variables are keyed by name, without a `name` field.
 - `flows` is added from `analyze()`: each line where a labeled variable reaches an effect, with the effect as its raw tag.
 - `changes` is added from `analyze()`: each change tag, whether it covers a whole block, and the effects on the lines it covers, as `L<line> <raw tag>`.
+- `folds` is added from `rollup()`: for each block header tagged `::fold`, how many lines fold under it, the pills it shows when folded (the first raw tag of each, the lines that carry one, its danger notes, whether it is removed, and the labeled variables that reach it), the changes inside and the lines inside with a warning.
 - `false`, missing values, empty arrays and empty objects are left out.
 
 ## data

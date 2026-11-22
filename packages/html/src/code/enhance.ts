@@ -3,9 +3,9 @@
  */
 import { Popover, POPOVER_DELAY } from '../shared/popover.ts';
 
-/** Variable highlighting and explanations for the code sketches under `root`. */
+/** Variable highlighting, explanations and folding for the code sketches under `root`. */
 export function enhanceCode(root: HTMLElement | Document): () => void {
-  const off = [highlightVariables(root), showDocs(root)];
+  const off = [highlightVariables(root), showDocs(root), folding(root)];
   return () => off.forEach((remove) => remove());
 }
 
@@ -40,6 +40,120 @@ function highlightVariables(root: HTMLElement | Document): () => void {
 
 /** A sketch row's depth, from the `--d` its style sets. */
 const rowDepth = (row: Element) => Number((row as HTMLElement).style.getPropertyValue('--d')) || 0;
+
+/** Each foldable header of a code sketch, with a key that finds it again when the sketch is rendered again: its code, and which of the headers with that code it is. */
+function foldableRows(sketch: Element): { key: string; row: Element }[] {
+  const seen = new Map<string, number>();
+  return [...sketch.querySelectorAll('.sk-foldable')].map((row) => {
+    const code = row.querySelector('.sk-code')?.textContent ?? '';
+    const n = (seen.get(code) ?? 0) + 1;
+    seen.set(code, n);
+    return { key: `${code}\u0000${n}`, row };
+  });
+}
+
+/**
+ * Folding. The chevron on a block header folds or unfolds its block, and clicking a folded line's
+ * summary unfolds it. The renderer marks which lines start folded and hidden; code.css acts on those
+ * marks only under `sk-folding`, which this puts on the root, so a page without enhance() shows every line.
+ */
+function folding(root: HTMLElement | Document): () => void {
+  const host = root instanceof Document ? root.documentElement : root;
+  host.classList.add('sk-folding');
+  const win = (root instanceof Document ? root : root.ownerDocument).defaultView;
+  const address = () => (win ? win.location.pathname + win.location.search : '');
+  let page = address();
+  /**
+   * The blocks the reader folded or opened, by the sketch's position under root and the header's key,
+   * with whether the markup started the block folded. A preview that renders the page again on each edit,
+   * as VS Code's does, then keeps each block as the reader left it, unless the edit added or removed its
+   * `::fold`. It is forgotten when the page's address changes, as for the steps of data sketches.
+   */
+  const remembered = new Map<number, Map<string, { folded: boolean; markup: boolean }>>();
+  const sketches = () => [...root.querySelectorAll('[data-sketch]')];
+
+  /** Puts back the blocks of each sketch not seen yet as the reader left them, and remembers how its markup starts them. */
+  function start() {
+    if (address() !== page) {
+      remembered.clear();
+      page = address();
+    }
+    sketches().forEach((sketch, i) => {
+      if (sketch.hasAttribute('data-sk-live')) return;
+      sketch.setAttribute('data-sk-live', '');
+      const before = remembered.get(i);
+      const now = new Map<string, { folded: boolean; markup: boolean }>();
+      for (const { key, row } of foldableRows(sketch)) {
+        const markup = row.classList.contains('sk-folded');
+        const left = before?.get(key);
+        const folded = left && left.markup === markup ? left.folded : markup;
+        if (folded !== markup) setFolded(row, folded);
+        now.set(key, { folded, markup });
+      }
+      remembered.set(i, now);
+    });
+  }
+
+  const click = (e: Event) => {
+    // A variable in a summary, as in `← body`, pins its highlight instead.
+    if ((e.target as Element | null)?.closest?.('[data-var]')) return;
+    const el = (e.target as Element | null)?.closest?.('.sk-fold, .sk-folded > .sk-tags > .sk-rollup');
+    const row = el?.closest('.sk-row');
+    const sketch = row?.closest('[data-sketch]');
+    if (!row || !sketch) return;
+    e.preventDefault();
+    const folded = !row.classList.contains('sk-folded');
+    setFolded(row, folded);
+    const entry = remembered.get(sketches().indexOf(sketch))?.get(foldableRows(sketch).find((r) => r.row === row)?.key ?? '');
+    if (entry) entry.folded = folded;
+  };
+
+  start();
+  const observer = new MutationObserver(start);
+  observer.observe(host, { childList: true, subtree: true });
+  root.addEventListener('click', click);
+  return () => {
+    observer.disconnect();
+    host.classList.remove('sk-folding');
+    root.removeEventListener('click', click);
+  };
+}
+
+function setFolded(row: Element, folded: boolean) {
+  row.classList.toggle('sk-folded', folded);
+  const button = row.querySelector('.sk-fold');
+  button?.setAttribute('aria-expanded', String(!folded));
+  button?.setAttribute('aria-label', folded ? 'Unfold block' : 'Fold block');
+  if (row.parentElement) hideFolded(row.parentElement);
+}
+
+/**
+ * Hides the lines inside folded blocks, and shows the others, as the renderer does for the blocks that
+ * start folded. A blank line takes the depth of the shallower line around it, so one inside a block is
+ * hidden with it.
+ */
+function hideFolded(lines: Element) {
+  let foldDepth = -1;
+  for (const row of lines.children) {
+    const depth = rowDepth(row);
+    const hidden = foldDepth >= 0 && depth > foldDepth;
+    row.classList.toggle('sk-hide', hidden);
+    if (!hidden) foldDepth = row.classList.contains('sk-folded') ? depth : -1;
+  }
+}
+
+/**
+ * Unfolds the blocks around a row of a code sketch, so the row shows, as clicks on their chevrons would,
+ * so enhance() remembers them open.
+ */
+export function unfoldTo(row: Element) {
+  let depth = rowDepth(row);
+  for (let r = row.previousElementSibling; r && depth > 0; r = r.previousElementSibling) {
+    if (r.classList.contains('sk-blank') || rowDepth(r) >= depth) continue;
+    depth = rowDepth(r);
+    if (r.classList.contains('sk-folded')) r.querySelector<HTMLElement>('.sk-fold')?.click();
+  }
+}
 
 /**
  * Shows the explanation of a call or a line in a popover. The popover sits on the page's body with a

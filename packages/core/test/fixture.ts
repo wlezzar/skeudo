@@ -1,4 +1,4 @@
-import { analyze, parse, replayData, type Sketch } from '../src/index.ts';
+import { analyze, parse, replayData, rollup, type Sketch } from '../src/index.ts';
 
 /** Parses a fixture with parse(), so the header's warnings show, and checks it is in the expected view. */
 function parseAs<V extends Sketch['view']>(source: string, view: V): Extract<Sketch, { view: V }> {
@@ -29,7 +29,8 @@ export function projectData(source: string): unknown {
 
 /**
  * The expected output of a fixture: the AST with offsets and derivable fields removed,
- * plus label flows. spec/fixtures/README.md describes the shape.
+ * plus label flows, changes and what each block tagged `::fold` shows when folded.
+ * spec/fixtures/README.md describes the shape.
  */
 export function project(source: string): unknown {
   const sketch = parseAs(source, 'code');
@@ -51,6 +52,18 @@ export function project(source: string): unknown {
       block: c.block,
       effects: c.effects.map((e) => `L${e.line} ${e.tag.raw}`),
     })),
+    folds: lines
+      .filter((l) => l.fold)
+      .map((l) => {
+        const r = rollup(sketch, l);
+        return {
+          header: r.header,
+          lines: r.lines,
+          tags: r.tags.map((t) => ({ tag: t.tag.raw, lines: t.lines, dangers: t.dangers, removed: t.removed, flows: t.flows })),
+          changes: r.changes,
+          warnings: r.diagnostics.map((d) => d.line),
+        };
+      }),
     lines: lines.map(({ children: _children, trailingStart: _trailingStart, tags, segments, ...line }) => ({
       ...line,
       tags: tags.map(({ start: _start, end: _end, raw, ...tag }) => ({ raw, ...tag })),

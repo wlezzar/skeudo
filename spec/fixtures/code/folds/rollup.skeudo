@@ -1,0 +1,23 @@
+view: code
+handle(request):
+    body = request.json()                     ::untrusted:body
+    check the request:                        ::fold
+        if body.email is malformed:
+            ::fail:InvalidEmail
+        user = find_user(body.email)          ::read:postgres.users[lookup by key]
+        if no user:
+            ::fail:NotFound
+
+        token = issue(user)                   ::write:postgres.tokens ::secret:token
+    record it:                                ::fold
+        log_event(body)                       ::write:logs ::danger[raw body reaches the logs]
+        save_token(token)                     ::write:postgres.tokens[!no retry]
+        cache it                              ::write?:redis
+        cache it again                        ::write:redis
+        notify:                               ::fold
+            send_mail(user, token)            ::write:sendgrid ::new
+            send_sms(user)                    ::write:twilio ::removed
+            ::src:send_mail[mail.py:3]
+        audit                                 ::write:logs ::unsure[maybe async]
+    peek:                                     ::fold
+        look at the queue                     ::read

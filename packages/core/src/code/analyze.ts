@@ -82,13 +82,26 @@ export interface Review {
   diagnostics: Diagnostic[];
 }
 
-const KNOWN = new Set(['read', 'write', 'fail', 'src', 'repo', 'doc', 'danger', 'unsure', 'untrusted', 'secret', ...CHANGE_KINDS]);
+const KNOWN = new Set(['read', 'write', 'fail', 'src', 'repo', 'doc', 'fold', 'danger', 'unsure', 'untrusted', 'secret', ...CHANGE_KINDS]);
 
 /** The line's text without its tags. */
 export function lineContext(line: SketchLine): string {
   let text = line.text;
   for (const t of [...line.tags].reverse()) text = text.slice(0, t.start) + text.slice(t.end);
   return text.replace(/\s+/g, ' ').trim();
+}
+
+/**
+ * The tracked variables a line uses, in order: every use but a definition, and the variable a call chain
+ * starts with. Labeled data reaches an effect when the line with the effect uses the labeled variable.
+ */
+export function usedVariables(line: SketchLine): string[] {
+  const used = new Set<string>();
+  for (const seg of line.segments) {
+    if (seg.type === 'var' && !seg.definition) used.add(seg.name);
+    if (seg.type === 'call' && seg.head) used.add(seg.head);
+  }
+  return [...used];
 }
 
 export function analyze(sketch: CodeSketch): Review {
@@ -176,12 +189,7 @@ export function analyze(sketch: CodeSketch): Review {
     }
 
     if (lineEffects.length) {
-      const used = new Set<string>();
-      for (const seg of line.segments) {
-        if (seg.type === 'var' && !seg.definition) used.add(seg.name);
-        if (seg.type === 'call' && seg.head) used.add(seg.head);
-      }
-      for (const name of used) {
+      for (const name of usedVariables(line)) {
         const v = sketch.variables[name];
         if (!v?.labels.length) continue;
         for (const effect of lineEffects) flows.push({ line: line.number, variable: name, labels: v.labels, effect });
