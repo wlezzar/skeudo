@@ -27,7 +27,7 @@ sketch.diagnostics; // [{ line, severity, message }], the warnings listed in the
 
 `parse` never throws. A problem becomes a warning on its line, and line numbers count from the sketch's first line. The result is a `Sketch`, a union told apart by `view`:
 
-- A `CodeSketch` has its `lines`, each with its code segments and tags, the `variables` it defines and uses, its `signature`, and the repository it names with `::repo`. `analyze(sketch)` lists what a reviewer looks at: the effects, the systems each one touches, failures and the flows of labeled values.
+- A `CodeSketch` has its `lines`, each with its code segments and tags, the `variables` it defines and uses, its `signature`, and the repository it names with `::repo`. `analyze(sketch)` lists what a reviewer looks at: the effects, the systems each one touches, failures and the flows of labeled values. `rollup(sketch, line)` sums up a block for its header, as a folded header shows it.
 - A `DataSketch` has its `tables` (and folders), `groups` and story `steps`. `replayData(sketch)` plays the story and returns the rows at each frame, and the rows each read finds.
 
 The exported TypeScript types describe every field.

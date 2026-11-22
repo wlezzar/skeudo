@@ -1,0 +1,398 @@
+{
+  "signature": { "name": "handle", "params": ["request"], "line": 2 },
+  "indentUnit": 4,
+  "callSources": { "send_mail": { "path": "mail.py", "start": 3, "end": 3 } },
+  "diagnostics": [
+    {
+      "line": 23,
+      "severity": "warning",
+      "message": "::read needs the system it touches, as in ::read:postgres."
+    }
+  ],
+  "variables": {
+    "request": { "origin": "param", "line": 2 },
+    "body": { "origin": "binding", "line": 3, "labels": ["untrusted"] },
+    "user": { "origin": "binding", "line": 7 },
+    "token": { "origin": "binding", "line": 11, "labels": ["secret"] }
+  },
+  "flows": [
+    {
+      "line": 7,
+      "variable": "body",
+      "labels": ["untrusted"],
+      "effect": "::read:postgres.users[lookup by key]"
+    },
+    { "line": 13, "variable": "body", "labels": ["untrusted"], "effect": "::write:logs" },
+    {
+      "line": 14,
+      "variable": "token",
+      "labels": ["secret"],
+      "effect": "::write:postgres.tokens[!no retry]"
+    },
+    { "line": 18, "variable": "token", "labels": ["secret"], "effect": "::write:sendgrid" }
+  ],
+  "changes": [
+    { "line": 18, "kind": "new", "effects": ["L18 ::write:sendgrid"] },
+    { "line": 19, "kind": "removed", "effects": ["L19 ::write:twilio"] }
+  ],
+  "folds": [
+    {
+      "header": 4,
+      "lines": 6,
+      "tags": [
+        { "tag": "::fail:InvalidEmail", "lines": [6] },
+        { "tag": "::read:postgres.users[lookup by key]", "lines": [7], "flows": ["body"] },
+        { "tag": "::fail:NotFound", "lines": [9] },
+        { "tag": "::write:postgres.tokens", "lines": [11] }
+      ]
+    },
+    {
+      "header": 12,
+      "lines": 8,
+      "tags": [
+        { "tag": "::write:logs", "lines": [13, 21], "flows": ["body"] },
+        {
+          "tag": "::danger[raw body reaches the logs]",
+          "lines": [13],
+          "dangers": ["raw body reaches the logs"]
+        },
+        {
+          "tag": "::write:postgres.tokens[!no retry]",
+          "lines": [14],
+          "dangers": ["no retry"],
+          "flows": ["token"]
+        },
+        { "tag": "::write?:redis", "lines": [15] },
+        { "tag": "::write:redis", "lines": [16] },
+        { "tag": "::write:sendgrid", "lines": [18], "flows": ["token"] },
+        { "tag": "::new", "lines": [18] },
+        { "tag": "::write:twilio", "lines": [19], "removed": true },
+        { "tag": "::removed", "lines": [19] },
+        { "tag": "::unsure[maybe async]", "lines": [21] }
+      ],
+      "changes": ["new", "removed"]
+    },
+    {
+      "header": 17,
+      "lines": 2,
+      "tags": [
+        { "tag": "::write:sendgrid", "lines": [18], "flows": ["token"] },
+        { "tag": "::new", "lines": [18] },
+        { "tag": "::write:twilio", "lines": [19], "removed": true },
+        { "tag": "::removed", "lines": [19] }
+      ],
+      "changes": ["new", "removed"]
+    },
+    { "header": 22, "lines": 1, "tags": [{ "tag": "::read", "lines": [23] }], "warnings": [23] }
+  ],
+  "lines": [
+    { "number": 1, "depth": 0, "text": "", "blank": true },
+    {
+      "number": 2,
+      "depth": 0,
+      "text": "handle(request):",
+      "signature": true,
+      "header": true,
+      "segments": [
+        { "type": "fn", "text": "handle" },
+        { "type": "text", "text": "(" },
+        { "type": "var", "text": "request", "name": "request", "definition": true },
+        { "type": "text", "text": "):" }
+      ]
+    },
+    {
+      "number": 3,
+      "depth": 1,
+      "text": "body = request.json()                     ::untrusted:body",
+      "parent": 2,
+      "binding": "body",
+      "tags": [
+        { "raw": "::untrusted:body", "kind": "untrusted", "value": "body", "trailing": true }
+      ],
+      "segments": [
+        { "type": "var", "text": "body", "name": "body", "definition": true },
+        { "type": "text", "text": " = " },
+        { "type": "call", "text": "request.json", "name": "request.json", "head": "request" },
+        { "type": "text", "text": "()" }
+      ]
+    },
+    {
+      "number": 4,
+      "depth": 1,
+      "text": "check the request:                        ::fold",
+      "header": true,
+      "fold": true,
+      "parent": 2,
+      "tags": [{ "raw": "::fold", "kind": "fold", "trailing": true }],
+      "segments": [
+        { "type": "word", "text": "check" },
+        { "type": "text", "text": " the " },
+        { "type": "var", "text": "request", "name": "request" },
+        { "type": "text", "text": ":" }
+      ]
+    },
+    {
+      "number": 5,
+      "depth": 2,
+      "text": "if body.email is malformed:",
+      "header": true,
+      "parent": 4,
+      "segments": [
+        { "type": "word", "text": "if" },
+        { "type": "text", "text": " " },
+        { "type": "var", "text": "body", "name": "body" },
+        { "type": "text", "text": ".email is malformed:" }
+      ]
+    },
+    {
+      "number": 6,
+      "depth": 3,
+      "text": "::fail:InvalidEmail",
+      "parent": 5,
+      "tags": [{ "raw": "::fail:InvalidEmail", "kind": "fail", "value": "InvalidEmail" }],
+      "segments": [{ "type": "tag", "raw": "::fail:InvalidEmail" }]
+    },
+    {
+      "number": 7,
+      "depth": 2,
+      "text": "user = find_user(body.email)          ::read:postgres.users[lookup by key]",
+      "parent": 4,
+      "binding": "user",
+      "tags": [
+        {
+          "raw": "::read:postgres.users[lookup by key]",
+          "kind": "read",
+          "value": "postgres.users",
+          "note": { "text": "lookup by key" },
+          "trailing": true
+        }
+      ],
+      "segments": [
+        { "type": "var", "text": "user", "name": "user", "definition": true },
+        { "type": "text", "text": " = " },
+        { "type": "call", "text": "find_user", "name": "find_user" },
+        { "type": "text", "text": "(" },
+        { "type": "var", "text": "body", "name": "body" },
+        { "type": "text", "text": ".email)" }
+      ]
+    },
+    {
+      "number": 8,
+      "depth": 2,
+      "text": "if no user:",
+      "header": true,
+      "parent": 4,
+      "segments": [
+        { "type": "word", "text": "if" },
+        { "type": "text", "text": " no " },
+        { "type": "var", "text": "user", "name": "user" },
+        { "type": "text", "text": ":" }
+      ]
+    },
+    {
+      "number": 9,
+      "depth": 3,
+      "text": "::fail:NotFound",
+      "parent": 8,
+      "tags": [{ "raw": "::fail:NotFound", "kind": "fail", "value": "NotFound" }],
+      "segments": [{ "type": "tag", "raw": "::fail:NotFound" }]
+    },
+    { "number": 10, "depth": 2, "text": "", "blank": true },
+    {
+      "number": 11,
+      "depth": 2,
+      "text": "token = issue(user)                   ::write:postgres.tokens ::secret:token",
+      "parent": 4,
+      "binding": "token",
+      "tags": [
+        {
+          "raw": "::write:postgres.tokens",
+          "kind": "write",
+          "value": "postgres.tokens",
+          "trailing": true
+        },
+        { "raw": "::secret:token", "kind": "secret", "value": "token", "trailing": true }
+      ],
+      "segments": [
+        { "type": "var", "text": "token", "name": "token", "definition": true },
+        { "type": "text", "text": " = " },
+        { "type": "call", "text": "issue", "name": "issue" },
+        { "type": "text", "text": "(" },
+        { "type": "var", "text": "user", "name": "user" },
+        { "type": "text", "text": ")" }
+      ]
+    },
+    {
+      "number": 12,
+      "depth": 1,
+      "text": "record it:                                ::fold",
+      "header": true,
+      "fold": true,
+      "parent": 2,
+      "tags": [{ "raw": "::fold", "kind": "fold", "trailing": true }],
+      "segments": [{ "type": "word", "text": "record" }, { "type": "text", "text": " it:" }]
+    },
+    {
+      "number": 13,
+      "depth": 2,
+      "text": "log_event(body)                       ::write:logs ::danger[raw body reaches the logs]",
+      "parent": 12,
+      "tags": [
+        { "raw": "::write:logs", "kind": "write", "value": "logs", "trailing": true },
+        {
+          "raw": "::danger[raw body reaches the logs]",
+          "kind": "danger",
+          "note": { "text": "raw body reaches the logs" },
+          "trailing": true
+        }
+      ],
+      "segments": [
+        { "type": "call", "text": "log_event", "name": "log_event" },
+        { "type": "text", "text": "(" },
+        { "type": "var", "text": "body", "name": "body" },
+        { "type": "text", "text": ")" }
+      ]
+    },
+    {
+      "number": 14,
+      "depth": 2,
+      "text": "save_token(token)                     ::write:postgres.tokens[!no retry]",
+      "parent": 12,
+      "tags": [
+        {
+          "raw": "::write:postgres.tokens[!no retry]",
+          "kind": "write",
+          "value": "postgres.tokens",
+          "note": { "text": "no retry", "danger": true },
+          "trailing": true
+        }
+      ],
+      "segments": [
+        { "type": "call", "text": "save_token", "name": "save_token" },
+        { "type": "text", "text": "(" },
+        { "type": "var", "text": "token", "name": "token" },
+        { "type": "text", "text": ")" }
+      ]
+    },
+    {
+      "number": 15,
+      "depth": 2,
+      "text": "cache it                              ::write?:redis",
+      "parent": 12,
+      "tags": [
+        {
+          "raw": "::write?:redis",
+          "kind": "write",
+          "conditional": true,
+          "value": "redis",
+          "trailing": true
+        }
+      ],
+      "segments": [{ "type": "word", "text": "cache" }, { "type": "text", "text": " it" }]
+    },
+    {
+      "number": 16,
+      "depth": 2,
+      "text": "cache it again                        ::write:redis",
+      "parent": 12,
+      "tags": [{ "raw": "::write:redis", "kind": "write", "value": "redis", "trailing": true }],
+      "segments": [{ "type": "word", "text": "cache" }, { "type": "text", "text": " it again" }]
+    },
+    {
+      "number": 17,
+      "depth": 2,
+      "text": "notify:                               ::fold",
+      "header": true,
+      "fold": true,
+      "parent": 12,
+      "tags": [{ "raw": "::fold", "kind": "fold", "trailing": true }],
+      "segments": [{ "type": "word", "text": "notify" }, { "type": "text", "text": ":" }]
+    },
+    {
+      "number": 18,
+      "depth": 3,
+      "text": "send_mail(user, token)            ::write:sendgrid ::new",
+      "parent": 17,
+      "change": { "kind": "new" },
+      "tags": [
+        { "raw": "::write:sendgrid", "kind": "write", "value": "sendgrid", "trailing": true },
+        { "raw": "::new", "kind": "new", "trailing": true }
+      ],
+      "segments": [
+        { "type": "call", "text": "send_mail", "name": "send_mail" },
+        { "type": "text", "text": "(" },
+        { "type": "var", "text": "user", "name": "user" },
+        { "type": "text", "text": ", " },
+        { "type": "var", "text": "token", "name": "token" },
+        { "type": "text", "text": ")" }
+      ]
+    },
+    {
+      "number": 19,
+      "depth": 3,
+      "text": "send_sms(user)                    ::write:twilio ::removed",
+      "parent": 17,
+      "change": { "kind": "removed" },
+      "tags": [
+        { "raw": "::write:twilio", "kind": "write", "value": "twilio", "trailing": true },
+        { "raw": "::removed", "kind": "removed", "trailing": true }
+      ],
+      "segments": [
+        { "type": "call", "text": "send_sms", "name": "send_sms" },
+        { "type": "text", "text": "(" },
+        { "type": "var", "text": "user", "name": "user" },
+        { "type": "text", "text": ")" }
+      ]
+    },
+    {
+      "number": 20,
+      "depth": 3,
+      "text": "::src:send_mail[mail.py:3]",
+      "hidden": true,
+      "parent": 17,
+      "tags": [
+        {
+          "raw": "::src:send_mail[mail.py:3]",
+          "kind": "src",
+          "value": "send_mail",
+          "note": { "text": "mail.py:3" }
+        }
+      ],
+      "segments": [{ "type": "tag", "raw": "::src:send_mail[mail.py:3]" }]
+    },
+    {
+      "number": 21,
+      "depth": 2,
+      "text": "audit                                 ::write:logs ::unsure[maybe async]",
+      "parent": 12,
+      "tags": [
+        { "raw": "::write:logs", "kind": "write", "value": "logs", "trailing": true },
+        {
+          "raw": "::unsure[maybe async]",
+          "kind": "unsure",
+          "note": { "text": "maybe async" },
+          "trailing": true
+        }
+      ],
+      "segments": [{ "type": "word", "text": "audit" }]
+    },
+    {
+      "number": 22,
+      "depth": 1,
+      "text": "peek:                                     ::fold",
+      "header": true,
+      "fold": true,
+      "parent": 2,
+      "tags": [{ "raw": "::fold", "kind": "fold", "trailing": true }],
+      "segments": [{ "type": "word", "text": "peek" }, { "type": "text", "text": ":" }]
+    },
+    {
+      "number": 23,
+      "depth": 2,
+      "text": "look at the queue                     ::read",
+      "parent": 22,
+      "tags": [{ "raw": "::read", "kind": "read", "trailing": true }],
+      "segments": [{ "type": "word", "text": "look" }, { "type": "text", "text": " at the queue" }]
+    }
+  ]
+}

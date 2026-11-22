@@ -53,6 +53,8 @@ const FAMILIES: Record<string, Family> = {
   src: { kinds: ['src', 'repo'], tag: 'comment.src.skeudo', note: 'location' },
   // Renderers show ::doc on hover, so in the editor it reads as a comment.
   doc: { kinds: ['doc'], tag: 'comment.doc.skeudo' },
+  // Renderers turn ::fold into a folded block and hide the tag, so it reads as a comment too.
+  fold: { kinds: ['fold'], tag: 'comment.fold.skeudo' },
   other: { head: 'entity.name.label.$kind.skeudo' },
 };
 

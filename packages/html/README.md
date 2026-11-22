@@ -27,7 +27,7 @@ get_user(id):
 The page needs two more things:
 
 - **The stylesheet**, `@skeudo/html/skeudo.css`. Import it from a bundler (`import '@skeudo/html/skeudo.css'`), or copy `node_modules/@skeudo/html/dist/skeudo.css` next to your page.
-- **`enhance()`**, called once in the browser. It wires the interaction: hovering a name highlights its other uses and clicking pins them, explanations from `::doc` show in a popover, and data sketches step through their story by click or with the arrow keys. It watches the page, so sketches added later, as when a single-page site changes page, work too. Without it, explanations are the browser's tooltips and a data sketch shows its last step.
+- **`enhance()`**, called once in the browser. It wires the interaction: hovering a name highlights its other uses and clicking pins them, explanations from `::doc` show in a popover, blocks fold and unfold by their chevron, with a folded line showing the tags of the lines under it, and data sketches step through their story by click or with the arrow keys. It watches the page, so sketches added later, as when a single-page site changes page, work too, and a sketch rendered again, as a live preview does on each edit, keeps its step and its blocks as the reader left them. Without it, explanations are the browser's tooltips, every block shows open and a data sketch shows its last step.
 
 ```js
 import { enhance } from '@skeudo/html';
@@ -54,6 +54,7 @@ The data view takes no options.
 
 - `tagHtml(tag, options)` and `tagHast(tag, options)` render one tag as a pill, as the Markdown plugins do for inline code such as `` `::read:postgres.users` ``.
 - `repoHref(repo, location, gitHosts)` is the default link for a `::src` location in a sketch with `::repo`.
+- `unfoldTo(row)` opens the folded blocks around a line's row, for a page that scrolls to a line, as the playground's review panel does. It needs `enhance()`.
 - `escapeHtml(text)`.
 
 ## License

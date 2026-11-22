@@ -38,6 +38,7 @@ Sketches go in fenced code blocks tagged `skeudo`. The first line is always `vie
 | `::repo[url]` | Names the repository and commit that `::src` paths and lines refer to. See step 5. |
 | `::doc[…]`, `::doc:call[…]` | Explains a line, or a call whose name doesn't say what it does. Renderers show it on hover. See step 4. |
 | `::new`, `::changed[was …]`, `::removed` | What a commit or pull request did to the line. See step 6. |
+| `::fold` | On a block header: the block starts folded, and the header shows the tags of the lines under it. See step 4. |
 | `::anything[note]` | Any other kind is valid and renders as a neutral pill. |
 
 - **Systems** are free names: `postgres`, `stripe`, `redis`. A dot names the part: `postgres.orders`, `s3.reports`. `*` means decided at runtime.
@@ -51,7 +52,7 @@ Sketches go in fenced code blocks tagged `skeudo`. The first line is always `vie
    - For a function or file, sketch each public function that has effects.
    - For a commit or PR (`git show --stat <rev>`, then the diff), sketch the flows the change affects, in the order data moves (for example the server, then the client).
    - Skip pure plumbing such as types, mappers and passing a new field through. Mention it in one sentence instead.
-2. **Read the full code, not just the hunks.** Open each function at the revision you're sketching. Follow calls until you know what they touch. An effect inside a callee is tagged on the call. Find the real table, bucket, queue and service names (schema files, clients, config). If you can't verify an effect, mark it `~`.
+2. **Read the full code, not just the hunks.** Open each function at the revision you're sketching. Follow calls until you know what they touch. An effect inside a callee is tagged on the call, unless you write the callee's body under the call as a fold (step 4). Find the real table, bucket, queue and service names (schema files, clients, config). If you can't verify an effect, mark it `~`.
 3. **Decide what is an effect.**
    - Effects: databases, caches, queues, object storage, files, HTTP and RPC calls (including to your own backend from a client), email, third-party APIs, model calls, and devices such as the microphone or camera.
    - Not effects: in-memory and UI state, timers, local child processes that only compute (such as ffmpeg transcoding a stream), and logging.
@@ -63,6 +64,8 @@ Sketches go in fenced code blocks tagged `skeudo`. The first line is always `vie
    - Name the failures the function raises or handles with `::fail`, inside an `if …:` block for their condition. Failures from callees that just propagate need no tag.
    - Explain what a name doesn't say. When a reviewer couldn't guess what a call does from its name, add `::doc:name[…]` at the end of the sketch, before the `::src` tags, as in `::doc:hydrate[loads the user's teams and settings onto the row]`. Write the name as the call is written: `::doc:cache.set[…]` for `cache.set(…)`. When a line's code is hard to follow, put `::doc[…]` at the end of it, before its `::src`; on a block header it explains the block. Keep it to a phrase, and skip calls and lines that already say what they do.
    - An explanation stays hidden until a reader hovers over it, so it never holds an effect or a danger. The call's line still carries its effect tags, and a danger is still `[!…]` or `::danger[…]`.
+   - Fold the detail of a long flow. When a sketch runs past a screen, or mixes the steps of a flow with how each step works, keep the top level to the steps a reader needs, and put each step's detail under a header that says what it does, tagged `::fold`: `reserve stock:  ::fold`, with the loop and its effects under it. A call can be the header too, with the callee's body under it: `remaining = apply_credits(order)  ::fold`. Failure handling, retries and loops over items are good detail to fold. Don't fold a block of one or two lines, which saves nothing.
+   - Tag the effects in the detail, never on the header. A folded header shows every tag under it, so a tag on the header too counts the effect twice, and a call with its body under it takes its effects from the body. In plain text nothing folds, so the sketch still reads as an outline.
 5. **Link the source.**
    - Put `::src[path:start-end]` on the signature, with the path relative to the repo root.
    - Put `::src[start-end]` on blocks and key lines. A location without a path uses the signature's file.
@@ -115,6 +118,7 @@ Each item in the last section should be something the sketches make visible: an 
 - Indentation is 4 spaces per level; calls close on the same line; notes contain no `]`.
 - Calls are real names a reviewer can open; everything else is prose.
 - Calls whose names don't say what they do have a `::doc:name[…]`, and no effect or danger appears only in a `::doc`.
+- A long flow keeps its top level short, with the detail under `::fold` headers, and the effects are tagged on the detail lines, not on the headers.
 - Each sketch with `::src` links ends with `::repo`, naming the repository and the commit sketched.
 
 ## Example

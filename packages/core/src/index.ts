@@ -3,8 +3,9 @@ export { VIEWS, codeView, dataView, viewOf, parse, FENCE_LANGS, type Sketch, typ
 
 // The code view.
 export * from './code/types.ts';
-export { parseCode, scanTags, parseTagsOnly, parseLocation, formatLocation, parseRepo, repoId, CHANGE_KINDS, HIDDEN_KINDS } from './code/parse.ts';
-export { analyze, lineContext } from './code/analyze.ts';
+export { parseCode, scanTags, parseTagsOnly, parseLocation, formatLocation, parseRepo, repoId, blockLines, CHANGE_KINDS, HIDDEN_KINDS } from './code/parse.ts';
+export { rollup, type Rollup, type RolledTag } from './code/fold.ts';
+export { analyze, lineContext, usedVariables } from './code/analyze.ts';
 export type { Effect, SystemUse, Failure, Flag, Flow, Change, Review } from './code/analyze.ts';
 
 // The data view.

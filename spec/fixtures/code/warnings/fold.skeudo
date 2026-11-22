@@ -1,0 +1,6 @@
+view: code
+pay(card):                       ::fold
+    ::fold
+    charge it:                   ::fold ::write:stripe
+        charge(card)             ::write:stripe
+    then report it               ::fold

@@ -150,6 +150,32 @@ cancel_order(order_id):
     email the customer                      ::write:sendgrid ::removed
 `;
 
+const placeOrder = `view: code
+place_order(cart, card):                              ::secret:card
+    Takes payment for a cart and holds its stock.
+    order = create_order(cart)                        ::write:postgres.orders
+    reserve stock:                                    ::fold
+        for each item in cart:
+            stock = get_stock(item.sku)               ::read:postgres.stock[lookup by key]
+            if stock < item.qty:
+                ::fail:OutOfStock
+            decrement stock                           ::write:postgres.stock[!no lock, two orders can oversell]
+    remaining = apply_credits(order)                  ::fold
+        credits = open credits, oldest first          ::read:postgres.credits[range on created_at]
+        for each credit until the total is covered:
+            spend it                                  ::write:postgres.credits
+    charge the card:                                  ::fold
+        intent = stripe.create_intent(card, remaining)  ::write:stripe ::new
+        confirm 3-D Secure if the bank asks:          ::fold
+            challenge = stripe.next_action(intent)    ::read:stripe
+            wait for the customer                     ::read~:stripe-webhooks ::unsure[timeout not found]
+        if that fails:                                ::new
+            give the stock back                       ::write:postgres.stock
+            ::fail:PaymentFailed
+    mark order paid                                   ::write:postgres.orders
+    send_receipt(order)                               ::write:sendgrid[failure ignored]
+`;
+
 const realCode = `view: code
 load_config(path):
     Real code stays plain: only tags after whitespace are markers.
@@ -207,6 +233,7 @@ export const examples: Example[] = [
   { id: 'book-trip', title: 'Failure blocks (book_trip)', source: bookTrip },
   { id: 'run-agent', title: 'Runtime effects (run_agent)', source: runAgent },
   { id: 'cancel-order', title: 'A change (cancel_order)', source: cancelOrder },
+  { id: 'place-order', title: 'Folds (place_order)', source: placeOrder },
   { id: 'real-code', title: 'Real code stays plain (load_config)', source: realCode },
   { id: 'checkout', title: 'A data model and its story (checkout)', source: checkout },
   { id: 'groups', title: 'Groups and folders (checkout, shipping)', source: groups },

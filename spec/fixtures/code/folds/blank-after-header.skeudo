@@ -1,0 +1,7 @@
+view: code
+sync(account):
+    pull the changes:                         ::fold
+
+        rows = fetch(account)                 ::read:crm
+
+    push them                                 ::write:warehouse

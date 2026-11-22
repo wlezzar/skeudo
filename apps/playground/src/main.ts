@@ -1,6 +1,6 @@
 import markdownit, { type MarkdownIt } from 'markdown-it';
 import { analyze, formatLocation, parse, parseTagsOnly, type Review, type Sketch } from '@skeudo/core';
-import { enhance, escapeHtml as esc, repoHref, srcBaseHref, tagHtml, toHtml, type HtmlOptions } from '@skeudo/html';
+import { enhance, escapeHtml as esc, repoHref, srcBaseHref, tagHtml, toHtml, unfoldTo, type HtmlOptions } from '@skeudo/html';
 import markdownItSkeudo, { FENCE_LANGS, sketchFences } from 'markdown-it-skeudo';
 import '@skeudo/html/skeudo.css';
 import './tokens.css';
@@ -76,6 +76,7 @@ const LEGEND = [
   ['::new', 'added by the change (a header: its whole block)'],
   ['::changed[was wall-clock time]', 'altered by the change'],
   ['::removed', 'taken away by the change (a header: its whole block)'],
+  ['::fold', 'on a block header: the block starts folded, and its line shows what the block touches'],
   ['::todo[ask about retries]', 'any other kind'],
 ];
 const legendHtml = () =>
@@ -261,6 +262,7 @@ review.addEventListener('click', (e) => {
   const sketchEl = preview.querySelectorAll('[data-sketch]')[Number(row.dataset.sketchIndex)];
   const lineEl = sketchEl?.querySelector<HTMLElement>(`[data-line="${row.dataset.line}"]`);
   if (!lineEl) return;
+  unfoldTo(lineEl);
   lineEl.scrollIntoView({ block: 'center', behavior: 'smooth' });
   lineEl.classList.remove('flash');
   void lineEl.offsetWidth;

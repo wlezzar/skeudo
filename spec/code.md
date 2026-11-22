@@ -67,6 +67,7 @@ Every marker is a tag: `::kind`, optionally followed by `:value` and an attached
 | `::new` | The change being sketched adds this line. See Changes. |
 | `::changed[how]` | The change being sketched alters what this line does. See Changes. |
 | `::removed[what]` | The change being sketched takes this behavior away. See Changes. |
+| `::fold` | On a block header: the block starts folded, and the header shows what its lines touch. See Folds. |
 
 Any other kind is valid, such as `::todo[ask about retries]` or `::lock:token-refresh`. The spec sets default colors for the kinds above and renders others as a neutral pill; renderers may let users give any kind its own color.
 
@@ -218,6 +219,41 @@ cancel_order(order_id):
 
 The change refunds the payment before it touches the order. If marking the order fails, the customer has the money back but the order stays open, and a retry refunds again, since nothing makes the refund idempotent. The customer also stops getting an email, which the reviewer should confirm is intended.
 
+## Folds
+
+A block can fold, so a sketch reads at a high level and opens its detail on demand. Every block header but the signature folds, and `::fold` on a header makes its block start folded. The header's words say what the block does, and the lines under it say how.
+
+```skeudo
+view: code
+place_order(cart, card):
+    order = create_order(cart)                  ::write:postgres.orders
+    reserve stock:                              ::fold
+        for each item in cart:
+            stock = get_stock(item.sku)         ::read:postgres.stock[lookup by key]
+            if stock < item.qty:
+                ::fail:OutOfStock
+            decrement stock                     ::write:postgres.stock[!no lock]
+    remaining = apply_credits(order)            ::fold
+        spend open credits, oldest first        ::write:postgres.credits
+    charge(card, remaining)                     ::write:stripe
+    if that fails:
+        give the stock back                     ::write:postgres.stock
+        ::fail:PaymentFailed
+```
+
+A folded header shows what its block holds, after its own tags: every tag a reviewer must see, from every line under it, nested blocks included. That is effects, failures, dangers, doubts, change tags and any other kind. So folding never hides an effect, and the contract holds for the folded sketch too. Folded, the sketch above still shows that a failed charge gives the stock back but not the credits `apply_credits` spent.
+
+- Tags of the same kind, modifiers and value share one pill, in the order they first appear, with a count when there are several.
+- A pill keeps only danger notes. Other notes say how, and they show when the block opens.
+- Labels stay on their variables. When labeled data reaches an effect inside the block, the effect's pill names the variable, since the line that shows it is folded away.
+- `::src`, `::repo` and `::doc` stay hidden.
+- Effects on removed lines get pills of their own, dimmed, since the code no longer has them.
+- A change or a warning inside the block marks the header.
+
+Tag an effect once, on the line where it happens. The folded header shows it, so a tag on the header too would count it twice. This changes where a call's effects go: a call whose body is written under it, like `apply_credits` above, takes its effects from that body rather than from a tag of its own.
+
+In plain text nothing folds, and the sketch reads as an outline. A renderer without a script shows every block open.
+
 ## Grammar
 
 The grammar covers only tags, notes, calls, bindings and blocks; any other text is prose. Written in EBNF:
@@ -253,6 +289,7 @@ A sketch always renders. Problems are warnings attached to their line, never err
 - `::src` has no location, or its location has no file and the signature names none.
 - `::repo` has no URL, or a sketch has more than one `::repo`. The first one applies.
 - `::doc` has no note, has no value on a line with nothing else to explain, or names a call the sketch never makes.
+- `::fold` is on the signature or on a line with nothing under it, or a header tagged `::fold` carries an effect that a line in its block also carries.
 
 ## Authoring rules
 
@@ -260,7 +297,7 @@ These rules apply to anyone writing a sketch, human or AI. The first two carry t
 
 | Rule | What it means |
 | --- | --- |
-| Mark every effect where it happens | Any line that reads or changes outside state carries a tag, whether it is prose or a call. Effects inside a called function are tagged on the call. |
+| Mark every effect where it happens | Any line that reads or changes outside state carries a tag, whether it is prose or a call. Effects inside a called function are tagged on the call, unless the function's body is written under the call. |
 | Keep effects separate and in order | One tag per effect, in execution order. Never fold several effects into untagged words like "undo both". |
 | Name the failures the function raises or handles | Each one is `::fail:Name`, inside an `if …:` block for its condition. Failures from callees that simply propagate need no tag. A swallowed failure is noted on its effect, as in `::write:sendgrid[failure ignored]`. |
 | Anchor what a reviewer may open | Use real function names for calls worth jumping to. Write everything else as prose. When the source is known, link lines and calls with `::src`, and name the repository and revision with `::repo`. |
@@ -269,6 +306,7 @@ These rules apply to anyone writing a sketch, human or AI. The first two carry t
 | Flag doubt instead of guessing | Add `~` or `::unsure[…]` when a claim isn't verified. When a detail like an access pattern is a guess, say "probably" in its note. |
 | Flag dangers | Start a note with `!` where a reviewer should stop, as in `::write:stripe[!no idempotency key]` or `::read:postgres.orders[!full scan]`. Use `::danger[…]` for a danger that belongs to the whole line. |
 | Label data worth tracking | Add `::untrusted` where outside input enters and `::secret` for sensitive values. |
+| Fold the detail | When a flow is long, keep its top level short, and put the detail under headers that say what each part does, tagged `::fold`. Tag the effects in the detail, never on the header. See Folds. |
 | Mark what a change did | In a sketch of a commit or pull request, tag added lines `::new`, altered lines `::changed[was …]` and removed behavior `::removed`. See Changes. |
 | Leave out observability | Omit logs, metrics and traces, unless they are a requirement like an audit log or labeled data flows into them. A kept log is an effect and gets a tag, such as `::write:logs`. |
 
@@ -302,6 +340,9 @@ A highlighter works only from tags, the shape of calls and bindings, and positio
 | `::new` tag | Green pill. A green bar in the gutter beside the line, and beside every line of the block it covers |
 | `::changed` tag | Blue pill with its note. A blue bar in the gutter beside the line |
 | `::removed` tag | Red pill. A red bar in the gutter beside the line and the block it covers, whose code is struck through and whose effects are dimmed |
+| `::fold` tag | Hidden. The block starts folded |
+| Block header | A chevron left of its text folds and unfolds the block. It shows while the row is hovered, and always on a folded header. The signature has none |
+| Folded header | The lines of its block are hidden but keep their width, so the tag column doesn't move. After its own tags, a faint band starts with `⋯` and holds the pills of its block; clicking it opens the block. A labeled variable that reaches a pill's effect follows the pill, as `← body`, underlined like its other uses. A change inside adds a dotted bar in the gutter, and a warning inside adds the warning bar |
 
 ### First words
 
@@ -433,11 +474,11 @@ These changes make the format consistent with what was sketched in discussion, a
 | Format name | "Sketch" was a working name, with `` ```sketch `` fences and `.sketch` files | Skeudo, with `` ```skeudo `` fences (`` ```sketch `` still accepted) and `.skeudo` files | `.sketch` belongs to the Sketch design app, and "sketch" alone is a common word other tools also use |
 | Source repository | `::src` paths had no stated root, so links resolved against wherever the sketch was opened, and the revision was left to the tool that generated the sketch | `::repo[git+<remote>@<revision>]` names the repository and revision; `::src` paths are relative to its root | A sketch saved or read outside its repository, or read after the code moved on, still links to the right lines. The URL form is the one pip uses for git dependencies |
 | Explanations | A free kind such as `::explain[…]` showed its text inline, as a neutral pill | `::doc[…]` explains a line or block, and `::doc:name[…]` a call. Renderers show them on hover | A reviewer can look up a call they don't recognize without the sketch getting longer, and the tag needs no grammar change |
+| Zoom levels | An open question; a sketch had one level of detail, the block level | Any block folds, and `::fold` starts it folded. A folded header shows the tags of the lines under it | A sketch can read at a high level and open the detail on demand, without hiding an effect, and the tag needs no grammar change |
 
 | Open question | Current default |
 | --- | --- |
 | Whether editors open a file at the sketch's revision, rather than the local copy as it is now | The local copy as it is now, with a warning when the file has changed since the revision |
-| Zoom levels: one line, block level, near source | Block level only |
 | Whether model calls need their own kind, for cost and nondeterminism | Treated as reads |
 | Whether shorthands such as `->sys` come back as sugar for tags | Tags only |
 | Whether labels follow bindings, so `user = find(body.email)` makes `user` untrusted | No; the author labels a derived value explicitly |

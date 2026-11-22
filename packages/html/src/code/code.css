@@ -123,6 +123,30 @@ a.sk-src:hover { color: var(--sk-blue); text-decoration: underline; }
 @container sketch (max-width: 240ch) { .sk-fit-240 > .sk-tags { grid-area: 2 / 2 / auto / -1; padding-left: var(--sk-under-indent); } }
 @container sketch (max-width: 250ch) { .sk-fit-250 > .sk-tags { grid-area: 2 / 2 / auto / -1; padding-left: var(--sk-under-indent); } }
 
+/* A folded line's tags include the summary of its block, so it gets a second mark for when it is
+   folded: `sk-ffit-90`, or `sk-funder`. */
+.sk-folding .sk-folded.sk-funder > .sk-tags { grid-area: 2 / 2 / auto / -1; padding-left: var(--sk-under-indent); }
+@container sketch (max-width: 60ch) { .sk-folding .sk-folded.sk-ffit-60 > .sk-tags { grid-area: 2 / 2 / auto / -1; padding-left: var(--sk-under-indent); } }
+@container sketch (max-width: 70ch) { .sk-folding .sk-folded.sk-ffit-70 > .sk-tags { grid-area: 2 / 2 / auto / -1; padding-left: var(--sk-under-indent); } }
+@container sketch (max-width: 80ch) { .sk-folding .sk-folded.sk-ffit-80 > .sk-tags { grid-area: 2 / 2 / auto / -1; padding-left: var(--sk-under-indent); } }
+@container sketch (max-width: 90ch) { .sk-folding .sk-folded.sk-ffit-90 > .sk-tags { grid-area: 2 / 2 / auto / -1; padding-left: var(--sk-under-indent); } }
+@container sketch (max-width: 100ch) { .sk-folding .sk-folded.sk-ffit-100 > .sk-tags { grid-area: 2 / 2 / auto / -1; padding-left: var(--sk-under-indent); } }
+@container sketch (max-width: 110ch) { .sk-folding .sk-folded.sk-ffit-110 > .sk-tags { grid-area: 2 / 2 / auto / -1; padding-left: var(--sk-under-indent); } }
+@container sketch (max-width: 120ch) { .sk-folding .sk-folded.sk-ffit-120 > .sk-tags { grid-area: 2 / 2 / auto / -1; padding-left: var(--sk-under-indent); } }
+@container sketch (max-width: 130ch) { .sk-folding .sk-folded.sk-ffit-130 > .sk-tags { grid-area: 2 / 2 / auto / -1; padding-left: var(--sk-under-indent); } }
+@container sketch (max-width: 140ch) { .sk-folding .sk-folded.sk-ffit-140 > .sk-tags { grid-area: 2 / 2 / auto / -1; padding-left: var(--sk-under-indent); } }
+@container sketch (max-width: 150ch) { .sk-folding .sk-folded.sk-ffit-150 > .sk-tags { grid-area: 2 / 2 / auto / -1; padding-left: var(--sk-under-indent); } }
+@container sketch (max-width: 160ch) { .sk-folding .sk-folded.sk-ffit-160 > .sk-tags { grid-area: 2 / 2 / auto / -1; padding-left: var(--sk-under-indent); } }
+@container sketch (max-width: 170ch) { .sk-folding .sk-folded.sk-ffit-170 > .sk-tags { grid-area: 2 / 2 / auto / -1; padding-left: var(--sk-under-indent); } }
+@container sketch (max-width: 180ch) { .sk-folding .sk-folded.sk-ffit-180 > .sk-tags { grid-area: 2 / 2 / auto / -1; padding-left: var(--sk-under-indent); } }
+@container sketch (max-width: 190ch) { .sk-folding .sk-folded.sk-ffit-190 > .sk-tags { grid-area: 2 / 2 / auto / -1; padding-left: var(--sk-under-indent); } }
+@container sketch (max-width: 200ch) { .sk-folding .sk-folded.sk-ffit-200 > .sk-tags { grid-area: 2 / 2 / auto / -1; padding-left: var(--sk-under-indent); } }
+@container sketch (max-width: 210ch) { .sk-folding .sk-folded.sk-ffit-210 > .sk-tags { grid-area: 2 / 2 / auto / -1; padding-left: var(--sk-under-indent); } }
+@container sketch (max-width: 220ch) { .sk-folding .sk-folded.sk-ffit-220 > .sk-tags { grid-area: 2 / 2 / auto / -1; padding-left: var(--sk-under-indent); } }
+@container sketch (max-width: 230ch) { .sk-folding .sk-folded.sk-ffit-230 > .sk-tags { grid-area: 2 / 2 / auto / -1; padding-left: var(--sk-under-indent); } }
+@container sketch (max-width: 240ch) { .sk-folding .sk-folded.sk-ffit-240 > .sk-tags { grid-area: 2 / 2 / auto / -1; padding-left: var(--sk-under-indent); } }
+@container sketch (max-width: 250ch) { .sk-folding .sk-folded.sk-ffit-250 > .sk-tags { grid-area: 2 / 2 / auto / -1; padding-left: var(--sk-under-indent); } }
+
 /* Narrow boxes: code wraps (continuation lines hang 2ch past the indentation) and all trailing tags
    move under the code. Nothing scrolls sideways. */
 @container sketch (max-width: 36rem) {
@@ -239,6 +263,101 @@ a.sk-src:hover { color: var(--sk-blue); text-decoration: underline; }
   text-decoration-color: color-mix(in srgb, var(--sk-red) 70%, transparent);
 }
 .sk-ch-removed > .sk-tags .sk-tagw:not(:has(.sk-k-removed)) { opacity: 0.5; }
+
+/* ---------- Folds ---------- */
+
+/* Folding needs enhance(), which puts sk-folding on its root. Without it, every block stays open and
+   no chevron or summary shows. */
+.sk-fold,
+.sk-rollup { display: none; }
+
+/* The chevron hangs left of the header's text, in the indentation or the gutter's padding. It shows on
+   a folded line, and on an open one while the row is hovered or the chevron has focus. */
+.sk-folding .sk-fold {
+  display: block;
+  position: absolute;
+  top: 0;
+  left: calc(var(--d, 0) * var(--sk-indent) - 2.2ch);
+  width: 2ch;
+  height: calc(var(--sk-lh) * 1em);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 3px;
+  background: none;
+  color: var(--sk-muted);
+  cursor: pointer;
+  opacity: 0;
+}
+.sk-folding .sk-fold::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 0.42em;
+  height: 0.42em;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: translate(-50%, -70%) rotate(45deg);
+}
+.sk-folding .sk-folded .sk-fold::before { transform: translate(-70%, -50%) rotate(-45deg); }
+.sk-folding .sk-row:hover .sk-fold,
+.sk-folding .sk-fold:focus-visible,
+.sk-folding .sk-folded .sk-fold { opacity: 1; }
+.sk-folding .sk-fold:hover { color: var(--sk-fg); }
+.sk-folding .sk-fold:focus { outline: none; }
+.sk-folding .sk-fold:focus-visible { outline: 1.5px solid color-mix(in srgb, var(--sk-blue) 60%, transparent); }
+
+/* Lines inside a folded block keep their width, so folding never moves the tag column. */
+.sk-folding .sk-hide {
+  height: 0;
+  overflow: hidden;
+  visibility: hidden;
+}
+
+/* A folded line's summary: a ⋯, then the tags of the lines under it, on a faint band that sets them
+   apart from the line's own tags. Clicking it unfolds the block. */
+.sk-folding .sk-folded > .sk-tags > .sk-rollup {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.15rem 0.45rem;
+  min-width: 0;
+  padding: 0 0.5em 0 0.4em;
+  border-radius: 0.75em;
+  background: color-mix(in srgb, var(--sk-muted) 11%, transparent);
+  cursor: pointer;
+}
+.sk-folding .sk-folded > .sk-tags > .sk-rollup:hover { background: color-mix(in srgb, var(--sk-muted) 19%, transparent); }
+.sk-more {
+  color: var(--sk-muted);
+  font-weight: 700;
+  font-size: 0.9em;
+  user-select: none;
+}
+.sk-count {
+  margin-left: 0.35em;
+  font-weight: 700;
+}
+/* The labeled variables that reach a rolled-up effect: `← body`, set like a note. */
+.sk-flow {
+  margin-left: 0.4em;
+  font-size: 0.8em;
+  color: var(--sk-muted);
+}
+.sk-arrow { user-select: none; }
+.sk-rolled-removed { opacity: 0.5; }
+.sk-rolled-removed .sk-tag { text-decoration: line-through; }
+
+/* A folded line marks what its block holds: a dotted bar in the gutter for a change inside, and the
+   warning bar for a warning inside. */
+.sk-folding .sk-folded.sk-ch-in:not(.sk-ch) > .sk-gut {
+  background: repeating-linear-gradient(var(--sk-ch-in) 0 3px, transparent 3px 6px) no-repeat right 0.35rem top 0 / 3px 100%;
+}
+.sk-ch-in-new { --sk-ch-in: var(--sk-green); }
+.sk-ch-in-changed { --sk-ch-in: var(--sk-blue); }
+.sk-ch-in-removed { --sk-ch-in: var(--sk-red); }
+.sk-folding .sk-folded.sk-diag-in { box-shadow: inset 3px 0 var(--sk-amber); }
 
 /* ---------- Code ---------- */
 

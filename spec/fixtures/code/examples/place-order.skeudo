@@ -1,0 +1,15 @@
+view: code
+place_order(cart, card):
+    order = create_order(cart)                  ::write:postgres.orders
+    reserve stock:                              ::fold
+        for each item in cart:
+            stock = get_stock(item.sku)         ::read:postgres.stock[lookup by key]
+            if stock < item.qty:
+                ::fail:OutOfStock
+            decrement stock                     ::write:postgres.stock[!no lock]
+    remaining = apply_credits(order)            ::fold
+        spend open credits, oldest first        ::write:postgres.credits
+    charge(card, remaining)                     ::write:stripe
+    if that fails:
+        give the stock back                     ::write:postgres.stock
+        ::fail:PaymentFailed

@@ -2,9 +2,12 @@ import {
   CHANGE_KINDS,
   formatLocation,
   HIDDEN_KINDS,
+  rollup,
   type CodeSketch,
   type ParseOptions,
   type ResolvedSrc,
+  type RolledTag,
+  type Rollup,
   type Segment,
   type SketchLine,
   type Tag,
@@ -27,8 +30,8 @@ export interface CodeHtmlOptions extends ParseOptions {
   kindColors?: Record<string, string>;
 }
 
-const KNOWN_KINDS = new Set(['read', 'write', 'fail', 'src', 'repo', 'doc', 'danger', 'unsure', 'untrusted', 'secret', ...CHANGE_KINDS]);
-/** Tags a renderer hides: `::src` and `::repo` become links, and `::doc` shows on hover. */
+const KNOWN_KINDS = new Set(['read', 'write', 'fail', 'src', 'repo', 'doc', 'fold', 'danger', 'unsure', 'untrusted', 'secret', ...CHANGE_KINDS]);
+/** Tags a renderer hides: `::src` and `::repo` become links, `::doc` shows on hover, and `::fold` folds its block. */
 const isHiddenTag = (tag: Tag) => HIDDEN_KINDS.has(tag.kind);
 const DEFAULT_LABEL_KINDS = ['untrusted', 'secret'];
 
@@ -188,14 +191,97 @@ function gutterWidth(lines: SketchLine[], gutter: boolean): number {
   return 2 + 0.78 * Math.max(4.5, 1.5 + digits);
 }
 
-/** The `sk-fit-*` class for a line whose trailing tags (given as widths) may not fit in the tag column, if any. */
-function fitClass(widths: number[], before: number): string | undefined {
+/**
+ * The `sk-fit-*` class for a line whose trailing tags (given as widths) may not fit in the tag column, if
+ * any. `prefix` names the class: `sk-fit-90` and `sk-under`, or for a folded line `sk-ffit-90` and `sk-funder`.
+ */
+function fitClass(widths: number[], before: number, prefix = ''): string | undefined {
   if (!widths.length) return undefined;
   const column = TAG_COLUMN_PADDING + widths.reduce((a, b) => a + b, 0) + TAG_GAP * (widths.length - 1);
   if (column <= TAG_COLUMN_MIN) return undefined;
   const need = Math.ceil((before + column) / FIT_STEP) * FIT_STEP;
   if (need < FIT_MIN) return undefined;
-  return need > FIT_MAX ? 'sk-under' : `sk-fit-${need}`;
+  return need > FIT_MAX ? `sk-${prefix}under` : `sk-${prefix}fit-${need}`;
+}
+
+/** Text for the lines a rolled-up tag comes from: `On line 5`, `On lines 5 and 9`, `On lines 5, 7 and 9`. */
+function onLines(lines: number[]): string {
+  const list = [...new Set(lines)];
+  if (list.length === 1) return `On line ${list[0]}`;
+  return `On lines ${list.slice(0, -1).join(', ')} and ${list[list.length - 1]}`;
+}
+
+/** The tag a rolled-up tag shows as: the first of them, with their danger notes as its note and no other. */
+function rolledTag(rolled: RolledTag): Tag {
+  const { tag, dangers } = rolled;
+  // A ::danger tag is amber already, so its note isn't marked again.
+  const note = dangers.length ? { text: dangers.join('; '), danger: tag.kind !== 'danger' } : undefined;
+  return { ...tag, note };
+}
+
+/**
+ * A rolled-up tag as a pill, with a count when several lines carry it. The labeled variables that reach it
+ * follow, as `← body`, underlined like their other uses, since the line that shows it is folded away.
+ */
+function rolledHast(rolled: RolledTag, sketch: CodeSketch, opts: CodeHtmlOptions): HastElement {
+  const el = tagHast(rolledTag(rolled), opts);
+  (el.properties.className as string[]).push('sk-rolled');
+  if (rolled.removed) (el.properties.className as string[]).push('sk-rolled-removed');
+  el.properties.title = `${onLines(rolled.lines)}${rolled.removed ? ', removed by the change' : ''}`;
+  if (rolled.lines.length > 1) {
+    const pill = el.children[0] as HastElement;
+    pill.children.push(h('span', { className: ['sk-count'] }, text(`×${rolled.lines.length}`)));
+  }
+  if (rolled.flows.length) {
+    const names = rolled.flows.flatMap((name, i) => [...(i ? text(', ') : []), varHast(sketch, name, name, false)]);
+    const reach = rolled.flows.map((name) => `${name} (${sketch.variables[name]?.labels.join(', ')})`).join(', ');
+    el.children.push(h('span', { className: ['sk-flow'], title: `${reach} reaches this effect` }, [h('span', { className: ['sk-arrow'] }, text('← ')), ...names]));
+  }
+  return el;
+}
+
+/** Estimated width of a rolled-up tag, with its count and the variables that reach it. */
+function rolledWidth(rolled: RolledTag): number {
+  const count = rolled.lines.length > 1 ? (0.35 * EM + textWidth(`×${rolled.lines.length}`)) * TAG_SCALE : 0;
+  const flows = rolled.flows.length ? (0.4 * EM + textWidth(`← ${rolled.flows.join(', ')}`)) * TAG_SCALE : 0;
+  return tagWidth(rolledTag(rolled)) + count + flows;
+}
+
+/** The ⋯ that starts a folded line's summary, and the padding around it, in `ch`. */
+const ROLLUP_MARK_WIDTH = 2 + 0.9 * EM * TAG_SCALE;
+
+/**
+ * The summary a folded line shows in its tag column, after its own tags: a ⋯, then the tags of the lines
+ * under it. Clicking it unfolds the block.
+ */
+function rollupHast(r: Rollup, sketch: CodeSketch, opts: CodeHtmlOptions): HastElement {
+  const folded = `${r.lines} line${r.lines === 1 ? '' : 's'} folded`;
+  const warnings = r.diagnostics.length ? `, ${r.diagnostics.length} with a warning` : '';
+  return h('span', { className: ['sk-rollup'], title: `${folded}${warnings}. Click to unfold.` }, [
+    h('span', { className: ['sk-more'], ariaHidden: 'true' }, text('⋯')),
+    ...r.tags.map((t) => rolledHast(t, sketch, opts)),
+  ]);
+}
+
+/** A line can fold when it is a block header other than the signature. */
+const canFold = (line: SketchLine) => line.header && !line.signature;
+
+/**
+ * The lines hidden at first: the lines of every block tagged `::fold`. A blank line takes the depth of
+ * the shallower line around it, so a blank line inside a block is hidden with it. enhance() does the same
+ * each time a block is folded or unfolded.
+ */
+function hiddenAtFirst(lines: SketchLine[]): Set<number> {
+  const hidden = new Set<number>();
+  let foldDepth = -1;
+  for (const line of lines) {
+    if (foldDepth >= 0 && line.depth > foldDepth) {
+      hidden.add(line.number);
+      continue;
+    }
+    foldDepth = line.fold && canFold(line) ? line.depth : -1;
+  }
+  return hidden;
 }
 
 /** A file path that can break after each slash. */
@@ -204,7 +290,14 @@ function breakablePath(path: string): ElementContent[] {
   return parts.flatMap((part, i) => (i < parts.length - 1 ? [...text(`${part}/`), h('wbr', {})] : text(part)));
 }
 
-function lineHast(line: SketchLine, sketch: CodeSketch, opts: CodeHtmlOptions, gutter: boolean, before: number): HastElement {
+interface LineFold {
+  /** What the line shows when its block is folded. */
+  rollup?: Rollup;
+  /** True when the line starts hidden, inside a folded block. */
+  hidden: boolean;
+}
+
+function lineHast(line: SketchLine, sketch: CodeSketch, opts: CodeHtmlOptions, gutter: boolean, before: number, fold: LineFold): HastElement {
   const indent = ' '.repeat(line.depth * (sketch.indentUnit ?? 4));
   const cls = ['sk-row'];
   if (line.blank) cls.push('sk-blank');
@@ -213,6 +306,14 @@ function lineHast(line: SketchLine, sketch: CodeSketch, opts: CodeHtmlOptions, g
   if (line.change) cls.push('sk-ch', `sk-ch-${line.change.kind}`);
   const diags = sketch.diagnostics.filter((d) => d.line === line.number);
   if (diags.length) cls.push('sk-has-diag');
+  const { rollup: summary } = fold;
+  if (summary) {
+    cls.push('sk-foldable');
+    if (line.fold) cls.push('sk-folded');
+    if (summary.changes.length) cls.push('sk-ch-in', `sk-ch-in-${summary.changes[0]}`);
+    if (summary.diagnostics.length) cls.push('sk-diag-in');
+  }
+  if (fold.hidden) cls.push('sk-hide');
 
   let code = line.segments.flatMap((s) => segmentHast(s, sketch, opts));
   // Wrapped so the strike-through of a removed line skips its indentation.
@@ -227,6 +328,11 @@ function lineHast(line: SketchLine, sketch: CodeSketch, opts: CodeHtmlOptions, g
   }
   const fit = fitClass(widths, before);
   if (fit) cls.push(fit);
+  if (summary) {
+    tags.push(rollupHast(summary, sketch, opts));
+    const ffit = fitClass([...widths, ROLLUP_MARK_WIDTH + summary.tags.reduce((w, t) => w + rolledWidth(t) + TAG_GAP, 0)], before, 'f');
+    if (ffit) cls.push(ffit);
+  }
 
   const title = diags.length ? { title: diags.map((d) => d.message).join('\n') } : {};
   // A line with an explanation gets a marker after its code. Its circle is drawn by code.css, so it isn't copied.
@@ -234,9 +340,14 @@ function lineHast(line: SketchLine, sketch: CodeSketch, opts: CodeHtmlOptions, g
   // The indentation is an element with a width, not bare spaces, since some hosts drop whitespace-only
   // text: VitePress compiles Markdown pages as Vue templates, and Vue does.
   const ind = indent ? [h('span', { className: ['sk-ind'] }, text(indent))] : [];
+  // The chevron that folds the block. code.css draws it, so copying the code leaves it out, and shows it
+  // only once enhance() runs, since nothing could fold the block without it.
+  const chevron = summary
+    ? [h('button', { type: 'button', className: ['sk-fold'], ariaExpanded: line.fold ? 'false' : 'true', ariaLabel: line.fold ? 'Unfold block' : 'Fold block' })]
+    : [];
   return h('div', { className: cls, style: `--d:${line.depth}`, dataLine: line.number, ...title }, [
     h('span', { className: ['sk-gut'] }, gutter ? gutterHast(line.src, sketch, opts) : []),
-    withDoc(h('span', { className: ['sk-code'] }, [...ind, ...(code.length ? code : text('​')), ...mark]), line.doc),
+    withDoc(h('span', { className: ['sk-code'] }, [...ind, ...(code.length ? code : text('​')), ...mark, ...chevron]), line.doc),
     h('span', { className: ['sk-tags'] }, tags),
   ]);
 }
@@ -249,7 +360,12 @@ export function codeToHast(sketch: CodeSketch, opts: CodeHtmlOptions = {}): Hast
   // Everything left of the tag column: the gutter and the widest line of code.
   const unit = sketch.indentUnit ?? 4;
   const before = gutterWidth(lines, gutter) + Math.max(0, ...lines.map((l) => codeWidth(l, unit)));
-  const rows = lines.map((l) => lineHast(l, sketch, opts, gutter, before));
+  const hidden = hiddenAtFirst(lines);
+  const rows = lines.map((l) => {
+    // A block of lines the renderer drops, such as ::src tags, has nothing to fold.
+    const summary = canFold(l) ? rollup(sketch, l) : undefined;
+    return lineHast(l, sketch, opts, gutter, before, { rollup: summary?.lines ? summary : undefined, hidden: hidden.has(l.number) });
+  });
   return h('div', { className: gutter ? ['sketch', 'sk-gutter'] : ['sketch'], style: `--sk-indent:${unit}ch`, dataSketch: true }, [
     h('div', { className: ['sk-lines'] }, rows),
   ]);

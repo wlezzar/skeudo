@@ -1,0 +1,88 @@
+{
+  "signature": { "name": "pay", "params": ["card"], "line": 2 },
+  "indentUnit": 4,
+  "diagnostics": [
+    {
+      "line": 2,
+      "severity": "warning",
+      "message": "The signature can't fold. Put ::fold on a block inside the sketch."
+    },
+    {
+      "line": 3,
+      "severity": "warning",
+      "message": "There is nothing under this line to fold. Put ::fold on a line with indented lines under it."
+    },
+    {
+      "line": 4,
+      "severity": "warning",
+      "message": "stripe is written inside this block too. Tag an effect once, where it happens; the folded line shows it."
+    },
+    {
+      "line": 6,
+      "severity": "warning",
+      "message": "There is nothing under this line to fold. Put ::fold on a line with indented lines under it."
+    }
+  ],
+  "variables": { "card": { "origin": "param", "line": 2 } },
+  "folds": [{ "header": 4, "lines": 1, "tags": [{ "tag": "::write:stripe", "lines": [5] }] }],
+  "lines": [
+    { "number": 1, "depth": 0, "text": "", "blank": true },
+    {
+      "number": 2,
+      "depth": 0,
+      "text": "pay(card):                       ::fold",
+      "signature": true,
+      "header": true,
+      "tags": [{ "raw": "::fold", "kind": "fold", "trailing": true }],
+      "segments": [
+        { "type": "fn", "text": "pay" },
+        { "type": "text", "text": "(" },
+        { "type": "var", "text": "card", "name": "card", "definition": true },
+        { "type": "text", "text": "):" }
+      ]
+    },
+    {
+      "number": 3,
+      "depth": 1,
+      "text": "::fold",
+      "hidden": true,
+      "parent": 2,
+      "tags": [{ "raw": "::fold", "kind": "fold" }],
+      "segments": [{ "type": "tag", "raw": "::fold" }]
+    },
+    {
+      "number": 4,
+      "depth": 1,
+      "text": "charge it:                   ::fold ::write:stripe",
+      "header": true,
+      "fold": true,
+      "parent": 2,
+      "tags": [
+        { "raw": "::fold", "kind": "fold", "trailing": true },
+        { "raw": "::write:stripe", "kind": "write", "value": "stripe", "trailing": true }
+      ],
+      "segments": [{ "type": "word", "text": "charge" }, { "type": "text", "text": " it:" }]
+    },
+    {
+      "number": 5,
+      "depth": 2,
+      "text": "charge(card)             ::write:stripe",
+      "parent": 4,
+      "tags": [{ "raw": "::write:stripe", "kind": "write", "value": "stripe", "trailing": true }],
+      "segments": [
+        { "type": "call", "text": "charge", "name": "charge" },
+        { "type": "text", "text": "(" },
+        { "type": "var", "text": "card", "name": "card" },
+        { "type": "text", "text": ")" }
+      ]
+    },
+    {
+      "number": 6,
+      "depth": 1,
+      "text": "then report it               ::fold",
+      "parent": 2,
+      "tags": [{ "raw": "::fold", "kind": "fold", "trailing": true }],
+      "segments": [{ "type": "word", "text": "then" }, { "type": "text", "text": " report it" }]
+    }
+  ]
+}
