@@ -15,12 +15,13 @@ What this machine has, and the traps found on it. Each fact gives the command to
 
 - **`skeudo` on PATH** is a packed build installed by `mise run install:cli`. It doesn't follow the source. Use `node apps/cli/dist/skeudo.js` after `pnpm build:cli` to test a change, and re-run the mise task when the user should get the new CLI.
 - **The skeudo skill.** In this repository, `.claude/skills/skeudo` links to `skills/skeudo`, so an edit applies at once. Other projects use the copy in `~/.agents/skills/skeudo`, which `mise run install:skills` refreshes. Run it after changing the skill, or tell the user to.
+- **The VS Code extension** the user runs is a packed build installed by `mise run install:vscode`. It bundles the workspace packages from source, so it goes stale when they change too. The task's last step needs `code`, which agents don't have (see Known limits), so run `pnpm package:vscode` to check the build, then ask the user to run the task.
 - **agent-browser** is a global CLI (`agent-browser --version`). Its skill is vendored in `.agents/skills/agent-browser` and pinned in `skills-lock.json`.
 
 ## Known limits
 
 - **agent-browser needs `--no-sandbox`.** Its Chrome exits with "No usable sandbox!" because AppArmor blocks unprivileged user namespaces on this Ubuntu machine. Launch it with `agent-browser --args "--no-sandbox" open <url>`, only for local or trusted pages, and tell the user. (Seen 2026-11-09.)
-- **VS Code can't be run.** It isn't installed, and running a downloaded copy was refused by the permission check. [visual-checks.md](visual-checks.md#the-vs-code-preview) has the workaround, and in-editor checks are left to the user. (Seen 2026-10-31.)
+- **VS Code can't be run.** It isn't installed, and running a downloaded copy was refused by the permission check. [visual-checks.md](visual-checks.md#the-vs-code-preview) has the workaround, and in-editor checks are left to the user. The user's VS Code reaches this machine over Remote-SSH, so extensions live in `~/.vscode-server/extensions`, and `code` is on `PATH` only in VS Code's own terminal. (Seen 2026-11-13.)
 - **Editing `mise.toml` untrusts it.** Every mise command inside the repository then fails with "not trusted" until the user runs `mise trust`. Don't run it for them; ask, and run mise from another folder meanwhile. (Seen 2026-11-10.)
 - **`pkill -f <pattern>` kills its own shell** when the pattern is in the command line, as it always is. Stop a background server by its port: `lsof -ti tcp:4173 | xargs -r kill`. (Seen 2026-11-10.)
 - **`rm` with a variable path is refused** by Claude Code's safety check, as in `rm -f $T/*.tgz`. Use a literal absolute path, or `"${T:?}"`. (Seen 2026-11-10.)
