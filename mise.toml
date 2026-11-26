@@ -6,6 +6,14 @@ run = [
   "npm install -g apps/cli/skeudo.tgz",
 ]
 
+[tasks."install:vscode"]
+description = "Build the VS Code extension, pack it and install it with `code`, replacing any Marketplace version. Reload VS Code after"
+run = [
+  "pnpm install",
+  "pnpm package:vscode",
+  "code --install-extension apps/vscode/skeudo-vscode-0.0.0.vsix --force",
+]
+
 [tasks."install:skills"]
 description = "Install the skeudo agent skill globally: a copy in ~/.agents/skills, linked into Claude Code. Re-run after editing the skill"
 run = "npx skills add {{config_root}} -g --symlink --yes"
